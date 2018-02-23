@@ -13,7 +13,7 @@ var TrelloApi = function(key,token)
         this.call("get",baseURL);
     }
 
-    this.delete = function(baseURL)
+    this.del = function(baseURL)
     {
         this.call("get",baseURL);
     }
