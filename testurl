@@ -1,1 +1,29 @@
-console.log(process.argv[2].replace(/key=(.+)\&token=(.+)/,"key=dummy&token=dummy"));
+const murphy = require("murphytest");
+const path = require("path");
+const fs = require("fs");
+const md5 = require("md5");
+const {exec} = require('child_process');
+eval(murphy.load(__dirname,"TestConnector.js"));
+////////////////////////////////////////////////////////////////////////////////////////
+var live_url          = process.argv[4];
+var method            = process.argv[3];
+var dummy_url         = live_url.replace(/key=(.+)\&token=(.+)/,"key=dummy&token=dummy");
+var cmd               = "curl --request "+method+" --url '"+live_url+"'";
+var options           = {"method": method,"muteHttpExceptions":true};
+var fixture_file_name = path.resolve(__dirname,process.argv[2]+".js.murphy/"+TestConnector.trello_api_fixture_path+"/"+md5(dummy_url+JSON.stringify(options)));
+
+exec(cmd, (err, stdout, stderr) =>
+{
+    if (err)
+        console.log("Unable to execute: "+cmd);
+
+    if(stdout)
+    {
+        fs.writeFileSync(fixture_file_name,stdout);
+        console.log("Fixture created at: "+fixture_file_name);
+    }
+
+    else
+        console.log("Error in API call: ".stderr);
+});
+
