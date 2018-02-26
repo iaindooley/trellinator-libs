@@ -7,7 +7,7 @@ var TestConnector = function()
     this.fetch = function(url,options)
     {
         var signature = md5(url+JSON.stringify(options));
-        var fixture_path = path.resolve(TestConnector.path,"api_fixtures/"+signature);
+        var fixture_path = path.resolve(TestConnector.path,TestConnector.trello_api_fixture_path+"/"+signature);
         var output = "";
 
         try
@@ -27,3 +27,5 @@ var TestConnector = function()
     
     return this;
 }
+
+TestConnector.trello_api_fixture_path = "trello_api_fixtures";
