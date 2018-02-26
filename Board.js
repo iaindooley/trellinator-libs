@@ -9,7 +9,7 @@ var Board = function(arg)
     
     this.moveCards = function(params)
     {
-        //console.log("ohai moving");
+        console.log("ohai moving");
         return this;
     }
     
