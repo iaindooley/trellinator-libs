@@ -1,8 +1,15 @@
 var TrelloApi = function(key,token)
 {
-    this.key = key;
-    this.token = token;
+    this.key       = key;
+    this.token     = token;
+    this.connector = (typeof UrlFetchApp == "undefined")? "":UrlFetchApp;
     
+    this.setConnector = function(conn)
+    {
+        this.connector = conn;
+        return this;
+    }
+
     this.post = function(baseURL)
     {
         this.call("post",baseURL);
@@ -25,9 +32,12 @@ var TrelloApi = function(key,token)
 
     this.call = function(method,baseURL)
     {
-        //console.log(method+":"+this.constructTrelloURL(baseURL));
-        //var resp = UrlFetchApp.fetch(trelloURL, {"method": "post","muteHttpExceptions":true});
-        //Utilities.sleep(5);
+        var resp = this.connector.fetch(this.constructTrelloURL(baseURL), {"method": method,"muteHttpExceptions":true});
+        
+        if(typeof Utilities != "undefined")
+            Utilities.sleep(5);
+
+        return resp;
     }
 
     this.constructTrelloURL = function(baseURL)

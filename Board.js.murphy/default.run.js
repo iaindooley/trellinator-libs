@@ -1,9 +1,5 @@
-////START MURPHY BOILERPLATE////////////////////////////////////////////////
-//Always include this at the start of your script
-const path = require("path");
-const fs = require("fs");
-//Load each file you need for this test
-eval(fs.readFileSync(path.resolve(__dirname,"../Board.js")).toString());
+const murphy = require("murphytest");
+eval(murphy.load(__dirname,"../Board.js"));
 ////////////////////////////////////////////////////////////////////////////
 
 Board({id:"87asdfadf"})
