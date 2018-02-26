@@ -9,22 +9,12 @@ const cmd = "node ";
 eval(murphy.load(__dirname,"../TrelloApi.js"));
 eval(murphy.load(__dirname,"../TestConnector.js"));
 //////////////////////////////////////////////////////
+TestConnector.path = __dirname;
 
-var test_connection_log = path.resolve(__dirname,"test_connection.txt");
-fs.writeFileSync(test_connection_log,"");
-var stream = fs.createWriteStream(test_connection_log, {flags:'a'});
+var actual = TrelloApi().post("cards/9878a9sdadf/idLabels?value=878asdfdf");
 
-TrelloApi("key","token")
-.setConnector(new TestConnector(stream))
-.post("cards/9878a9sdadf/idLabels?value=878asdfdf");
-stream.end();
-
-stream.once('finish',function()
-{
-    var expected = "{\"method\":\"post\",\"muteHttpExceptions\":true}\nhttps://trello.com/1/cards/9878a9sdadf/idLabels?value=878asdfdf&key=key&token=token\n";
-    var actual = fs.readFileSync(test_connection_log).toString();
+var expected = "{\"method\":\"post\",\"muteHttpExceptions\":true}\nhttps://trello.com/1/cards/9878a9sdadf/idLabels?value=878asdfdf&key=key&token=token\n";
     
-    if(actual != expected)
-        console.log("Unexpected output from TrelloApi in TrelloApi.js.murphy/default.run.js: \n"+actual);
-});
+if(actual != expected)
+    console.log("Unexpected output from TrelloApi in TrelloApi.js.murphy/default.run.js: \n"+actual);
 
