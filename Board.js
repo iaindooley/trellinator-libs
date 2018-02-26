@@ -1,28 +1,15 @@
-var Board = function(arg)
+var Board = function(data)
 {    
-    this.id = arg;
+    this.data = data;
   
-    this.writeMessage = function()
+    this.moveAllCards = function(data)
     {
-      writeInfo(this.id);
+        //data.from == RegExp, data.to == RegExp
     }
-    
-    this.moveCards = function(params)
+
+    this.list = function()
     {
-        //console.log("ohai moving");
-        return this;
-    }
-    
-    this.findCard = function(params)
-    {
-        //console.log("hai again!");
-        return this;
-    }
-    
-    this.move = function(params)
-    {
-        //console.log("again! again!");
-        return this;
+        //{name: new RegExp(list_name+" \\([0-9]+\\)")});
     }
     
     return this;
