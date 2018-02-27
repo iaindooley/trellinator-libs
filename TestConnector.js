@@ -6,8 +6,7 @@ var TestConnector = function()
 {
     this.fetch = function(url,options)
     {
-        var signature = md5(url+JSON.stringify(options));
-        var fixture_path = path.resolve(TestConnector.path,TestConnector.trello_api_fixture_path+"/"+signature);
+        var fixture_path = TestConnector.fixturePath(TestConnector.test_base_dir,url,options);
         var output = "";
 
         try
@@ -20,12 +19,21 @@ var TestConnector = function()
             console.log("No test return content for: "+fixture_path);
             console.log(JSON.stringify(options));
             console.log(url);
+            console.log(e);
         }
         
         return output;
     }
+
     
     return this;
 }
 
-TestConnector.trello_api_fixture_path = "trello_api_fixtures";
+TestConnector.test_base_dir   = "";
+
+TestConnector.fixturePath = function(base_dir,url,options)
+{
+    var signature =  md5(url+JSON.stringify(options));
+    var fixture_path = path.resolve(base_dir,"./trello_api_fixtures/").toString()+"/"+signature;
+    return fixture_path;
+}
