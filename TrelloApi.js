@@ -70,3 +70,28 @@ TrelloApi.checkControlValues = function()
     //both found
     return {key: appKey, token: token, err:""};
 }
+
+//Convenience functions
+/**
+* Tests if an actual string matches a test,
+* whether the test is a string (equal) or a
+* regular expression
+*/
+TrelloApi.nameTest = function(test,actual)
+{
+    var ret = null;
+
+    if(typeof test === 'string')
+    {
+        if(actual == test)
+            ret = actual;
+    }
+        
+    else if(typeof test === 'RegExp')
+    {
+        if(test.test(actual))
+            ret = actual;
+    }
+    
+    return ret;
+}
