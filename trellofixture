@@ -1,16 +1,23 @@
 const murphy = require("murphytest");
-const path = require("path");
 const fs = require("fs");
-const md5 = require("md5");
 const {exec} = require('child_process');
+
+if(process.argv.length < 5)
+{
+    console.log("Usage:");
+    console.log("node trellofixture ClassName httpmethod livetrellourl");
+    process.exit();
+}
+
 eval(murphy.load(__dirname,"TestConnector.js"));
 ////////////////////////////////////////////////////////////////////////////////////////
-var live_url          = process.argv[4];
+var class_name        = process.argv[2];
 var method            = process.argv[3];
+var live_url          = process.argv[4];
 var dummy_url         = live_url.replace(/key=(.+)\&token=(.+)/,"key=dummy&token=dummy");
 var cmd               = "curl --request "+method+" --url '"+live_url+"'";
 var options           = {"method": method,"muteHttpExceptions":true};
-var fixture_file_name = path.resolve(__dirname,process.argv[2]+".js.murphy/"+TestConnector.trello_api_fixture_path+"/"+md5(dummy_url+JSON.stringify(options)));
+var fixture_file_name = TestConnector.fixturePath(__dirname+"/"+class_name+".js.murphy/",dummy_url,options);
 
 exec(cmd, (err, stdout, stderr) =>
 {
