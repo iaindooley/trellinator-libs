@@ -20,9 +20,31 @@ var Board = function(data)
         return TrelloApi.post("lists/"+from_list.id+"/moveAllCards?idBoard="+to_list.idBoard+"&idList="+to_list.id);
     }
 
-    this.list = function()
+    this.list = function(data)
     {
-        //{name: new RegExp(list_name+" \\([0-9]+\\)")});
+        var lists = this.lists(data);
+        
+        for(var key in lists)
+           return lists[key];
+    }
+
+    this.lists = function(data)
+    {
+        var lists = TrelloApi.get("boards/"+this.data.id+"/lists?filter=open&fields=all");
+        var ret = lists;
+
+        if(data.name)
+        {
+            ret = [];
+
+            for(var key in lists)
+            {
+                if(TrelloApi.nameTest(data.name,lists[key].name))
+                    ret[key] = lists[key];
+            }
+        }
+
+        return ret;
     }
 
     return this;
