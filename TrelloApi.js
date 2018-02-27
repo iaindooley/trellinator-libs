@@ -87,10 +87,17 @@ TrelloApi.nameTest = function(test,actual)
             ret = actual;
     }
         
-    else if(typeof test === 'RegExp')
+    else if(test.constructor === RegExp)
     {
         if(test.test(actual))
             ret = actual;
+    }
+    
+    else
+    {
+        console.log("Unsupported test type: "+(typeof test));
+        console.log(test);
+        process.exit();
     }
     
     return ret;
