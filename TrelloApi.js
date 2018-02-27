@@ -11,12 +11,12 @@ TrelloApi.get = function(baseURL)
 
 TrelloApi.del = function(baseURL)
 {
-    return TrelloApi.call("get",baseURL);
+    return TrelloApi.call("delete",baseURL);
 }
 
 TrelloApi.put = function(baseURL)
 {
-    return TrelloApi.call("get",baseURL);
+    return TrelloApi.call("put",baseURL);
 }
 
 TrelloApi.call = function(method,baseURL)

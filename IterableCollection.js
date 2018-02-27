@@ -1,17 +1,41 @@
-var IterableCollection = function(arr)
+var IterableCollection = function(obj)
 {
-    this.arr = arr;
+    this.obj = obj;
+
+    this.first = function()
+    {
+        for(var key in this.obj)
+            return this.obj[key];
+    }
 
     this.each = function(callback)
     {
-        for(i = 0;i < arr.length;i++)
-            callback(arr[i]);
+        for(var key in this.obj)
+            callback(this.obj[key]);
     }
 
     this.transform = function(callback)
     {
-        for(i = 0;i < arr.length;i++)
-            arr[i] = callback(arr[i]);
+        for(var key in this.obj)
+            this.obj[key] = callback(this.obj[key]);
+    }
+    
+    this.length = function()
+    {
+        return Object.keys(this.obj).length;
+    }
+    
+    this.filterByName = function(expression)
+    {
+        var new_obj = [];
+        
+        for(var key in this.obj)
+        {
+            if(TrelloApi.nameTest(expression,this.obj[key].name()))
+                new_obj[key] = this.obj[key];
+        }
+        
+        this.obj = new_obj;
     }
     
     return this;
