@@ -1,9 +1,13 @@
 var Card = function(data)
 {    
-    this.data         = data;
-    this.last_comment = null;
-    this.set_due      = null;
-    this.moved        = null;
+    this.data            = data;
+    this.last_comment    = null;
+    this.set_due         = null;
+    this.moved           = null;
+    this.set_description = null;
+    this.archived        = null;
+    this.unarchived      = null;
+    this.added_checklist = null;
   
     this.name = function()
     {
@@ -13,10 +17,9 @@ var Card = function(data)
         return this.data.name;
     }
     
-    this.setDescription(desc)
+    this.setDescription = function(desc)
     {
-        console.log("implement me setDescritption");
-        process.exit();
+        this.set_description = TrelloApi.put("cards/"+this.data.id+"?desc="+encodeURIComponent(desc));
         return this;
     }
 
@@ -43,21 +46,20 @@ var Card = function(data)
     
     this.archive = function()
     {
-        console.log("Implement me archive");
-        process.exit();
+        this.archived = TrelloApi.put("cards/"+this.data.id+"?closed=true");
         return this;
     }
 
     this.unArchive = function()
     {
-        console.log("Implement me unarchive");
-        process.exit();
+        this.unarchived = TrelloApi.put("cards/"+this.data.id+"?closed=false");
         return this;
     }
     
     this.addChecklist = function(name,callback)
     {
-        var checklist = Checklist(TrelloApi.post(add checklist));
+        var checklist = Checklist(TrelloApi.post("cards/5a94f62b2a126a83233b14dd/checklists?name="+encodeURIComponent(name)));
+        this.added_checklist = checklist;
         callback(checklist);
         return this;
     }
