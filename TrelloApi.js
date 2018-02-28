@@ -27,7 +27,7 @@ TrelloApi.call = function(method,baseURL)
     
     if(typeof Utilities != "undefined")
         Utilities.sleep(5);
-
+  
     return JSON.parse(resp);
 }
 
@@ -55,17 +55,17 @@ TrelloApi.constructTrelloURL = function(baseURL)
 
 TrelloApi.checkControlValues = function()
 { 
-    var col = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG_NAME).getRange("B2:B3").getValues();
+    var col = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG_NAME_).getRange("B2:B3").getValues();
  
     var appKey = (col[0][0] + "").trim();
  
     if(appKey == "")
-        return {key: "", token: "", err: "Trello Key not found in " + CONFIG_NAME + " tab." };
+        return {key: "", token: "", err: "Trello Key not found in " + CONFIG_NAME_ + " tab." };
    
     var token = (col[1][0] + "").trim();
 
     if(token == "")
-        return {key: "", token: "", err: "Trello Token not found in " + CONFIG_NAME + " tab." };
+        return {key: "", token: "", err: "Trello Token not found in " + CONFIG_NAME_ + " tab." };
 
     //both found
     return {key: appKey, token: token, err:""};
