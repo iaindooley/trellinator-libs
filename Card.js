@@ -17,6 +17,14 @@ var Card = function(data)
         return this.data.name;
     }
     
+    this.description = function()
+    {
+        if(!this.data.desc)
+            this.load();
+        
+        return this.data.desc;
+    }
+    
     this.setDescription = function(desc)
     {
         this.set_description = TrelloApi.put("cards/"+this.data.id+"?desc="+encodeURIComponent(desc));
@@ -40,7 +48,8 @@ var Card = function(data)
         if(!this.data.board)
             this.load();
 
-        this.moved = TrelloApi.put("cards/"+this.data.id+"?idList="+Board(this.data.board).list({name: data.list}).data.id+"&pos="+data.position);
+        var list_id = new Board(this.data.board).list({name: data.list}).data.id;
+        this.moved = TrelloApi.put("cards/"+this.data.id+"?idList="+list_id+"&pos="+data.position);
         return this;
     }
     
