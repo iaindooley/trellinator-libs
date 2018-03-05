@@ -64,7 +64,7 @@ var Board = function(data)
         });
         
         if(data.name)
-            cards.filter(data.name);
+            cards.filterByName(data.name);
         
         return cards;
     }
