@@ -4,8 +4,18 @@ var IterableCollection = function(obj)
 
     this.first = function()
     {
+        var ret = null;
+
         for(var key in this.obj)
-            return this.obj[key];
+        {
+            if(ret === null)
+                ret = this.obj[key];
+        }
+        
+        if(ret === null)
+            throw "No data in IterableCollection: "+this.obj;
+        
+        return ret;
     }
 
     this.each = function(callback)
