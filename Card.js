@@ -58,7 +58,7 @@ var Card = function(data)
     
     this.addChecklist = function(name,callback)
     {
-        var checklist = Checklist(TrelloApi.post("cards/5a94f62b2a126a83233b14dd/checklists?name="+encodeURIComponent(name)));
+        var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name)));
         this.added_checklist = checklist;
         callback(checklist);
         return this;

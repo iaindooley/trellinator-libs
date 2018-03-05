@@ -27,8 +27,20 @@ TrelloApi.call = function(method,baseURL)
     
     if(typeof Utilities != "undefined")
         Utilities.sleep(5);
+    
+    var ret = null;
   
-    return JSON.parse(resp);
+    try
+    {
+        ret = JSON.parse(resp);
+    }
+  
+    catch(e)
+    {
+        writeInfo_("Unable to parse response: "+resp+" from URL: "+baseURL+" with method: "+method+". Got error: "+e);
+    }
+  
+    return ret;
 }
 
 TrelloApi.constructTrelloURL = function(baseURL)
