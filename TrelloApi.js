@@ -1,4 +1,6 @@
 var TrelloApi = function(){};
+TrelloApi.trello_api_key_information = null;
+
 TrelloApi.post = function(baseURL)
 {
     return TrelloApi.call("post",baseURL);
@@ -37,7 +39,7 @@ TrelloApi.call = function(method,baseURL)
   
     catch(e)
     {
-        writeInfo_("Unable to parse response: "+resp+" from URL: "+baseURL+" with method: "+method+". Got error: "+e);
+        writeInfo_("Unable to parse response: "+resp+" from URL: "+url+" with method: "+method+". Got error: "+e);
     }
   
     return ret;
@@ -65,22 +67,29 @@ TrelloApi.constructTrelloURL = function(baseURL)
     return freshURL;
 }
 
+
+
 TrelloApi.checkControlValues = function()
-{ 
-    var col = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG_NAME_).getRange("B2:B3").getValues();
+{
+    if(!TrelloApi.trello_api_key_information)
+    {
+        var col = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG_NAME_).getRange("B2:B3").getValues();
  
-    var appKey = (col[0][0] + "").trim();
+        var appKey = (col[0][0] + "").trim();
  
-    if(appKey == "")
-        return {key: "", token: "", err: "Trello Key not found in " + CONFIG_NAME_ + " tab." };
+        if(appKey == "")
+            TrelloApi.trello_api_key_information = {key: "", token: "", err: "Trello Key not found in " + CONFIG_NAME_ + " tab." };
    
-    var token = (col[1][0] + "").trim();
+        var token = (col[1][0] + "").trim();
 
-    if(token == "")
-        return {key: "", token: "", err: "Trello Token not found in " + CONFIG_NAME_ + " tab." };
+        if(token == "")
+            TrelloApi.trello_api_key_information = {key: "", token: "", err: "Trello Token not found in " + CONFIG_NAME_ + " tab." };
 
-    //both found
-    return {key: appKey, token: token, err:""};
+        //both f ound
+        TrelloApi.trello_api_key_information = {key: appKey, token: token, err:""};
+    }
+  
+    return TrelloApi.trello_api_key_information;
 }
 
 //Convenience functions
