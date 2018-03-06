@@ -24,6 +24,21 @@ var Card = function(data)
         
         return this.data.desc;
     }
+
+    this.labels = function()
+    {
+        if(!this.data.labels)
+            this.load();
+
+        var ret = new IterableCollection(this.data.labels);
+
+        ret.transform(function(elem)
+        {
+            return new Label(elem);
+        });
+        
+        return ret;
+    }
     
     this.setDescription = function(desc)
     {
