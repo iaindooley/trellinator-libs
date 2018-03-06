@@ -13,7 +13,7 @@ var Board = function(data)
     this.moveAllCards = function(data)
     {
         //data.from == RegExp, data.to == RegExp
-        var lists = TrelloApi.get("boards/"+this.data.id+"/lists?cards=all&card_fields=all&filter=open&fields=all");
+        var lists = TrelloApi.get("boards/"+this.data.id+"/lists?cards=none&card_fields=none&filter=open&fields=all");
         var from_list = null;
         var to_list = null;
 
@@ -42,7 +42,7 @@ var Board = function(data)
 
     this.lists = function(data)
     {
-        var lists = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/lists?cards=all&card_fields=all&filter=open&fields=all"));
+        var lists = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/lists?cards=none&card_fields=none&filter=open&fields=all"));
 
         lists.transform(function(elem)
         {
