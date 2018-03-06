@@ -46,6 +46,7 @@ var IterableCollection = function(obj)
         }
         
         this.obj = new_obj;
+        return this;
     }
     
     return this;
