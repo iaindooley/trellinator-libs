@@ -15,7 +15,7 @@ var List = function(data)
     {
         if(!this.cards)
         {
-            this.cards = new IterableCollection(TrelloApi.get("lists/"+this.data.id+"/cards"));
+            this.cards = new IterableCollection(TrelloApi.get("lists/"+this.data.id+"/cards?fields=id"));
             
             this.cards.transform(function(elem)
             {
