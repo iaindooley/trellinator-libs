@@ -24,7 +24,7 @@ TrelloApi.put = function(baseURL)
 TrelloApi.call = function(method,baseURL)
 {
     var url = TrelloApi.constructTrelloURL(baseURL);
-    var connector = (typeof UrlFetchApp == "undefined")? TestConnector():UrlFetchApp;
+    var connector = (typeof UrlFetchApp == "undefined")? new TestConnector():UrlFetchApp;
     var resp = connector.fetch(url, {"method": method,"muteHttpExceptions":true});
     
     if(typeof Utilities != "undefined")
