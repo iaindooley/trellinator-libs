@@ -11,19 +11,27 @@ var List = function(data)
         return this.data.name;
     }
     
-    this.countCards = function(params)
+    this.cards = function(filter)
     {
         if(!this.cards)
         {
-            this.cards = new IterableCollection(TrelloApi.get("lists/"+this.data.id+"/cards?fields=id"));
+            this.cards = new IterableCollection(TrelloApi.get("lists/"+this.data.id+"/cards?fields=id,name"));
             
             this.cards.transform(function(elem)
             {
                 return new Card(elem);
             });
         }
+        
+        if(filter && filter.name)
+            this.cards.filterByName(filter);
 
-        return this.cards.length();
+        return this.cards;
+    }
+
+    this.countCards = function(params)
+    {
+        return this.cards().length();
     }
     
     this.rename = function(new_name)
