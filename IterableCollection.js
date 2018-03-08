@@ -22,12 +22,16 @@ var IterableCollection = function(obj)
     {
         for(var key in this.obj)
             callback(this.obj[key]);
+    
+        return this;
     }
 
     this.transform = function(callback)
     {
         for(var key in this.obj)
             this.obj[key] = callback(this.obj[key]);
+
+        return this;
     }
     
     this.length = function()
@@ -48,6 +52,4 @@ var IterableCollection = function(obj)
         this.obj = new_obj;
         return this;
     }
-    
-    return this;
 }
