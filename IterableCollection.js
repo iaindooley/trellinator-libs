@@ -2,6 +2,21 @@ var IterableCollection = function(obj)
 {
     this.obj = obj;
 
+    this.implode = function(separator,callback)
+    {
+        var ret = null;
+
+        for(var key in this.obj)
+        {
+            if(!ret)
+                ret = callback(this.obj[key]);
+            else
+                ret += "&"+callback(this.obj[key]);
+        }
+        
+        return ret;
+    }
+    
     this.first = function()
     {
         var ret = null;
@@ -41,15 +56,19 @@ var IterableCollection = function(obj)
     
     this.filterByName = function(expression)
     {
-        var new_obj = [];
-        
-        for(var key in this.obj)
+        if(expression)
         {
-            if(TrelloApi.nameTest(expression,this.obj[key].name()))
-                new_obj[key] = this.obj[key];
+            var new_obj = [];
+            
+            for(var key in this.obj)
+            {
+                if(TrelloApi.nameTest(expression,this.obj[key].name()))
+                    new_obj[key] = this.obj[key];
+            }
+            
+            this.obj = new_obj;
         }
-        
-        this.obj = new_obj;
+
         return this;
     }
 }
