@@ -8,7 +8,16 @@ var Card = function(data)
     this.archived        = null;
     this.unarchived      = null;
     this.added_checklist = null;
-  
+    this.checklists      = null;
+
+    this.link = function()
+    {
+        if(!this.data.shortLink)
+            this.load();
+        
+        return "https://trello.com/c/"+this.data.shortLink;
+    }
+
     this.name = function()
     {
         if(!this.data.name)
@@ -80,10 +89,32 @@ var Card = function(data)
         return this;
     }
     
+    this.checklist = function(name)
+    {
+        return this.checklists(name).first();
+    }
+
+    this.checklists = function(name)
+    {
+        if(!this.checklists)
+            this.checklists = new IterableCollection(TrelloApi.get("cards/"+this.data.id+"/checklists")).filterByName(name);
+        
+        return this.checklists;
+    }
+
     this.addChecklist = function(name,callback)
     {
-        var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name)));
-        this.added_checklist = checklist;
+        try
+        {
+            var checklist = this.checklist(name);
+        }
+        
+        catch(e)
+        {
+            var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name)));
+            this.added_checklist = checklist;
+        }
+
         callback(checklist);
         return this;
     }
@@ -127,4 +158,26 @@ var Card = function(data)
 
         return this;
     }
+}
+
+Card.create = function(list,data)
+{
+    return new Card(TrelloApi.post("cards?idList="+list.data.id+"&"+new IterableCollection(data).implode("&",encodeURIComponent)));
+}
+
+Card.findOrCreate = function(list,data)
+{
+    var cards = list.cards(data);
+    
+    try
+    {
+        var ret = cards.first();
+    }
+    
+    catch(e)
+    {
+        var ret = Card.create(list,data);
+    }
+    
+    return ret;
 }
