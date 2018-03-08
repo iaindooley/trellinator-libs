@@ -79,13 +79,14 @@ var Board = function(data)
 
     this.cards = function(data)
     {
-        var cards = new IterableCollection(TrelloApi.get("boards/5a938de4e0c2896bd94c7434/cards"));
+        var cards = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/cards?fields=id,name"));
+
         cards.transform(function(card)
         {
             return new Card(card);
         });
         
-        if(data.name)
+        if(data && data.name)
             cards.filterByName(data.name);
         
         return cards;
