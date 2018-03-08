@@ -35,6 +35,21 @@ var Board = function(data)
         return ret;
     }
 
+    this.label = function(data)
+    {
+        return this.labels(data).first();
+    }
+
+    this.labels = function(data)
+    {
+        return this.iterableCollection("boards/"+this.data.id+"/labels?fields=id,name&limit=50",
+                                       data,
+                                       function(elem)
+                                       {
+                                           return new Label(elem);
+                                       });
+    }
+
     this.list = function(data)
     {
         return this.lists(data).first();
@@ -42,17 +57,24 @@ var Board = function(data)
 
     this.lists = function(data)
     {
-        var lists = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/lists?cards=none&card_fields=none&filter=open&fields=all"));
+        return this.iterableCollection("boards/"+this.data.id+"/lists?cards=none&card_fields=none&filter=open&fields=all",
+                                       data,
+                                       function(elem)
+                                       {
+                                           return new List(elem);
+                                       });
+    }
 
-        lists.transform(function(elem)
-        {
-            return new List(elem);
-        });
+    this.iterableCollection = function(url,data,callback)
+    {
+        var ret = new IterableCollection(TrelloApi.get(url));
 
-        if(data.name)
-            lists.filterByName(data.name);
+        ret.transform(callback);
+
+        if(data && data.name)
+            ret.filterByName(data.name);
         
-        return lists;
+        return ret;
     }
 
     this.cards = function(data)
@@ -68,6 +90,4 @@ var Board = function(data)
         
         return cards;
     }
-
-    return this;
 }
