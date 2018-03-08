@@ -93,6 +93,24 @@ var Card = function(data)
         this.data = TrelloApi.get("cards/"+this.data.id+"?fields=all&actions=all&attachments=true&attachment_fields=all&member_fields=all&memberVoted_fields=all&checklists=all&checklist_fields=all&board=true&board_fields=all&list=true&pluginData=true&stickers=true&sticker_fields=all");
         return this;
     }
-    
-    return this;
+
+    this.addNewLabels = function(new_labels)
+    {
+        new_labels.each(function(label)
+        {
+            TrelloApi.post("cards/"+this.data.id+"/labels?color=null&name="+encodeURIComponent(label));
+        }.bind(this));
+        
+        return this;
+    }
+
+    this.applyLabelIds = function(label_ids)
+    {
+        label_ids.each(function(id)
+        {
+            TrelloApi.post("cards/"+this.data.id+"/idLabels?value="+encodeURIComponent(id));
+        }.bind(this));
+
+        return this;
+    }
 }
