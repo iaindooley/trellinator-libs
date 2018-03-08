@@ -98,7 +98,14 @@ var Card = function(data)
     {
         new_labels.each(function(label)
         {
-            TrelloApi.post("cards/"+this.data.id+"/labels?color=null&name="+encodeURIComponent(label));
+            try
+            {
+                TrelloApi.post("cards/"+this.data.id+"/labels?color=null&name="+encodeURIComponent(label));
+            }
+            
+            catch(e)
+            {
+            }
         }.bind(this));
         
         return this;
@@ -108,7 +115,14 @@ var Card = function(data)
     {
         label_ids.each(function(id)
         {
-            TrelloApi.post("cards/"+this.data.id+"/idLabels?value="+encodeURIComponent(id));
+            try
+            {
+                TrelloApi.post("cards/"+this.data.id+"/idLabels?value="+encodeURIComponent(id));
+            }
+            
+            catch(e)
+            {
+            }
         }.bind(this));
 
         return this;
