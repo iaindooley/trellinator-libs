@@ -38,6 +38,4 @@ var List = function(data)
         this.data = TrelloApi.get("lists/"+this.data.id+"?fields=all");
         return this;
     }
-    
-    return this;
 }

@@ -27,9 +27,6 @@ var TestConnector = function()
         
         return output;
     }
-
-    
-    return this;
 }
 
 TestConnector.test_base_dir   = "";

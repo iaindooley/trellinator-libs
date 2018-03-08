@@ -25,6 +25,4 @@ var Checklist = function(data)
         this.data = TrelloApi.get("checklists/"+this.data.id+"?cards=all&checkItems=all&checkItem_fields=all&fields=all");
         return this;
     }
-    
-    return this;
 }
