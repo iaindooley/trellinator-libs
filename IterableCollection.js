@@ -4,14 +4,14 @@ var IterableCollection = function(obj)
 
     this.implode = function(separator,callback)
     {
-        var ret = null;
+        var ret = "";
 
         for(var key in this.obj)
         {
             if(!ret)
-                ret = callback(this.obj[key]);
+                ret = key+"="+callback(this.obj[key]);
             else
-                ret += "&"+callback(this.obj[key]);
+                ret += "&key="+callback(this.obj[key]);
         }
         
         return ret;
@@ -28,7 +28,7 @@ var IterableCollection = function(obj)
         }
         
         if(ret === null)
-            throw "No data in IterableCollection: "+this.obj;
+            throw new Error("No data in IterableCollection: "+this.obj);
         
         return ret;
     }
