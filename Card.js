@@ -8,7 +8,7 @@ var Card = function(data)
     this.archived        = null;
     this.unarchived      = null;
     this.added_checklist = null;
-    this.checklists      = null;
+    this.checklist_list  = null;
 
     this.link = function()
     {
@@ -97,10 +97,15 @@ var Card = function(data)
 
     this.checklists = function(name)
     {
-        if(!this.checklists)
-            this.checklists = new IterableCollection(TrelloApi.get("cards/"+this.data.id+"/checklists")).filterByName(name);
-        
-        return this.checklists;
+        if(!this.checklist_list)         
+        {
+            this.checklist_list = new IterableCollection(TrelloApi.get("cards/"+this.data.id+"/checklists")).transform(function(elem)
+            {
+              return new Checklist(elem);
+            }).filterByName(name);
+        }
+
+        return this.checklist_list;
     }
 
     this.addChecklist = function(name,callback)
