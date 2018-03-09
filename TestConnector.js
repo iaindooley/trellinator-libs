@@ -23,7 +23,7 @@ var TestConnector = function()
             var live_url = url.replace("key=dummy&token=dummy","key="+TestConnector.live_key+"&token="+TestConnector.live_token);
             var cmd      = "curl --request "+options.method+" --url '"+live_url+"'";
 
-            var stdout = cp.execSync(cmd,{stdio: null});
+            var stdout = cp.execSync(cmd,{ stdio: ['pipe', 'pipe', 'ignore']});
             
             if(stdout)
             {
