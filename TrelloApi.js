@@ -114,11 +114,9 @@ TrelloApi.nameTest = function(test,actual)
             ret = actual;
     }
     
-    else
+    else if(test)
     {
-        console.log("Unsupported test type: "+(typeof test));
-        console.log(test);
-        process.exit();
+        writeInfo_("Unsupported test type: "+(typeof test));
     }
     
     return ret;
