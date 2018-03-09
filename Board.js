@@ -34,7 +34,22 @@ var Board = function(data)
         
         return ret;
     }
+    
+    this.member = function(data)
+    {
+        return this.members(data).first();
+    }
 
+    this.members = function(data)
+    {
+        return this.iterableCollection("boards/"+this.data.id+"/members?fields=fullName,username",
+                                       data,
+                                       function(elem)
+                                       {
+                                           return new Member(elem);
+                                       });
+    }
+    
     this.label = function(data)
     {
         return this.labels(data).first();
