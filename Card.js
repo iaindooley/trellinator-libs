@@ -73,7 +73,8 @@ var Card = function(data)
             this.load();
 
         var list_id = new Board(this.data.board).list({name: data.list}).data.id;
-        this.moved = TrelloApi.put("cards/"+this.data.id+"?idList="+list_id+"&pos="+data.position);
+        var position = (data.position)?data.position:"bottom";
+        this.moved = TrelloApi.put("cards/"+this.data.id+"?idList="+list_id+"&pos="+position);
         return this;
     }
     
