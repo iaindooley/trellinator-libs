@@ -14,7 +14,7 @@ if(new Card({id: "5a94f62b2a126a83233b14dd"}).postComment("hi there").last_comme
 if(new Card({id: "5a94f62b2a126a83233b14dd"}).setDue("2018-02-28 00:00:00").set_due.due != "2018-02-28T05:00:00.000Z")
     console.log("Got back the wrong due date");
 
-if(new Card({id: "5a94f62b2a126a83233b14dd"}).moveTo({list: "Updated List",position: 2}).moved.id != "5a94f62b2a126a83233b14dd")
+if(new Card({id: "5a94f62b2a126a83233b14dd"}).moveTo({list: new RegExp("Updated List.*"),position: 2}).moved.id != "5a94f62b2a126a83233b14dd")
     console.log("Got incorrect card id back from move card");
 
 
