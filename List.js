@@ -1,7 +1,7 @@
 var List = function(data)
 {    
-    this.data  = data;
-    this.cards = null;
+    this.data      = data;
+    this.card_list = null;
   
     this.name = function()
     {
@@ -13,20 +13,20 @@ var List = function(data)
     
     this.cards = function(filter)
     {
-        if(!this.cards)
+        if(!this.card_list)
         {
-            this.cards = new IterableCollection(TrelloApi.get("lists/"+this.data.id+"/cards?fields=id,name"));
-            
-            this.cards.transform(function(elem)
+            this.card_list = new IterableCollection(TrelloApi.get("lists/"+this.data.id+"/cards?fields=id,name"));
+
+            this.card_list.transform(function(elem)
             {
                 return new Card(elem);
             });
         }
-        
-        if(filter && filter.name)
-            this.cards.filterByName(filter);
 
-        return this.cards;
+        if(filter && filter.name)
+            this.card_list.filterByName(filter);
+
+        return this.card_list;
     }
 
     this.countCards = function(params)
