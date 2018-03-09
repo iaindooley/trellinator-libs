@@ -1,6 +1,7 @@
 const path = require("path");
-const fs = require("fs");
-const md5 = require("md5");
+const fs   = require("fs");
+const md5  = require("md5");
+const cp   = require('child_process');
 
 var TestConnector = function()
 {
@@ -19,12 +20,26 @@ var TestConnector = function()
         
         catch(e)
         {
+            var live_url = url.replace("key=dummy&token=dummy","key="+TestConnector.live_key+"&token="+TestConnector.live_token);
+            var cmd      = "curl --request "+options.method+" --url '"+live_url+"'";
+
+            var stdout = cp.execSync(cmd,{stdio: null});
+            
+            if(stdout)
+            {
+                fs.writeFileSync(fixture_path,stdout);
+                var output = fs.readFileSync(fixture_path).toString();
+            }
+        }
+
+        if(!output)
+        {
             console.log("No test return content for: "+fixture_path);
             console.log(JSON.stringify(options));
             console.log(url);
-            console.log(e);
+            console.log("Output: "+output);
         }
-        
+
         return output;
     }
 }
