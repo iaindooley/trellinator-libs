@@ -24,8 +24,8 @@ var List = function(data)
         }
 
         if(filter && filter.name)
-            this.card_list.filterByName(filter);
-
+            this.card_list.filterByName(filter.name);
+      
         return this.card_list;
     }
 
