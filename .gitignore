@@ -59,3 +59,4 @@ typings/
 
 package-lock.json
 TrelloApi.js.murphy/test_connection.txt
+**/trello_api_fixtures
