@@ -1,6 +1,7 @@
 var Board = function(data)
 {    
-    this.data = data;
+    this.data          = data;
+    this.list_of_lists = null;
 
     this.name = function()
     {
@@ -8,6 +9,14 @@ var Board = function(data)
             this.load();
         
         return this.data.name;
+    }
+    
+    this.shortUrl = function()
+    {
+        if(!this.data.shortUrl)
+            this.load();
+        
+        return this.data.shortUrl;
     }
   
     this.moveAllCards = function(data)
@@ -72,12 +81,19 @@ var Board = function(data)
 
     this.lists = function(data)
     {
-        return this.iterableCollection("boards/"+this.data.id+"/lists?cards=none&card_fields=none&filter=open&fields=all",
-                                       data,
-                                       function(elem)
-                                       {
-                                           return new List(elem);
-                                       });
+        if(!this.list_of_lists)
+        {
+            this.list_of_lists = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/lists?cards=none&card_fields=none&filter=open&fields=all"))
+                                 .transform(function(elem)
+                                 {
+                                     return new List(elem);
+                                 });
+        }
+      
+        if(data && data.name)
+            this.list_of_lists.filterByName(data.name);
+      
+        return this.list_of_lists;
     }
 
     this.iterableCollection = function(url,data,callback)
@@ -105,5 +121,21 @@ var Board = function(data)
             cards.filterByName(data.name);
         
         return cards;
+    }
+    
+    this.findOrCreateList = function(name)
+    {      
+      try
+      {
+        var list = this.list({name: name});
+      }
+      
+      catch(e)
+      {
+        var list = new List(TrelloApi.post("lists?name="+encodeURIComponent(name)+"&idBoard="+this.data.id+"&pos=top"));
+        this.list_of_lists = null;
+      }
+      
+      return list;
     }
 }
