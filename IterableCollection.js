@@ -11,7 +11,7 @@ var IterableCollection = function(obj)
             if(!ret)
                 ret = key+"="+callback(this.obj[key]);
             else
-                ret += "&key="+callback(this.obj[key]);
+                ret += "&"+key+"="+callback(this.obj[key]);
         }
         
         return ret;
@@ -52,6 +52,26 @@ var IterableCollection = function(obj)
     this.length = function()
     {
         return Object.keys(this.obj).length;
+    }
+
+    this.findByName = function(expression)    
+    {
+        var ret = this;
+      
+        if(expression)
+        {
+            var new_obj = [];
+            
+            for(var key in this.obj)
+            {
+                if(TrelloApi.nameTest(expression,this.obj[key].name()))
+                    new_obj[key] = this.obj[key];
+            }
+            
+            ret = new IterableCollection(new_obj);
+        }
+            
+        return ret;
     }
     
     this.filterByName = function(expression)
