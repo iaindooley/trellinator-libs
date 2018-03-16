@@ -7,14 +7,14 @@ var TestConnector = function()
 {
     this.fetch = function(url,options)
     {
-        if(TestConnector.test_base_dir == "")
-            throw "You need to set TestConnector.test_base_dir to __dirname from inside your test script";
-
-        var fixture_path = TestConnector.fixturePath(TestConnector.test_base_dir,url,options);
-        var output = "";
 
         try
         {
+            if(TestConnector.test_base_dir == "")
+                throw "You need to set TestConnector.test_base_dir to __dirname from inside your test script";
+
+            var fixture_path = TestConnector.fixturePath(TestConnector.test_base_dir,url,options);
+            var output = "";
             var output = fs.readFileSync(fixture_path).toString();
         }
         
@@ -27,8 +27,14 @@ var TestConnector = function()
             
             if(stdout)
             {
-                fs.writeFileSync(fixture_path,stdout);
-                var output = fs.readFileSync(fixture_path).toString();
+                if(TestConnector.test_base_dir != "")
+                {
+                    fs.writeFileSync(fixture_path,stdout);
+                    var output = fs.readFileSync(fixture_path).toString();
+                }
+                
+                else
+                    var output = stdout.toString();
             }
         }
 
