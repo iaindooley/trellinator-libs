@@ -9,6 +9,7 @@ var Card = function(data)
     this.unarchived      = null;
     this.added_checklist = null;
     this.checklist_list  = null;
+    this.attached_link   = null;
 
     this.link = function()
     {
@@ -17,6 +18,12 @@ var Card = function(data)
         
         return "https://trello.com/c/"+this.data.shortLink;
     }
+    
+    this.attachLink = function(link)
+    {
+        this.attached_link = TrelloApi.post("cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link));
+        return this;
+    }
 
     this.name = function()
     {
@@ -24,6 +31,24 @@ var Card = function(data)
             this.load();
         
         return this.data.name;
+    }
+    
+    this.member = function(data)
+    {
+        return this.members(data).first();
+    }
+    
+    this.members = function(data)
+    {
+        if(!this.data.members)
+        {
+            this.data.members = this.iterableCollection("cards/"+this.data.id+"/members?fields=username",data,function(elem)
+            {
+                return new Member(elem);
+            });
+        }
+                       
+        return this.data.members;
     }
     
     this.description = function()
@@ -163,6 +188,18 @@ var Card = function(data)
         }.bind(this));
 
         return this;
+    }
+    
+    this.iterableCollection = function(url,data,callback)
+    {
+        var ret = new IterableCollection(TrelloApi.get(url));
+
+        ret.transform(callback);
+
+        if(data && data.name)
+            ret.filterByName(data.name);
+        
+        return ret;
     }
 }
 
