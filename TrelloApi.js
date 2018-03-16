@@ -26,7 +26,7 @@ TrelloApi.call = function(method,baseURL)
     var url = TrelloApi.constructTrelloURL(baseURL);
     var connector = (typeof UrlFetchApp == "undefined")? new TestConnector():UrlFetchApp;
     var resp = connector.fetch(url, {"method": method,"muteHttpExceptions":true});
-    
+
     if(typeof Utilities != "undefined")
         Utilities.sleep(5);
     
@@ -39,7 +39,7 @@ TrelloApi.call = function(method,baseURL)
   
     catch(e)
     {
-        writeInfo_("Unable to parse response: "+resp+" from URL: "+url+" with method: "+method+". Got error: "+e);
+       writeInfo_("Unable to parse response: "+resp+" from URL: "+url+" with method: "+method+". Got error: "+e);
     }
   
     return ret;
