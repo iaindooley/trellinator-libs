@@ -31,10 +31,10 @@ var TestConnector = function()
                     else if(key == "token")
                         return TestConnector.live_token;
                     else
-                        return elem;
+                        return encodeURIComponent(elem);
                 });
                 
-                var cmd      = "curl --data \""+data_string+"\" --url '"+live_url+"'";
+                var cmd      = "curl --data \""+data_string+"\" --request "+options.method+" --url '"+live_url+"'";
             }
             
             else
@@ -44,6 +44,8 @@ var TestConnector = function()
             
             if(stdout)
             {
+                JSON.parse(stdout);
+
                 if(TestConnector.test_base_dir != "")
                 {
                     fs.writeFileSync(fixture_path,stdout);
