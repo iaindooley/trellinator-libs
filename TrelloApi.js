@@ -39,7 +39,7 @@ TrelloApi.call = function(method,baseURL)
             for(var key in payload_parts)
             {
                 var sub_parts = payload_parts[key].split("=");
-                payload[sub_parts[0]] = sub_parts[1];
+                payload[sub_parts[0]] = decodeURIComponent(sub_parts[1]);
             }
             
             params.payload = payload;
