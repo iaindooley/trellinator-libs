@@ -21,7 +21,24 @@ var TestConnector = function()
         catch(e)
         {
             var live_url = url.replace("key=dummy&token=dummy","key="+TestConnector.live_key+"&token="+TestConnector.live_token);
-            var cmd      = "curl --request "+options.method+" --url '"+live_url+"'";
+
+            if(options.payload)
+            {
+                var data_string = new IterableCollection(options.payload).implode("&",function(elem,key)
+                {
+                    if(key == "key")
+                        return TestConnector.live_key;
+                    else if(key == "token")
+                        return TestConnector.live_token;
+                    else
+                        return elem;
+                });
+                
+                var cmd      = "curl --data \""+data_string+"\" --url '"+live_url+"'";
+            }
+            
+            else
+                var cmd      = "curl --request "+options.method+" --url '"+live_url+"'";
 
             var stdout = cp.execSync(cmd,{ stdio: ['pipe', 'pipe', 'ignore']});
             
@@ -57,4 +74,9 @@ TestConnector.fixturePath = function(base_dir,url,options)
     var signature =  md5(url+JSON.stringify(options));
     var fixture_path = path.resolve(base_dir,"./trello_api_fixtures/").toString()+"/"+signature;
     return fixture_path;
+}
+
+function writeInfo_(msg)
+{
+    console.log(msg);
 }
