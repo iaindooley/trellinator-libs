@@ -23,9 +23,33 @@ TrelloApi.put = function(baseURL)
 
 TrelloApi.call = function(method,baseURL)
 {
-    var url = TrelloApi.constructTrelloURL(baseURL);
+    var url     = TrelloApi.constructTrelloURL(baseURL);
+    var payload = null;
+    var params  = {"method": method,"muteHttpExceptions":true};
+
+    if((method == "post") || (method == "put"))
+    {
+        if (url.indexOf("?") != -1)
+        {
+            var parts         = url.split("?");
+            var url           = parts[0];
+            var payload_parts = parts[1].split("&");
+            var payload       = {};
+            
+            for(var key in payload_parts)
+            {
+                var sub_parts = payload_parts[key].split("=");
+                payload[sub_parts[0]] = sub_parts[1];
+            }
+            
+            params.payload = payload;
+        }
+    }
+
     var connector = (typeof UrlFetchApp == "undefined")? new TestConnector():UrlFetchApp;
-    var resp = connector.fetch(url, {"method": method,"muteHttpExceptions":true});
+    var options
+    var resp = connector.fetch(url,params);
+
 
     if(typeof Utilities != "undefined")
         Utilities.sleep(5);
