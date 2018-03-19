@@ -4,14 +4,22 @@ var IterableCollection = function(obj)
 
     this.implode = function(separator,callback)
     {
+        if(!callback)
+        {
+            callback = function(elem,key)
+            {
+                return elem;
+            };
+        }
+
         var ret = "";
 
         for(var key in this.obj)
         {
             if(!ret)
-                ret = key+"="+callback(this.obj[key]);
+                ret = key+"="+callback(this.obj[key],key);
             else
-                ret += "&"+key+"="+callback(this.obj[key]);
+                ret += "&"+key+"="+callback(this.obj[key],key);
         }
         
         return ret;
