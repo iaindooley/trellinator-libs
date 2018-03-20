@@ -11,6 +11,14 @@ var Card = function(data)
     this.checklist_list  = null;
     this.attached_link   = null;
 
+    this.board = function()
+    {
+        if(!this.data.idBoard)
+            this.load();
+        
+        return new Board({id: this.data.idBoard});
+    }
+
     this.link = function()
     {
         if(!this.data.shortLink)
@@ -154,6 +162,20 @@ var Card = function(data)
     {
         this.data = TrelloApi.get("cards/"+this.data.id+"?fields=all&actions=all&attachments=true&attachment_fields=all&member_fields=all&memberVoted_fields=all&checklists=all&checklist_fields=all&board=true&board_fields=all&list=true&pluginData=true&stickers=true&sticker_fields=all");
         return this;
+    }
+
+    this.addLabel = function(label_name)
+    {
+        try
+        {
+            var label = this.board().label({name: label});
+            this.applyLabelIds(new IterableCollection([label.data.id]));
+        }
+        
+        catch(e)
+        {
+            this.addNewLabels(new IterableCollection([label_name]));
+        }
     }
 
     this.addNewLabels = function(new_labels)
