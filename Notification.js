@@ -11,7 +11,7 @@ var Notification = function(notification)
         else if(new IterableCollection(["action_move_card_from_list_to_list"]).hasMember(this.notification.action.display.translationKey))
             var ret = new List(this.notification.action.display.entities.listAfter);
         else
-            throw new Error("not present: "+this.notification.action.display.translationKey);
+            writeInfo_("not present: "+this.notification.action.display.translationKey);
         
         return ret;
     }
