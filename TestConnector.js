@@ -44,7 +44,15 @@ var TestConnector = function()
             
             if(stdout)
             {
-                JSON.parse(stdout);
+                try
+                {
+                    JSON.parse(stdout);
+                }
+                
+                catch(e)
+                {
+                    throw new Error("Unable to parse JSON: "+stdout);
+                }
 
                 if(TestConnector.test_base_dir != "")
                 {
