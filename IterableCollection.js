@@ -2,6 +2,19 @@ var IterableCollection = function(obj)
 {
     this.obj = obj;
 
+    this.hasMember = function(match)
+    {
+        var ret = false;
+
+        for(var key in this.obj)
+        {
+            if(this.obj[key] === match)
+                ret = true;
+        }
+        
+        return ret;
+    }
+
     this.implode = function(separator,callback)
     {
         if(!callback)
