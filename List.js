@@ -5,10 +5,10 @@ var List = function(data)
   
     this.name = function()
     {
-        if(!this.data.name)
+        if(!this.data.name && !this.data.text)
             this.load();
 
-        return this.data.name;
+        return this.data.name ? this.data.name:this.data.text;
     }
     
     this.cards = function(filter)
