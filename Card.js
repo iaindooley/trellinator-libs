@@ -67,6 +67,11 @@ var Card = function(data)
         return this.data.desc;
     }
 
+    this.label = function(data)
+    {
+        return this.labels().findByName(data).first();
+    }
+
     this.labels = function()
     {
         if(!this.data.labels)
@@ -139,6 +144,15 @@ var Card = function(data)
         }
 
         return this.checklist_list;
+    }
+
+    this.completeAllItemsOnChecklist = function(name)
+    {
+        this.checklist(name).items().each(function(elem)
+        {
+            if(elem.state == "incomplete")
+                TrelloApi.put("cards/"+this.data.id+"/checkItem/"+elem.id+"?state=complete");
+        }.bind(this));
     }
 
     this.addChecklist = function(name,callback)
