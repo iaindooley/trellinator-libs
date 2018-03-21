@@ -1,6 +1,7 @@
 var Checklist = function(data)
 {
     this.data       = data;
+    this.item_list  = null;
     this.added_item = null;
 
     this.name = function()
@@ -18,6 +19,14 @@ var Checklist = function(data)
 
         this.added_item = TrelloApi.post("checklists/"+this.data.id+"/checkItems?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position));
         return this;
+    }
+    
+    this.items = function()
+    {
+        if(!this.item_list)
+            this.item_list = new IterableCollection(TrelloApi.get("checklists/"+this.data.id+"/checkItems"));
+
+        return this.item_list;
     }
     
     this.load = function()
