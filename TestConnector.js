@@ -78,6 +78,8 @@ var TestConnector = function()
 }
 
 TestConnector.test_base_dir   = "";
+TestConnector.live_key      = process.argv[2];
+TestConnector.live_token    = process.argv[3];
 
 TestConnector.fixturePath = function(base_dir,url,options)
 {
