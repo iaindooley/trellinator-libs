@@ -59,6 +59,12 @@ var Card = function(data)
         return this.data.members;
     }
     
+    this.cardLinkedInDescription = function()
+    {
+        var parts = new RegExp("https:\\/\\/trello\\.com\\/c\\/([A-Za-z0-9]+)","i").exec(this.description());
+        return new Card({id: parts[1]});
+    }
+
     this.description = function()
     {
         if(!this.data.desc)
