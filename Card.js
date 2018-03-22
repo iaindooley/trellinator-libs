@@ -146,6 +146,18 @@ var Card = function(data)
         return this.checklist_list;
     }
 
+    this.checkItemByName = function(name)
+    {
+        this.checklists().each(function(checklist)
+        {
+            checklist.items().each(function(item)
+            {
+                if(item.state == "incomplete")
+                    TrelloApi.put("cards/"+this.data.id+"/checkItem/"+item.id+"?state=complete");
+            }.bind(this));
+        }.bind(this));
+    }
+
     this.completeAllItemsOnChecklist = function(name)
     {
         this.checklist(name).items().each(function(elem)
