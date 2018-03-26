@@ -19,6 +19,28 @@ var Card = function(data)
         return new Board({id: this.data.idBoard});
     }
 
+    this.cardsLinkedInAttachments = function()
+    {
+        return this.attachments(TrelloApi.cardLinkRegExp()).transform(function(elem)
+        {
+            var parts = TrelloApi.cardLinkRegExp().exec(new CheckItem(elem).url());
+            return new Card({id: parts[1]});
+        });
+    }
+
+    this.attachment = function(name)
+    {
+        return this.attachments(name).first();
+    }
+
+    this.attachments = function(name)
+    {
+        if(!this.data.attachments)
+            this.load();
+
+        return new IterableCollection(this.data.attachments);
+    }
+
     this.link = function()
     {
         if(!this.data.shortLink)
@@ -61,7 +83,7 @@ var Card = function(data)
     
     this.cardLinkedInDescription = function()
     {
-        var parts = new RegExp("https:\\/\\/trello\\.com\\/c\\/([A-Za-z0-9]+)","i").exec(this.description());
+        var parts = TrelloApi.cardLinkRegExp().exec(this.description());
         return new Card({id: parts[1]});
     }
 
