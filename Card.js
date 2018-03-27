@@ -19,6 +19,30 @@ var Card = function(data)
         return new Board({id: this.data.idBoard});
     }
 
+    this.currentList = function()
+    {
+        if(!this.data.list)
+            this.load();
+        
+        return new List(this.data.list);
+    }
+    
+    this.allChecklistsComplete = function()
+    {
+        var ret = true;
+
+        this.checklists().each(function(checklist)
+        {   
+            checklist.items().each(function(item)
+            {   
+                if(item.state == "incomplete")
+                    ret = false;
+            }.bind(this));
+        }.bind(this));        
+        
+        return ret;
+    }
+
     this.cardsLinkedInAttachments = function()
     {
         return this.attachments(TrelloApi.cardLinkRegExp()).transform(function(elem)
