@@ -12,6 +12,11 @@ var Notification = function(notification)
         return ret;
     }
 
+    this.member = function()
+    {
+        return new Member(this.notification.action.memberCreator);
+    }
+
     this.checklist = function()
     {
         return new Checklist(this.notification.action.data.checklist);
