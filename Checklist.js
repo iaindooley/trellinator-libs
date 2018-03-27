@@ -16,10 +16,7 @@ var Checklist = function(data)
         new IterableCollection(this.data.checkItems).each(function(elem)
         {
             if(elem.state == "incomplete")
-            {
                 ret = false;
-                console.log(elem);
-            }
         });
             
         return ret;
