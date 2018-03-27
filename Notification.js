@@ -38,6 +38,16 @@ var Notification = function(notification)
         return ret;
     }
 
+    this.listCardWasMovedTo = function()
+    {
+        if(this.notification.action.display.translationKey == "action_move_card_from_list_to_list")
+            var ret = new List(this.notification.action.display.entities.listAfter);
+        else
+            throw new Error("Card was not moved to a list");
+        
+        return ret;
+    }
+
     this.listCardWasAddedTo = function()
     {
         if(new IterableCollection(["action_create_card","action_copy_card","action_email_card"]).hasMember(this.notification.action.display.translationKey))
@@ -47,7 +57,7 @@ var Notification = function(notification)
         else if(new IterableCollection(["action_move_card_from_list_to_list"]).hasMember(this.notification.action.display.translationKey))
             var ret = new List(this.notification.action.display.entities.listAfter);
         else
-            writeInfo_("not present: "+this.notification.action.display.translationKey);
+            throw new Error("Card was not added to a list");
         
         return ret;
     }
