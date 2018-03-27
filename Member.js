@@ -1,6 +1,7 @@
 var Member = function(data)
 {    
-    this.data      = data;
+    this.data          = data;
+    this.list_of_teams = null;
   
     this.fullName = function()
     {
@@ -8,6 +9,25 @@ var Member = function(data)
             this.load();
 
         return this.data.fullName;
+    }
+
+    this.team = function(name)
+    {
+        return this.teams().findByName(name).first();
+    }
+    
+    this.teams = function()
+    {
+        if(!this.list_of_teams)
+        {
+            this.list_of_teams = new IterableCollection(TrelloApi.get("/members/"+this.username()+"/organizations?filter=all&fields=all"))
+                                 .transform(function(elem)
+                                 {
+                                     return new Team(elem);
+                                 });
+        }
+        
+        return this.list_of_teams;
     }
 
     this.username = function()
