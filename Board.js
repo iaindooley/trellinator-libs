@@ -11,6 +11,11 @@ var Board = function(data)
         return this.data.name;
     }
     
+    this.link = function()
+    {
+        return this.shortUrl();
+    }
+
     this.shortUrl = function()
     {
         if(!this.data.shortUrl)
@@ -137,5 +142,10 @@ var Board = function(data)
       }
       
       return list;
+    }
+    
+    this.copy = function(name,team)
+    {
+        return new Board(TrelloApi.post("/boards/?name="+encodeURIComponent(name)+"&idOrganization="+team.data.id+"&idBoardSource="+this.data.id+"&keepFromSource=cards&prefs_permissionLevel=org&prefs_voting=disabled&prefs_comments=members&prefs_invitations=members&prefs_selfJoin=true&prefs_cardCovers=true&prefs_background=blue&prefs_cardAging=regular"));
     }
 }
