@@ -38,6 +38,32 @@ var IterableCollection = function(obj)
         return ret;
     }
     
+    this.itemAfter = function(expression)
+    {
+        var ret         = null;
+        var return_next = false;
+      
+        if(expression)
+        {
+            for(var key in this.obj)
+            {
+                if(return_next)
+                {
+                    return_next = false;
+                    ret = this.obj[key];
+                }
+
+                else if(TrelloApi.nameTest(expression,this.obj[key].name()))
+                    return_next = true;
+            }
+        }
+        
+        if(!ret)
+            throw new Error("There was no item after: "+expression);
+            
+        return ret;
+    }
+
     this.first = function()
     {
         var ret = null;
