@@ -21,6 +21,10 @@ var Notification = function(notification)
             throw new Error("No checklist item was completed");
 
         var ret = new CheckItem(this.notification.action.display.entities.checkitem);
+        
+        if(name && (ret.name() != name))
+            throw new Error("A checklist item was completed but it was not named: "+name);
+
         ret.setContainingChecklist(this.checklist);
         return ret;
     }
@@ -42,10 +46,10 @@ var Notification = function(notification)
 
         var ret = this.checklist();
         
-        if(!ret.isComplete())
-            throw new Error("The checklist in which the item was checked is not complete");
-        else if(name && !TrelloApi.nameTest(name,ret.name()))
+        if(name && !TrelloApi.nameTest(name,ret.name()))
             throw new Error("The completed checklist was not named "+name);
+        else if(!ret.isComplete())
+            throw new Error("The checklist in which the item was checked is not complete");
         
         ret.setContainingCard(this.card());
         return ret;
