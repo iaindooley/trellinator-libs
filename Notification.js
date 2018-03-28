@@ -62,6 +62,11 @@ var Notification = function(notification)
         return ret;
     }
 
+    this.board = function()
+    {
+        return new Board(this.notification.model);
+    }
+
     this.card = function()
     {
         return new Card(this.notification.action.display.entities.card);
