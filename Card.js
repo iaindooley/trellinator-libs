@@ -157,6 +157,16 @@ var Card = function(data)
         return this;
     }
 
+    this.copyTo = function(data)
+    {
+        if(!this.data.board)
+            this.load();
+
+        var list_id = new Board(this.data.board).list({name: data.list}).data.id;
+        var position = (data.position)?data.position:"bottom";
+        return new Card(TrelloApi.post("cards?pos="+position+"&idList="+list_id+"&idCardSource="+this.data.id+"&keepFromSource=all"));
+    }
+
     this.moveTo = function(data)
     {
         if(!this.data.board)
