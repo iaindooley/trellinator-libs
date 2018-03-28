@@ -2,6 +2,19 @@ var Notification = function(notification)
 {
     this.notification = notification;
     
+    this.labelAddedToCard = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_add_label_to_card")
+            throw new Error("No label as added to a card");
+        
+        var ret = new Label(this.notification.action.data.label);
+        
+        if(name && (ret.name() != name))
+            throw new Error("Label was added, but was not named: "+name);
+        
+        return ret;
+    }
+
     this.completedChecklistItem = function(name)
     {
         if(this.notification.action.display.translationKey != "action_completed_checkitem")
