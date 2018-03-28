@@ -11,6 +11,11 @@ var List = function(data)
         return this.data.name ? this.data.name:this.data.text;
     }
     
+    this.card = function(filter)
+    {
+        return this.cards(filter).first();
+    }
+
     this.cards = function(filter)
     {
         if(!this.card_list)
