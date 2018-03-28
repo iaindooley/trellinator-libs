@@ -19,6 +19,11 @@ var Card = function(data)
         return new Board({id: this.data.idBoard});
     }
 
+    this.moveToNextList = function()
+    {
+        this.moveTo({list: this.board().lists().itemAfter(this.currentList().name()).name(),position: "top"});
+    }
+
     this.currentList = function()
     {
         if(!this.data.list)
