@@ -229,6 +229,11 @@ var Card = function(data)
         }.bind(this));
     }
 
+    this.copyChecklist = function(name,to_card)
+    {
+        return new Checklist(TrelloApi.post("cards/"+to_card.data.id+"/checklists?idChecklistSource="+this.checklist(name).data.id));
+    }
+
     this.addChecklist = function(name,callback)
     {
         try
