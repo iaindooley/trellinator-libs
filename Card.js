@@ -22,6 +22,7 @@ var Card = function(data)
     this.moveToNextList = function()
     {
         this.moveTo({list: this.board().lists().itemAfter(this.currentList().name()).name(),position: "top"});
+        return this;
     }
 
     this.currentList = function()
