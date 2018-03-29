@@ -78,9 +78,19 @@ var Card = function(data)
         return "https://trello.com/c/"+this.data.shortLink;
     }
     
-    this.attachLink = function(link)
+    this.attachLink = function(data)
     {
-        this.attached_link = TrelloApi.post("cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link));
+        if(data.link)
+            var link = data.link;
+        else
+            var link = data;
+
+        var url = "cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link);
+
+        if(data.name)
+            url += "&name="+encodeURIComponent(data.name);
+            
+        this.attached_link = TrelloApi.post(url);
         return this;
     }
 
