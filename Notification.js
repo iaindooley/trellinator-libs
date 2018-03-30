@@ -4,7 +4,10 @@ var Notification = function(notification)
     
     this.cardDueDateWasAddedTo = function()
     {
-        if(this.notification.action.display.translationKey != "action_added_a_due_date")
+        if(
+            (this.notification.action.display.translationKey != "action_added_a_due_date")&&
+            (this.notification.action.display.translationKey != "action_changed_a_due_date")
+          )
             throw new Error("No due date was added");
         
         return this.card();
