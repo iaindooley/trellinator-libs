@@ -167,6 +167,14 @@ var Card = function(data)
         return this;
     }
 
+    this.due = function()
+    {
+        if(!this.data.due)
+            this.load();
+        
+        return this.data.due;
+    }
+    
     this.setDue = function(datetime)
     {
         this.set_due = TrelloApi.put("cards/"+this.data.id+"?due="+encodeURIComponent(datetime));
