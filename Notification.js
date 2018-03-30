@@ -2,6 +2,14 @@ var Notification = function(notification)
 {
     this.notification = notification;
     
+    this.cardDueDateWasAddedTo = function()
+    {
+        if(this.notification.action.display.translationKey != "action_added_a_due_date")
+            throw new Error("No due date was added");
+        
+        return this.card();
+    }
+
     this.labelAddedToCard = function(name)
     {
         if(this.notification.action.display.translationKey != "action_add_label_to_card")
