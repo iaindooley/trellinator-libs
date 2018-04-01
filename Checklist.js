@@ -6,6 +6,17 @@ var Checklist = function(data)
     this.containing_card = null;
     this.check_items     = null;
 
+    this.convertIntoLinkedCards = function(list,params)
+    {
+        params.desc = this.card().link();
+
+        this.items().each(function(item)
+        {
+            params.name = item.name();
+            item.setName(Card.create(list,params).link());
+        }.bind(this));
+    }
+
     this.isComplete = function()
     {
         var ret = true;
@@ -53,7 +64,12 @@ var Checklist = function(data)
     this.items = function()
     {
         if(!this.item_list)
-            this.item_list = new IterableCollection(TrelloApi.get("checklists/"+this.data.id+"/checkItems"));
+        {
+            this.item_list = new IterableCollection(TrelloApi.get("checklists/"+this.data.id+"/checkItems")).transform(function(item)
+            {
+                return new CheckItem(item).setContainingChecklist(this);
+            }.bind(this));
+        }
 
         return this.item_list;
     }
