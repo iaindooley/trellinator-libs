@@ -267,7 +267,7 @@ var Card = function(data)
     
     this.checklist = function(name)
     {
-        return this.checklists(name).first();
+        return this.checklists(name).first().setContainingCard(this);
     }
 
     this.checklists = function(name)
@@ -332,6 +332,11 @@ var Card = function(data)
     {
         this.data = TrelloApi.get("cards/"+this.data.id+"?fields=all&actions=all&attachments=true&attachment_fields=all&member_fields=all&memberVoted_fields=all&checklists=all&checklist_fields=all&board=true&board_fields=all&list=true&pluginData=true&stickers=true&sticker_fields=all");
         return this;
+    }
+
+    this.removeLabel = function(label)
+    {
+        TrelloApi.del("cards/"+this.data.id+"/idLabels/"+label.data.id);
     }
 
     this.addLabel = function(label_name)
