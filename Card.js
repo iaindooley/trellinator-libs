@@ -19,6 +19,18 @@ var Card = function(data)
         return new Board({id: this.data.idBoard});
     }
 
+    this.comments = function(limit)
+    {
+        if(!limit)
+            limit = 20;
+
+        return new IterableCollection(TrelloApi.get("cards/"+this.data.id+"/actions?filter=commentCard&limit="+limit))
+                                               .transform(function(elem)
+        {
+            return new Comment(elem);
+        });
+    }
+
     this.moveToNextList = function()
     {
         this.moveTo({list: this.board().lists().itemAfter(this.currentList().name()).name(),position: "top"});
@@ -53,8 +65,10 @@ var Card = function(data)
     {
         return this.attachments(TrelloApi.cardLinkRegExp()).transform(function(elem)
         {
-            var parts = TrelloApi.cardLinkRegExp().exec(new CheckItem(elem).url());
-            return new Card({id: parts[1]});
+            if(parts = TrelloApi.cardLinkRegExp().exec(new CheckItem(elem).url()))
+                return new Card({id: parts[1]});
+            else
+                return false;
         });
     }
 
@@ -81,7 +95,9 @@ var Card = function(data)
     
     this.attachLink = function(data)
     {
-        if(data.link)
+        if(data.url)
+            var link = data.url;
+        else if(typeof data.link == "string")
             var link = data.link;
         else
             var link = data;
@@ -90,7 +106,7 @@ var Card = function(data)
 
         if(data.name)
             url += "&name="+encodeURIComponent(data.name);
-            
+
         this.attached_link = TrelloApi.post(url);
         return this;
     }
@@ -243,10 +259,12 @@ var Card = function(data)
         {
             checklist.items().each(function(item)
             {
-                if(item.state == "incomplete")
+                if((item.state == "incomplete") && (item.name == name))
                     TrelloApi.put("cards/"+this.data.id+"/checkItem/"+item.id+"?state=complete");
             }.bind(this));
         }.bind(this));
+        
+        return this;
     }
 
     this.completeAllItemsOnChecklist = function(name)
