@@ -196,6 +196,26 @@ var Card = function(data)
         return this.data.due;
     }
     
+    this.removeAllMembers = function()
+    {
+        this.members().each(function(elem)
+        {
+            this.removeMember(elem);
+        });
+    }
+    
+    this.removeMember = function(member)
+    {
+        TrelloApi.delete("cards/"+this.data.id+"/idMembers/"+member.data.id);
+        return this;
+    }
+
+    this.removeDueDate = function()
+    {
+        this.set_due = TrelloApi.put("cards/"+this.data.id+"?due=null");
+        return this;
+    }
+
     this.setDue = function(datetime)
     {
         this.set_due = TrelloApi.put("cards/"+this.data.id+"?due="+encodeURIComponent(datetime));
