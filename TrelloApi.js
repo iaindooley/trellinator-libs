@@ -57,7 +57,7 @@ TrelloApi.call = function(method,baseURL)
 
 
     if(typeof Utilities != "undefined")
-        Utilities.sleep(5);
+        Utilities.sleep(100);
     
     var ret = null;
   
