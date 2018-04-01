@@ -214,6 +214,12 @@ var Card = function(data)
         return this;
     }
 
+    this.markDueDateComplete = function()
+    {
+        TrelloApi.put("cards/"+this.data.id+"?dueComplete=true");
+        return this;
+    }
+
     this.removeDueDate = function()
     {
         this.set_due = TrelloApi.put("cards/"+this.data.id+"?due=null");
