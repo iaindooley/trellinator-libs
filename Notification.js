@@ -2,6 +2,14 @@ var Notification = function(notification)
 {
     this.notification = notification;
     
+    this.archivedCard = function()
+    {
+        if(this.notification.action.display.translationKey != "action_archived_card")
+            throw new Error("No card was archived in this update");
+        
+        return this.card();
+    }
+   
     this.cardDueDateWasAddedTo = function()
     {
         if(
