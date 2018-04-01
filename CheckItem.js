@@ -3,6 +3,11 @@ var CheckItem = function(data)
     this.data                 = data;
     this.containing_checklist = null;
 
+    this.checklist = function()
+    {
+        return this.containing_checklist;
+    }
+
     this.setContainingChecklist = function(checklist)
     {
         this.containing_checklist = checklist;
