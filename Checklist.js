@@ -30,6 +30,7 @@ var Checklist = function(data)
     this.setContainingCard = function(card)
     {
         this.containing_card = card;
+        return this;
     }
 
     this.name = function()
