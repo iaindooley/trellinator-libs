@@ -322,6 +322,7 @@ var Card = function(data)
         {
             var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name)));
             this.added_checklist = checklist;
+            this.checklist_list = null;
         }
 
         callback(checklist);
