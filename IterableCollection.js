@@ -15,8 +15,37 @@ var IterableCollection = function(obj)
         return ret;
     }
 
+    this.implodeValues = function(separator,callback)
+    {
+        if(!separator)
+            separator = "&";
+
+        if(!callback)
+        {
+            callback = function(elem,key)
+            {
+                return elem;
+            };
+        }
+
+        var ret = "";
+
+        for(var key in this.obj)
+        {
+            if(!ret)
+                ret = callback(this.obj[key],key);
+            else
+                ret += separator+callback(this.obj[key],key);
+        }
+        
+        return ret;
+    }
+
     this.implode = function(separator,callback)
     {
+        if(!separator)
+            separator = "&";
+
         if(!callback)
         {
             callback = function(elem,key)
@@ -32,7 +61,7 @@ var IterableCollection = function(obj)
             if(!ret)
                 ret = key+"="+callback(this.obj[key],key);
             else
-                ret += "&"+key+"="+callback(this.obj[key],key);
+                ret += separator+key+"="+callback(this.obj[key],key);
         }
         
         return ret;
