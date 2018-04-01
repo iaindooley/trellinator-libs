@@ -97,6 +97,10 @@ var Board = function(data)
       
         if(data && data.name)
             this.list_of_lists.filterByName(data.name);
+        else if(typeof data == "string")
+            this.list_of_lists.filterByName(data);
+        else if(data)
+            throw new Error("Either an object with a name element or a string need to be passed in as data to the Board.lists function");
       
         return this.list_of_lists;
     }
