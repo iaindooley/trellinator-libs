@@ -11,6 +11,13 @@ var CheckItem = function(data)
     this.setContainingChecklist = function(checklist)
     {
         this.containing_checklist = checklist;
+        return this;
+    }
+
+    this.setName = function(name)
+    {
+        TrelloApi.put("cards/"+this.containing_checklist.card().data.id+"/checkItem/"+this.data.id+"?name="+encodeURIComponent(name));
+        return this;
     }
 
     this.url = function()
