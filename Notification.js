@@ -36,7 +36,7 @@ var Notification = function(notification)
         if(name && (ret.name() != name))
             throw new Error("A checklist item was completed but it was not named: "+name);
 
-        ret.setContainingChecklist(this.checklist);
+        ret.setContainingChecklist(this.checklist().setContainingCard(this.card()));
         return ret;
     }
 
