@@ -206,7 +206,7 @@ var Card = function(data)
     
     this.removeMember = function(member)
     {
-        TrelloApi.delete("cards/"+this.data.id+"/idMembers/"+member.data.id);
+        TrelloApi.del("cards/"+this.data.id+"/idMembers/"+member.data.id);
         return this;
     }
 
