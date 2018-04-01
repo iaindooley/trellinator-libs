@@ -46,6 +46,11 @@ var List = function(data)
         return updated;
     }
     
+    this.archive = function()
+    {
+        TrelloApi.put("lists/"+this.data.id+"?closed=true");
+    }
+
     this.load = function()
     {
         this.data = TrelloApi.get("lists/"+this.data.id+"?fields=all");
