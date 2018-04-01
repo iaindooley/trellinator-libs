@@ -103,6 +103,11 @@ var Card = function(data)
         return this.data.name ? this.data.name:this.data.text;
     }
     
+    this.addMember = function(member)
+    {
+        return TrelloApi.post("cards/"+this.data.id+"/idMembers?value="+member.data.id);
+    }
+
     this.member = function(data)
     {
         return this.members(data).first();
