@@ -10,6 +10,7 @@ var Card = function(data)
     this.added_checklist = null;
     this.checklist_list  = null;
     this.attached_link   = null;
+    this.added_member    = null;
 
     this.board = function()
     {
@@ -121,7 +122,8 @@ var Card = function(data)
     
     this.addMember = function(member)
     {
-        return TrelloApi.post("cards/"+this.data.id+"/idMembers?value="+member.data.id);
+        this.added_member = TrelloApi.post("cards/"+this.data.id+"/idMembers?value="+member.data.id);
+        return this;
     }
 
     this.member = function(data)
@@ -201,7 +203,9 @@ var Card = function(data)
         this.members().each(function(elem)
         {
             this.removeMember(elem);
-        });
+        }.bind(this));
+      
+        return this;
     }
     
     this.removeMember = function(member)
