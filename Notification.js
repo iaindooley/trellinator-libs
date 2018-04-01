@@ -2,6 +2,16 @@ var Notification = function(notification)
 {
     this.notification = notification;
     
+    this.commentAddedToCard = function()
+    {
+        if(this.notification.action.display.translationKey != "action_comment_on_card")
+            throw new Error("No comment added as part of this notification");
+        
+        var data = {data: {id: this.notification.action.id,
+                    text: this.notification.action.data.text}};
+        return new Comment(data);
+    }
+
     this.archivedCard = function()
     {
         if(this.notification.action.display.translationKey != "action_archived_card")
