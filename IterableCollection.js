@@ -90,9 +90,15 @@ var IterableCollection = function(obj)
 
     this.transform = function(callback)
     {
-        for(var key in this.obj)
-            this.obj[key] = callback(this.obj[key]);
+        var new_obj = [];
 
+        for(var key in this.obj)
+        {
+            if((transformed = callback(this.obj[key])) !== false)
+                new_obj[key] = transformed;
+        }
+
+        this.obj = new_obj;
         return this;
     }
     
