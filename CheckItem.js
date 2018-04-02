@@ -28,6 +28,14 @@ var CheckItem = function(data)
         return this.data.url;
     }
 
+    this.state = function()
+    {
+        if(!this.data.state)
+            this.load();
+        
+        return this.data.state;
+    }
+
     this.name = function()
     {
         if(!this.data.nameHtml && !this.data.name)
