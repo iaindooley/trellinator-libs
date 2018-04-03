@@ -81,7 +81,7 @@ var Board = function(data)
 
     this.list = function(data)
     {
-        return this.lists(data).first();
+        return this.lists().findByName(Board.nameTestData(data)).first();
     }
 
     this.lists = function(data)
@@ -95,13 +95,9 @@ var Board = function(data)
                                  });
         }
       
-        if(data && data.name)
-            this.list_of_lists.filterByName(data.name);
-        else if((typeof data == "string") || (data.constructor === RegExp))
-            this.list_of_lists.filterByName(data);
-        else if(data)
-            throw new Error("Either an object with a name element or a string need to be passed in as data to the Board.lists function");
-      
+        if(filter = Board.nameTestData(data))
+            this.list_of_lists.filterByName(filter);
+
         return this.list_of_lists;
     }
 
@@ -170,4 +166,18 @@ var Board = function(data)
     {
         this.data = TrelloApi.get("boards/"+this.data.id+"?actions=none&boardStars=none&cards=none&checklists=none&fields=name%2C%20desc%2C%20descData%2C%20closed%2C%20idOrganization%2C%20url%2C%20shortUrl&lists=none&members=none&memberships=none&membersInvited=none");
     }
+}
+
+Board.nameTestData = function(data)
+{
+    var ret = null;
+
+    if(data && data.name)
+        ret = data.name;
+    else if((typeof data == "string") || ((typeof data !== "undefined") && (data.constructor === RegExp)))
+        ret = data;
+    else if(data)
+        throw new Error("Either an object with a name element or a string need to be passed in as data to the Board.nameTestData function");
+    
+    return ret;
 }
