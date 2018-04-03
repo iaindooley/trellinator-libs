@@ -2,6 +2,14 @@ var Notification = function(notification)
 {
     this.notification = notification;
     
+    this.cardDueDateWasCompletedOn = function()
+    {
+        if(this.notification.action.display.translationKey != "action_marked_the_due_date_complete")
+            throw new Error("Due date not marked complete");
+        
+        return this.card();
+    }
+
     this.actionOnDueDate = function(function_name,signature,params)
     {
         if(!params)
