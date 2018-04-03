@@ -12,6 +12,14 @@ var Card = function(data)
     this.attached_link   = null;
     this.added_member    = null;
 
+    this.dueComplete = function()
+    {
+        if(typeof this.data.dueComplete == "undefined")
+            this.load();
+
+        return this.data.dueComplete;
+    }
+
     this.board = function()
     {
         if(!this.data.idBoard)
