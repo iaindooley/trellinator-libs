@@ -84,5 +84,12 @@ var Member = function(data)
     }
 
     if(!this.data.id && this.data.username)
+    {
+        if(Member.mock_member_username)
+            this.data.username = Member.mock_member_username;
+
         this.load();
+    }
 }
+
+Member.mock_member_username = null;
