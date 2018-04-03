@@ -172,12 +172,10 @@ Board.nameTestData = function(data)
 {
     var ret = null;
 
-    if(data && data.name)
-        ret = data.name;
-    else if((typeof data == "string") || ((typeof data !== "undefined") && (data.constructor === RegExp)))
+    if((typeof data == "string") || ((typeof data !== "undefined") && (data.constructor === RegExp)))
         ret = data;
-    else if(data)
-        throw new Error("Either an object with a name element or a string need to be passed in as data to the Board.nameTestData function");
+    else if(data && data.name)
+        ret = data.name;
     
     return ret;
 }
