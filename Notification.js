@@ -2,6 +2,18 @@ var Notification = function(notification)
 {
     this.notification = notification;
     
+    this.actionOnDueDate = function(function_name,signature,params)
+    {
+        if(!params)
+            params = {};
+
+        var card = this.cardDueDateWasAddedTo();
+        var trigger_signature = signature+card.data.id;
+        clear(trigger_signature);
+        params.notification = this;
+        push(new Date(card.due()),{functionName: function_name,parameters: params},trigger_signature);
+    }
+
     this.commentAddedToCard = function()
     {
         if(this.notification.action.display.translationKey != "action_comment_on_card")
