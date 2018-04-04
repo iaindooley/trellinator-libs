@@ -309,8 +309,8 @@ var Card = function(data)
     {
         this.checklist(name).items().each(function(elem)
         {
-            if(elem.state == "incomplete")
-                TrelloApi.put("cards/"+this.data.id+"/checkItem/"+elem.id+"?state=complete");
+            if(elem.state() == "incomplete")
+                TrelloApi.put("cards/"+this.data.id+"/checkItem/"+elem.data.id+"?state=complete");
         }.bind(this));
     }
 
