@@ -407,6 +407,12 @@ var Card = function(data)
         
         return ret;
     }
+
+    if(!this.data.id && this.data.link)
+    {
+        this.data.id = new RegExp("https://trello.com/c/(.+)$").exec(this.data.link)[1];
+        this.load();
+    }
 }
 
 Card.create = function(list,data)
