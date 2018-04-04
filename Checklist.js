@@ -52,6 +52,21 @@ var Checklist = function(data)
         return this.data.name;
     }
 
+    this.addUniqueItem = function(name,position)
+    {
+        try
+        {
+            this.items().findByName(name).first();
+        }
+        
+        catch(e)
+        {
+            this.addItem(name,position);
+        }
+        
+        return this;
+    }
+
     this.addItem = function(name,position)
     {
         if(!position)
