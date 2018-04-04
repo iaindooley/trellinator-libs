@@ -74,7 +74,7 @@ var Card = function(data)
     {
         return this.attachments(TrelloApi.cardLinkRegExp()).transform(function(elem)
         {
-            if(parts = TrelloApi.cardLinkRegExp().exec(new CheckItem(elem).url()))
+            if(parts = TrelloApi.cardLinkRegExp().exec(elem.url))
                 return new Card({id: parts[1]});
             else
                 return false;
@@ -117,6 +117,12 @@ var Card = function(data)
             url += "&name="+encodeURIComponent(data.name);
 
         this.attached_link = TrelloApi.post(url);
+        return this;
+    }
+
+    this.setName = function(name)
+    {
+        this.set_description = TrelloApi.put("cards/"+this.data.id+"?name="+encodeURIComponent(name));
         return this;
     }
 
@@ -410,7 +416,7 @@ var Card = function(data)
 
     if(!this.data.id && this.data.link)
     {
-        this.data.id = new RegExp("https://trello.com/c/(.+)$").exec(this.data.link)[1];
+        this.data.id = TrelloApi.cardLinkRegExp().exec(this.data.link)[1];
         this.load();
     }
 }
