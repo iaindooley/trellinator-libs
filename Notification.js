@@ -2,6 +2,14 @@ var Notification = function(notification)
 {
     this.notification = notification;
     
+    this.cardWithNameChanged = function()
+    {
+        if(this.notification.action.display.translationKey != "action_renamed_card")
+            throw new Error("Card name was not changed");
+        
+        return this.card();
+    }
+
     this.cardDueDateWasCompletedOn = function()
     {
         if(this.notification.action.display.translationKey != "action_marked_the_due_date_complete")
