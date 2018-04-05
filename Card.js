@@ -10,6 +10,15 @@ var Card = function(data)
     this.added_checklist = null;
     this.checklist_list  = null;
     this.attached_link   = null;
+    this.added_member    = null;
+
+    this.dueComplete = function()
+    {
+        if(typeof this.data.dueComplete == "undefined")
+            this.load();
+
+        return this.data.dueComplete;
+    }
 
     this.board = function()
     {
@@ -17,6 +26,72 @@ var Card = function(data)
             this.load();
         
         return new Board({id: this.data.idBoard});
+    }
+
+    this.comments = function(limit)
+    {
+        if(!limit)
+            limit = 20;
+
+        return new IterableCollection(TrelloApi.get("cards/"+this.data.id+"/actions?filter=commentCard&limit="+limit))
+                                               .transform(function(elem)
+        {
+            return new Comment(elem);
+        });
+    }
+
+    this.moveToNextList = function()
+    {
+        this.moveTo({list: this.board().lists().itemAfter(this.currentList().name()).name(),position: "top"});
+        return this;
+    }
+
+    this.currentList = function()
+    {
+        if(!this.data.list)
+            this.load();
+        
+        return new List(this.data.list);
+    }
+    
+    this.allChecklistsComplete = function()
+    {
+        var ret = true;
+
+        this.checklists().each(function(checklist)
+        {   
+            checklist.items().each(function(item)
+            {   
+                if(item.state == "incomplete")
+                    ret = false;
+            }.bind(this));
+        }.bind(this));        
+        
+        return ret;
+    }
+
+    this.cardsLinkedInAttachments = function()
+    {
+        return this.attachments(TrelloApi.cardLinkRegExp()).transform(function(elem)
+        {
+            if(parts = TrelloApi.cardLinkRegExp().exec(elem.url))
+                return new Card({id: parts[1]});
+            else
+                return false;
+        });
+    }
+
+    this.attachment = function(name)
+    {
+        return this.attachments(name).first();
+    }
+
+    this.attachments = function(name)
+    {
+        if(!this.data.attachments)
+            this.load();
+
+        return new IterableCollection(this.data.attachments);
     }
 
     this.link = function()
@@ -27,9 +102,27 @@ var Card = function(data)
         return "https://trello.com/c/"+this.data.shortLink;
     }
     
-    this.attachLink = function(link)
+    this.attachLink = function(data)
     {
-        this.attached_link = TrelloApi.post("cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link));
+        if(data.url)
+            var link = data.url;
+        else if(typeof data.link == "string")
+            var link = data.link;
+        else
+            var link = data;
+
+        var url = "cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link);
+
+        if(data.name)
+            url += "&name="+encodeURIComponent(data.name);
+
+        this.attached_link = TrelloApi.post(url);
+        return this;
+    }
+
+    this.setName = function(name)
+    {
+        this.set_description = TrelloApi.put("cards/"+this.data.id+"?name="+encodeURIComponent(name));
         return this;
     }
 
@@ -41,6 +134,12 @@ var Card = function(data)
         return this.data.name ? this.data.name:this.data.text;
     }
     
+    this.addMember = function(member)
+    {
+        this.added_member = TrelloApi.post("cards/"+this.data.id+"/idMembers?value="+member.data.id);
+        return this;
+    }
+
     this.member = function(data)
     {
         return this.members(data).first();
@@ -61,7 +160,7 @@ var Card = function(data)
     
     this.cardLinkedInDescription = function()
     {
-        var parts = new RegExp("https:\\/\\/trello\\.com\\/c\\/([A-Za-z0-9]+)","i").exec(this.description());
+        var parts = TrelloApi.cardLinkRegExp().exec(this.description());
         return new Card({id: parts[1]});
     }
 
@@ -105,10 +204,56 @@ var Card = function(data)
         return this;
     }
 
+    this.due = function()
+    {
+        if(!this.data.due)
+            this.load();
+        
+        return this.data.due;
+    }
+    
+    this.removeAllMembers = function()
+    {
+        this.members().each(function(elem)
+        {
+            this.removeMember(elem);
+        }.bind(this));
+      
+        return this;
+    }
+    
+    this.removeMember = function(member)
+    {
+        TrelloApi.del("cards/"+this.data.id+"/idMembers/"+member.data.id);
+        return this;
+    }
+
+    this.markDueDateComplete = function()
+    {
+        TrelloApi.put("cards/"+this.data.id+"?dueComplete=true");
+        return this;
+    }
+
+    this.removeDueDate = function()
+    {
+        this.set_due = TrelloApi.put("cards/"+this.data.id+"?due=null");
+        return this;
+    }
+
     this.setDue = function(datetime)
     {
         this.set_due = TrelloApi.put("cards/"+this.data.id+"?due="+encodeURIComponent(datetime));
         return this;
+    }
+
+    this.copyTo = function(data)
+    {
+        if(!this.data.board)
+            this.load();
+
+        var list_id = new Board(this.data.board).list({name: data.list}).data.id;
+        var position = (data.position)?data.position:"bottom";
+        return new Card(TrelloApi.post("cards?pos="+position+"&idList="+list_id+"&idCardSource="+this.data.id+"&keepFromSource=all"));
     }
 
     this.moveTo = function(data)
@@ -136,7 +281,7 @@ var Card = function(data)
     
     this.checklist = function(name)
     {
-        return this.checklists(name).first();
+        return this.checklists(name).first().setContainingCard(this);
     }
 
     this.checklists = function(name)
@@ -158,19 +303,26 @@ var Card = function(data)
         {
             checklist.items().each(function(item)
             {
-                if(item.state == "incomplete")
-                    TrelloApi.put("cards/"+this.data.id+"/checkItem/"+item.id+"?state=complete");
+                if((item.state() == "incomplete") && TrelloApi.nameTest(name,item.name()))
+                    TrelloApi.put("cards/"+this.data.id+"/checkItem/"+item.data.id+"?state=complete");
             }.bind(this));
         }.bind(this));
+        
+        return this;
     }
 
     this.completeAllItemsOnChecklist = function(name)
     {
         this.checklist(name).items().each(function(elem)
         {
-            if(elem.state == "incomplete")
-                TrelloApi.put("cards/"+this.data.id+"/checkItem/"+elem.id+"?state=complete");
+            if(elem.state() == "incomplete")
+                TrelloApi.put("cards/"+this.data.id+"/checkItem/"+elem.data.id+"?state=complete");
         }.bind(this));
+    }
+
+    this.copyChecklist = function(name,to_card)
+    {
+        return new Checklist(TrelloApi.post("cards/"+to_card.data.id+"/checklists?idChecklistSource="+this.checklist(name).data.id));
     }
 
     this.addChecklist = function(name,callback)
@@ -184,6 +336,7 @@ var Card = function(data)
         {
             var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name)));
             this.added_checklist = checklist;
+            this.checklist_list = null;
         }
 
         callback(checklist);
@@ -194,6 +347,11 @@ var Card = function(data)
     {
         this.data = TrelloApi.get("cards/"+this.data.id+"?fields=all&actions=all&attachments=true&attachment_fields=all&member_fields=all&memberVoted_fields=all&checklists=all&checklist_fields=all&board=true&board_fields=all&list=true&pluginData=true&stickers=true&sticker_fields=all");
         return this;
+    }
+
+    this.removeLabel = function(label)
+    {
+        TrelloApi.del("cards/"+this.data.id+"/idLabels/"+label.data.id);
     }
 
     this.addLabel = function(label_name)
@@ -254,6 +412,12 @@ var Card = function(data)
             ret.filterByName(data.name);
         
         return ret;
+    }
+
+    if(!this.data.id && this.data.link)
+    {
+        this.data.id = TrelloApi.cardLinkRegExp().exec(this.data.link)[1];
+        this.load();
     }
 }
 

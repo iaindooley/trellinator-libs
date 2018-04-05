@@ -15,8 +15,37 @@ var IterableCollection = function(obj)
         return ret;
     }
 
+    this.implodeValues = function(separator,callback)
+    {
+        if(!separator)
+            separator = "&";
+
+        if(!callback)
+        {
+            callback = function(elem,key)
+            {
+                return elem;
+            };
+        }
+
+        var ret = "";
+
+        for(var key in this.obj)
+        {
+            if(!ret)
+                ret = callback(this.obj[key],key);
+            else
+                ret += separator+callback(this.obj[key],key);
+        }
+        
+        return ret;
+    }
+
     this.implode = function(separator,callback)
     {
+        if(!separator)
+            separator = "&";
+
         if(!callback)
         {
             callback = function(elem,key)
@@ -32,12 +61,38 @@ var IterableCollection = function(obj)
             if(!ret)
                 ret = key+"="+callback(this.obj[key],key);
             else
-                ret += "&"+key+"="+callback(this.obj[key],key);
+                ret += separator+key+"="+callback(this.obj[key],key);
         }
         
         return ret;
     }
     
+    this.itemAfter = function(expression)
+    {
+        var ret         = null;
+        var return_next = false;
+      
+        if(expression)
+        {
+            for(var key in this.obj)
+            {
+                if(return_next)
+                {
+                    return_next = false;
+                    ret = this.obj[key];
+                }
+
+                else if(TrelloApi.nameTest(expression,this.obj[key].name()))
+                    return_next = true;
+            }
+        }
+        
+        if(!ret)
+            throw new Error("There was no item after: "+expression);
+            
+        return ret;
+    }
+
     this.first = function()
     {
         var ret = null;
@@ -64,9 +119,15 @@ var IterableCollection = function(obj)
 
     this.transform = function(callback)
     {
-        for(var key in this.obj)
-            this.obj[key] = callback(this.obj[key]);
+        var new_obj = [];
 
+        for(var key in this.obj)
+        {
+            if((transformed = callback(this.obj[key])) !== false)
+                new_obj[key] = transformed;
+        }
+
+        this.obj = new_obj;
         return this;
     }
     

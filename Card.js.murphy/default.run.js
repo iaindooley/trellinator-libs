@@ -8,8 +8,7 @@ eval(murphy.load(__dirname,"../TestConnector.js"));
 eval(murphy.load(__dirname,"../IterableCollection.js"));
 TestConnector.test_base_dir = __dirname;
 
-if(new Card({id: "5a94f62b2a126a83233b14dd"}).postComment("hi there").last_comment.id != "5a950eb0a34708447dd64637")
-    console.log("Error posting comment to card");
+new Card({id: "5a94f62b2a126a83233b14dd"}).postComment("hi there");
 
 if(new Card({id: "5a94f62b2a126a83233b14dd"}).setDue("2018-02-28 00:00:00").set_due.due != "2018-02-28T05:00:00.000Z")
     console.log("Got back the wrong due date");

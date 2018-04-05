@@ -11,6 +11,11 @@ var List = function(data)
         return this.data.name ? this.data.name:this.data.text;
     }
     
+    this.card = function(filter)
+    {
+        return this.cards(filter).first();
+    }
+
     this.cards = function(filter)
     {
         if(!this.card_list)
@@ -41,6 +46,11 @@ var List = function(data)
         return updated;
     }
     
+    this.archive = function()
+    {
+        TrelloApi.put("lists/"+this.data.id+"?closed=true");
+    }
+
     this.load = function()
     {
         this.data = TrelloApi.get("lists/"+this.data.id+"?fields=all");

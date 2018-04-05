@@ -1,6 +1,11 @@
 var TrelloApi = function(){};
 TrelloApi.trello_api_key_information = null;
 
+TrelloApi.cardLinkRegExp = function()
+{
+    return new RegExp("https:\\/\\/trello\\.com\\/c\\/([A-Za-z0-9]+)","i");
+}
+
 TrelloApi.post = function(baseURL)
 {
     return TrelloApi.call("post",baseURL);
@@ -52,7 +57,7 @@ TrelloApi.call = function(method,baseURL)
 
 
     if(typeof Utilities != "undefined")
-        Utilities.sleep(5);
+        Utilities.sleep(50);
     
     var ret = null;
   

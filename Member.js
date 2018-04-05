@@ -1,6 +1,7 @@
 var Member = function(data)
 {    
-    this.data      = data;
+    this.data = data;
+    this.list_of_teams = null;
   
     this.fullName = function()
     {
@@ -8,6 +9,25 @@ var Member = function(data)
             this.load();
 
         return this.data.fullName;
+    }
+
+    this.team = function(name)
+    {
+        return this.teams().findByName(name).first();
+    }
+    
+    this.teams = function()
+    {
+        if(!this.list_of_teams)
+        {
+            this.list_of_teams = new IterableCollection(TrelloApi.get("/members/"+this.username()+"/organizations?filter=all&fields=all"))
+                                 .transform(function(elem)
+                                 {
+                                     return new Team(elem);
+                                 });
+        }
+        
+        return this.list_of_teams;
     }
 
     this.username = function()
@@ -25,7 +45,14 @@ var Member = function(data)
     
     this.load = function()
     {
-        this.data = TrelloApi.get("members/"+this.data.id+"?fields=id,username,fullName");
+        if(this.data.id)
+            var toload = this.data.id;
+        else if(this.data.username)
+            var toload = this.data.username;
+        else
+            throw new Error("You have to pass in either an ID or a username to a new Member");
+
+        this.data = TrelloApi.get("members/"+toload+"?fields=id,username,fullName");
         return this;
     }
     
@@ -55,4 +82,14 @@ var Member = function(data)
         
         return ret;
     }
+
+    if(!this.data.id && this.data.username)
+    {
+        if(Member.mock_member_username)
+            this.data.username = Member.mock_member_username;
+
+        this.load();
+    }
 }
+
+Member.mock_member_username = null;

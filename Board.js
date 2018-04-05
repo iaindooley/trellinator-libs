@@ -11,6 +11,11 @@ var Board = function(data)
         return this.data.name;
     }
     
+    this.link = function()
+    {
+        return this.shortUrl();
+    }
+
     this.shortUrl = function()
     {
         if(!this.data.shortUrl)
@@ -76,7 +81,7 @@ var Board = function(data)
 
     this.list = function(data)
     {
-        return this.lists(data).first();
+        return this.lists().findByName(Board.nameTestData(data)).first();
     }
 
     this.lists = function(data)
@@ -90,9 +95,9 @@ var Board = function(data)
                                  });
         }
       
-        if(data && data.name)
-            this.list_of_lists.filterByName(data.name);
-      
+        if(filter = Board.nameTestData(data))
+            this.list_of_lists.filterByName(filter);
+
         return this.list_of_lists;
     }
 
@@ -138,4 +143,39 @@ var Board = function(data)
       
       return list;
     }
+    
+    this.copy = function(name,team)
+    {
+        var new_board = new Board(TrelloApi.post("/boards/?name="+encodeURIComponent(name)+"&idOrganization="+team.data.id+"&idBoardSource="+this.data.id+"&keepFromSource=cards&prefs_permissionLevel=org&prefs_voting=disabled&prefs_comments=members&prefs_invitations=members&prefs_selfJoin=true&prefs_cardCovers=true&prefs_background=blue&prefs_cardAging=regular"));
+        
+        this.members().each(function(elem)
+        {
+            new_board.addMember(elem);
+        }.bind(this));
+        
+        return new_board;
+    }
+
+    this.addMember = function(member)
+    {
+        TrelloApi.put("boards/"+this.data.id+"/members/"+member.username()+"?type=admin");
+        return this;
+    }
+
+    this.load = function()
+    {
+        this.data = TrelloApi.get("boards/"+this.data.id+"?actions=none&boardStars=none&cards=none&checklists=none&fields=name%2C%20desc%2C%20descData%2C%20closed%2C%20idOrganization%2C%20url%2C%20shortUrl&lists=none&members=none&memberships=none&membersInvited=none");
+    }
+}
+
+Board.nameTestData = function(data)
+{
+    var ret = null;
+
+    if((typeof data == "string") || ((typeof data !== "undefined") && (data.constructor === RegExp)))
+        ret = data;
+    else if(data && data.name)
+        ret = data.name;
+    
+    return ret;
 }
