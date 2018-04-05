@@ -200,7 +200,7 @@ var Card = function(data)
     {
         try
         {
-            var label = this.board().label({name: label});
+            var label = this.board().label({name: label_name});
             this.applyLabelIds(new IterableCollection([label.data.id]));
         }
         
