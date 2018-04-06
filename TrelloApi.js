@@ -150,3 +150,18 @@ TrelloApi.nameTest = function(test,actual)
     
     return ret;
 }
+
+/*
+Either a string or an object passed in containing a name, or regex
+*/
+TrelloApi.nameTestData = function(data)
+{
+    var ret = null;
+
+    if((typeof data == "string") || ((typeof data !== "undefined") && (data.constructor === RegExp)))
+        ret = data;
+    else if(data && data.name)
+        ret = data.name;
+
+    return ret;
+}
