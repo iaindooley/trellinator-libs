@@ -131,12 +131,28 @@ var Notification = function(notification)
         if(this.notification.action.display.translationKey != "action_completed_checkitem")
             throw new Error("No checklist item was completed, therefore no checklist was completed as part of this action");
 
+
         var ret = this.checklist();
         
         if(name && !TrelloApi.nameTest(name,ret.name()))
             throw new Error("The completed checklist was not named "+name);
-        else if(!ret.isComplete())
-            throw new Error("The checklist in which the item was checked is not complete");
+
+        else
+        {
+            if(!ret.isComplete())
+                throw new Error("The checklist in which the item was checked is not complete");
+
+            var completed_actions = new Array();
+    
+            new IterableCollection(TrelloApi.get("cards/"+this.card().data.id+"/actions?filter=updateCheckItemStateOnCard")).each(function(elem)
+            {
+                if(elem.data.checkItem.state == "complete")
+                    completed_actions.push(elem);
+            });
+    
+            if(this.notification.action.id != completed_actions[0].id)
+                throw new Error("This was not the most recent completed notification so couldn't be the one that caused the checklist to be completed");
+        }
         
         ret.setContainingCard(this.card());
         return ret;
