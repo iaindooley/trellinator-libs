@@ -58,7 +58,7 @@ var Member = function(data)
     
     this.board = function(data)
     {
-        return this.boards(data).first();
+        return this.boards().findByName(TrelloApi.nameTestData(data)).first();
     }
 
     this.boards = function(data)
@@ -74,12 +74,8 @@ var Member = function(data)
     this.iterableCollection = function(url,data,callback)
     {
         var ret = new IterableCollection(TrelloApi.get(url));
-
         ret.transform(callback);
-
-        if(data && data.name)
-            ret.filterByName(data.name);
-        
+        ret.filterByName(TrelloApi.nameTestData(data));
         return ret;
     }
 
