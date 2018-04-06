@@ -48,16 +48,20 @@ var Notification = function(notification)
         return this.card();
     }
 
-    this.actionOnDueDate = function(function_name,signature,params)
+    this.actionOnDueDate = function(function_name,signature,callback)
     {
-        if(!params)
-            params = {};
+        var params = {};
+        
+        if(!callback)
+            callback = function(){}
 
         var card = this.cardDueDateWasAddedTo();
         var trigger_signature = signature+card.data.id;
         clear(trigger_signature);
         params.notification = this;
-        push(new Date(card.due()),{functionName: function_name,parameters: params},trigger_signature);
+        var date = new Date(card.due());
+        callback(date,params);
+        push(date,{functionName: function_name,parameters: params},trigger_signature);
     }
 
     this.commentAddedToCard = function()
