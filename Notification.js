@@ -2,6 +2,36 @@ var Notification = function(notification)
 {
     this.notification = notification;
     
+    this.listBefore = function()
+    {
+        if(notification.action.data.listBefore)
+            ret = new List(notification.action.data.listBefore);
+        else
+            throw new Error("No list before");
+        
+        return ret;
+    }
+
+    this.listAfter = function()
+    {
+        if(notification.action.data.listAfter)
+            ret = new List(notification.action.data.listAfter);
+        else
+            throw new Error("No list after");
+        
+        return ret;
+    }
+
+    this.updatedList = function()
+    {
+        if(notification.action.data.list)
+            ret = new List(notification.action.data.list);
+        else
+            throw new Error("List not updated");
+        
+        return ret;
+    }
+
     this.cardWithNameChanged = function()
     {
         if(this.notification.action.display.translationKey != "action_renamed_card")
