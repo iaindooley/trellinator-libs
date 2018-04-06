@@ -13,7 +13,7 @@ var List = function(data)
     
     this.card = function(filter)
     {
-        return this.cards(filter).first();
+        return this.cards().findByName(TrelloApi.nameTestData(filter)).first();
     }
 
     this.cards = function(filter)
@@ -28,9 +28,7 @@ var List = function(data)
             });
         }
 
-        if(filter && filter.name)
-            this.card_list.filterByName(filter.name);
-      
+        this.card_list.filterByName(TrelloApi.nameTestData(filter));
         return this.card_list;
     }
 
