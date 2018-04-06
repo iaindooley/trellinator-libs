@@ -2,6 +2,20 @@ var Notification = function(notification)
 {
     this.notification = notification;
     
+    this.addedChecklist = function(name)
+    {
+        if(!this.notification.action.display.translationKey == "action_add_checklist_to_card")
+            throw new Error("No checklist was added to a card");
+        
+        var ret = new Checklist(this.notification.action.display.entities.checklist);
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new Error("A checklist was added but it was not named: "+name+" it was named: "+ret.name());
+
+        ret.setContainingCard(this.card());
+        return ret;
+    }
+
     this.listBefore = function()
     {
         if(notification.action.data.listBefore)
