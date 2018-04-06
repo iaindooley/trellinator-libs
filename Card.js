@@ -325,6 +325,12 @@ var Card = function(data)
         return new Checklist(TrelloApi.post("cards/"+to_card.data.id+"/checklists?idChecklistSource="+this.checklist(name).data.id));
     }
 
+    this.removeChecklist = function(checklist)
+    {
+        TrelloApi.del("cards/"+this.data.id+"/checklists/"+checklist.data.id);
+        return this;
+    }
+
     this.addChecklist = function(name,callback)
     {
         try
