@@ -352,6 +352,7 @@ var Card = function(data)
     this.removeLabel = function(label)
     {
         TrelloApi.del("cards/"+this.data.id+"/idLabels/"+label.data.id);
+        return this;
     }
 
     this.addLabel = function(label_name)
@@ -366,6 +367,8 @@ var Card = function(data)
         {
             this.addNewLabels(new IterableCollection([label_name]));
         }
+        
+        return this;
     }
 
     this.addNewLabels = function(new_labels)
