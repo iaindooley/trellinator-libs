@@ -146,3 +146,8 @@ var Notification = function(notification)
         return new Card(this.notification.action.display.entities.card);
     }
 }
+
+Notification.fromDueDateAction = function(params)
+{
+    return new Notification(params.notification.notification);
+}
