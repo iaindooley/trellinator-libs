@@ -115,6 +115,11 @@ var Board = function(data)
         return ret;
     }
 
+    this.card = function(data)
+    {
+        return this.cards().findByName(TrelloApi.nameTestData(data)).first();
+    }
+
     this.cards = function(data)
     {
         var cards = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/cards?fields=id,name"));
@@ -124,9 +129,7 @@ var Board = function(data)
             return new Card(card);
         });
         
-        if(data && data.name)
-            cards.filterByName(data.name);
-        
+        var ret = cards.findByName(TrelloApi.nameTestData(data));
         return cards;
     }
     
