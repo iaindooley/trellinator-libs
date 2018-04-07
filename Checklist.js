@@ -6,6 +6,29 @@ var Checklist = function(data)
     this.containing_card = null;
     this.check_items     = null;
 
+    this.deleteItems = function(state)
+    {
+        this.items().each(function(elem)
+        {   
+            if(
+               (elem.state() == state) ||
+               !state
+              )
+                TrelloApi.delete("cards/"+this.card().data.id+"/checkItem/"+elem.data.id);
+        }.bind(this));
+        return this;
+    }
+
+    this.reset = function()
+    {
+        this.items().each(function(elem)
+        {   
+            if(elem.state() == "complete")
+                TrelloApi.put("cards/"+this.card().data.id+"/checkItem/"+elem.data.id+"?state=incomplete");
+        }.bind(this));
+        return this;
+    }
+
     this.markAllItemsComplete = function()
     {
         this.items().each(function(elem)
