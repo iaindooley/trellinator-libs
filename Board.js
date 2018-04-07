@@ -96,9 +96,11 @@ var Board = function(data)
         }
       
         if(filter = TrelloApi.nameTestData(data))
-            this.list_of_lists.filterByName(filter);
+            var ret = this.list_of_lists.findByName(filter);
+        else
+            var ret = this.list_of_lists;
 
-        return this.list_of_lists;
+        return ret;
     }
 
     this.iterableCollection = function(url,data,callback)
