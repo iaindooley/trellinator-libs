@@ -313,16 +313,13 @@ var Card = function(data)
 
     this.completeAllItemsOnChecklist = function(name)
     {
-        this.checklist(name).items().each(function(elem)
-        {
-            if(elem.state() == "incomplete")
-                TrelloApi.put("cards/"+this.data.id+"/checkItem/"+elem.data.id+"?state=complete");
-        }.bind(this));
+        this.checklist(name).markAllItemsComplete();
+        return this;
     }
 
     this.copyChecklist = function(name,to_card)
     {
-        return new Checklist(TrelloApi.post("cards/"+to_card.data.id+"/checklists?idChecklistSource="+this.checklist(name).data.id));
+        return new Checklist(TrelloApi.post("cards/"+to_card.data.id+"/checklists?idChecklistSource="+this.checklist(name).data.id)).setContainingCard(to_card);
     }
 
     this.removeChecklist = function(checklist)
