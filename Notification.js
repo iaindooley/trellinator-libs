@@ -199,6 +199,18 @@ var Notification = function(notification)
         return ret;
     }
 
+    this.listCardWasCreatedIn = function()
+    {
+        if(new IterableCollection(["action_create_card","action_copy_card","action_email_card"]).hasMember(this.notification.action.display.translationKey))
+            var ret = new List(this.notification.action.display.entities.list);
+        else if(new IterableCollection(["action_move_card_to_board","action_convert_to_card_from_checkitem"]).hasMember(this.notification.action.display.translationKey))
+            var ret = new List(this.notification.action.data.list);
+        else
+            throw new Error("Card was not created in a list");
+        
+        return ret;
+    }
+
     this.listCardWasAddedTo = function()
     {
         if(new IterableCollection(["action_create_card","action_copy_card","action_email_card"]).hasMember(this.notification.action.display.translationKey))
