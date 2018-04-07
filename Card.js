@@ -246,6 +246,14 @@ var Card = function(data)
         return this;
     }
 
+    this.copyToList = function(list,position)
+    {
+        if(!position)
+            position = "bottom";
+
+        return new Card(TrelloApi.post("cards?pos="+position+"&idList="+list.data.id+"&idCardSource="+this.data.id+"&keepFromSource=all"));
+    }
+
     this.copyTo = function(data)
     {
         if(!this.data.board)
