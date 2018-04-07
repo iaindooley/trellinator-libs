@@ -281,7 +281,7 @@ var Card = function(data)
     
     this.checklist = function(name)
     {
-        return this.checklists(name).first().setContainingCard(this);
+        return this.checklists().findByName(name).first().setContainingCard(this);
     }
 
     this.checklists = function(name)
@@ -291,10 +291,10 @@ var Card = function(data)
             this.checklist_list = new IterableCollection(TrelloApi.get("cards/"+this.data.id+"/checklists")).transform(function(elem)
             {
               return new Checklist(elem);
-            }).filterByName(name);
+            })
         }
 
-        return this.checklist_list;
+        return this.checklist_list.findByName(name);
     }
 
     this.checkItemByName = function(name)
