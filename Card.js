@@ -264,6 +264,14 @@ var Card = function(data)
         return new Card(TrelloApi.post("cards?pos="+position+"&idList="+list_id+"&idCardSource="+this.data.id+"&keepFromSource=all"));
     }
 
+    this.moveToList = function(list,position)
+    {
+        if(!position)
+            position = "bottom";
+
+        this.moved = TrelloApi.put("cards/"+this.data.id+"?idList="+list.data.id+"&pos="+position);
+    }
+
     this.moveTo = function(data)
     {
         if(!this.data.board)
