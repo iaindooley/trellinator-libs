@@ -120,6 +120,19 @@ var Notification = function(notification)
         return ret;
     }
 
+    this.cardAllChecklistsAreCompleteOn = function()
+    {
+        var item = this.completedChecklist();
+        
+        this.card().checklists().each(function(list)
+        {
+            if(!list.isComplete())
+                throw new Error("There is an incomplete checklist on "+this.card().name()+" name "+list.name());
+        });
+        
+        return this.card();
+    }
+
     this.completedChecklistItem = function(name)
     {
         if(this.notification.action.display.translationKey != "action_completed_checkitem")
