@@ -6,6 +6,15 @@ var Checklist = function(data)
     this.containing_card = null;
     this.check_items     = null;
 
+    this.markAllItemsComplete = function()
+    {
+        this.items().each(function(elem)
+        {   
+            if(elem.state() == "incomplete")
+                TrelloApi.put("cards/"+this.card().data.id+"/checkItem/"+elem.data.id+"?state=complete");
+        }.bind(this));
+    }
+
     this.convertIntoLinkedCards = function(list,params)
     {
         params.desc = this.card().link();
