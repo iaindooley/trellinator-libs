@@ -189,17 +189,20 @@ var Notification = function(notification)
         return ret;
     }
 
-    this.listCardWasMovedTo = function()
+    this.listCardWasMovedTo = function(name)
     {
         if(this.notification.action.display.translationKey == "action_move_card_from_list_to_list")
             var ret = new List(this.notification.action.display.entities.listAfter);
         else
             throw new Error("Card was not moved to a list");
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new Error("Card was moved to : "+ret.name()+" rather than "+name);
         
         return ret;
     }
 
-    this.listCardWasCreatedIn = function()
+    this.listCardWasCreatedIn = function(name)
     {
         if(new IterableCollection(["action_create_card","action_copy_card","action_email_card"]).hasMember(this.notification.action.display.translationKey))
             var ret = new List(this.notification.action.display.entities.list);
@@ -207,11 +210,14 @@ var Notification = function(notification)
             var ret = new List(this.notification.action.data.list);
         else
             throw new Error("Card was not created in a list");
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new Error("Card was created in : "+ret.name()+" rather than "+name);
         
         return ret;
     }
 
-    this.listCardWasAddedTo = function()
+    this.listCardWasAddedTo = function(name)
     {
         if(new IterableCollection(["action_create_card","action_copy_card","action_email_card"]).hasMember(this.notification.action.display.translationKey))
             var ret = new List(this.notification.action.display.entities.list);
@@ -221,6 +227,9 @@ var Notification = function(notification)
             var ret = new List(this.notification.action.display.entities.listAfter);
         else
             throw new Error("Card was not added to a list");
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new Error("Card was addd in : "+ret.name()+" rather than "+name);
         
         return ret;
     }
