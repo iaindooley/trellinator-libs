@@ -270,6 +270,7 @@ var Card = function(data)
             position = "bottom";
 
         this.moved = TrelloApi.put("cards/"+this.data.id+"?idList="+list.data.id+"&pos="+position);
+        return this;
     }
 
     this.moveTo = function(data)
