@@ -14,7 +14,7 @@ var Checklist = function(data)
                (elem.state() == state) ||
                !state
               )
-                TrelloApi.delete("cards/"+this.card().data.id+"/checkItem/"+elem.data.id);
+                TrelloApi.del("cards/"+this.card().data.id+"/checkItem/"+elem.data.id);
         }.bind(this));
         return this;
     }
