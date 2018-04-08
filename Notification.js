@@ -78,6 +78,28 @@ var Notification = function(notification)
         push(date,{functionName: function_name,parameters: params},trigger_signature);
     }
 
+    this.memberMentionedInComment = function(name)
+    {
+        return this.membersMentionedInComment().findByName(name).first();
+    }
+
+    this.membersMentionedInComment = function()
+    {
+        var comment = this.commentAddedToCard();
+        var ret     = new Array();
+
+        this.board().members().each(function(member)
+        {
+            if(new RegExp(".*@"+member.name()+".*").test(comment.text()))
+                ret.push(member);
+        });
+        
+        if(!ret.length)
+            throw new Error("No members were mentioned in this comment");
+        
+        return new IterableCollection(ret);
+    }
+
     this.commentAddedToCard = function()
     {
         if(this.notification.action.display.translationKey != "action_comment_on_card")
