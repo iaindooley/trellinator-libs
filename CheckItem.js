@@ -28,6 +28,11 @@ var CheckItem = function(data)
         return this.data.url;
     }
 
+    this.mark = function(state)
+    {
+        TrelloApi.put("cards/"+this.checklist().card().data.id+"/checkItem/"+elem.data.id+"?state="+state);
+    }
+
     this.state = function()
     {
         if(!this.data.state)
