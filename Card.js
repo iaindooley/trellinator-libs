@@ -12,6 +12,20 @@ var Card = function(data)
     this.attached_link   = null;
     this.added_member    = null;
 
+    this.removeChecklistItemByName = function(name)
+    {
+        this.checklists().each(function(list)
+        {   
+            list.items().each(function(item)
+            {   
+                if(TrelloApi.nameTest(name,item.name()))
+                    item.remove();
+            });
+        });
+        
+        return this;
+    }
+
     this.dueComplete = function()
     {
         if(typeof this.data.dueComplete == "undefined")
