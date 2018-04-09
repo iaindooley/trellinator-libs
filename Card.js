@@ -88,8 +88,8 @@ var Card = function(data)
     {
         return this.attachments(TrelloApi.cardLinkRegExp()).transform(function(elem)
         {
-            if(parts = TrelloApi.cardLinkRegExp().exec(elem.url))
-                return new Card({id: parts[1]});
+            if(TrelloApi.cardLinkRegExp().test(elem.url))
+                return new Card({link: elem.url});
             else
                 return false;
         });
@@ -283,7 +283,7 @@ var Card = function(data)
         if(!position)
             position = "bottom";
 
-        this.moved = TrelloApi.put("cards/"+this.data.id+"?idList="+list.data.id+"&pos="+position);
+        this.moved = TrelloApi.put("cards/"+this.data.id+"?idList="+list.data.id+"&idBoard="+list.board().data.id+"&pos="+position);
         return this;
     }
 
@@ -312,7 +312,7 @@ var Card = function(data)
     
     this.checklist = function(name)
     {
-        return this.checklists().findByName(name).first().setContainingCard(this);
+        return this.checklists().findByName(name).first();
     }
 
     this.checklists = function(name)
@@ -321,8 +321,8 @@ var Card = function(data)
         {
             this.checklist_list = new IterableCollection(TrelloApi.get("cards/"+this.data.id+"/checklists")).transform(function(elem)
             {
-              return new Checklist(elem);
-            })
+              return new Checklist(elem).setContainingCard(this);
+            }.bind(this))
         }
 
         return this.checklist_list.findByName(name);
