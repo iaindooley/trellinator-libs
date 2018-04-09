@@ -130,7 +130,7 @@ var Board = function(data)
         });
         
         var ret = cards.findByName(TrelloApi.nameTestData(data));
-        return cards;
+        return ret;
     }
     
     this.findOrCreateList = function(name)
