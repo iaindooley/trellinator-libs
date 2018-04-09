@@ -104,7 +104,7 @@ var Checklist = function(data)
         if(!position)
             position = "bottom";
 
-        this.added_item = TrelloApi.post("checklists/"+this.data.id+"/checkItems?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position));
+        this.added_item = new CheckItem(TrelloApi.post("checklists/"+this.data.id+"/checkItems?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position))).setContainingChecklist(this);
         return this;
     }
     
