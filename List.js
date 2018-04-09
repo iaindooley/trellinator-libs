@@ -17,6 +17,14 @@ var List = function(data)
         return this.data.name ? this.data.name:this.data.text;
     }
     
+    this.board = function(filter)
+    {
+        if(!this.data.idBoard)
+            this.load();
+        
+        return new Board({id: this.data.idBoard});
+    }
+
     this.card = function(filter)
     {
         return this.cards().findByName(TrelloApi.nameTestData(filter)).first();
