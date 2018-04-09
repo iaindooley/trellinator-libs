@@ -263,6 +263,9 @@ var Notification = function(notification)
 
     this.card = function()
     {
+        if(!this.notification.action.display.entities.card)
+            throw new Error("No card was part of this notification");
+
         return new Card(this.notification.action.display.entities.card);
     }
 }
