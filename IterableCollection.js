@@ -112,7 +112,7 @@ var IterableCollection = function(obj)
     this.each = function(callback)
     {
         for(var key in this.obj)
-            callback(this.obj[key]);
+            callback(this.obj[key],key);
     
         return this;
     }
@@ -123,7 +123,7 @@ var IterableCollection = function(obj)
 
         for(var key in this.obj)
         {
-            if((transformed = callback(this.obj[key])) !== false)
+            if((transformed = callback(this.obj[key],key)) !== false)
                 new_obj[key] = transformed;
         }
 
