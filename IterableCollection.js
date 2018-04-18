@@ -173,4 +173,14 @@ var IterableCollection = function(obj)
 
         return this;
     }
+    
+    this.asArray = function()
+    {
+      ret = new Array();
+      
+      for(var key in this.obj)
+        ret[key] = this.obj[key];
+      
+      return ret;
+    }
 }
