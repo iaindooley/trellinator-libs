@@ -96,9 +96,11 @@ var Board = function(data)
         }
       
         if(filter = TrelloApi.nameTestData(data))
-            this.list_of_lists.filterByName(filter);
+            var ret = this.list_of_lists.findByName(filter);
+        else
+            var ret = this.list_of_lists;
 
-        return this.list_of_lists;
+        return ret;
     }
 
     this.iterableCollection = function(url,data,callback)
@@ -113,6 +115,11 @@ var Board = function(data)
         return ret;
     }
 
+    this.card = function(data)
+    {
+        return this.cards().findByName(TrelloApi.nameTestData(data)).first();
+    }
+
     this.cards = function(data)
     {
         var cards = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/cards?fields=id,name"));
@@ -122,10 +129,8 @@ var Board = function(data)
             return new Card(card);
         });
         
-        if(data && data.name)
-            cards.filterByName(data.name);
-        
-        return cards;
+        var ret = cards.findByName(TrelloApi.nameTestData(data));
+        return ret;
     }
     
     this.findOrCreateList = function(name)

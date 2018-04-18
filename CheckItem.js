@@ -3,6 +3,12 @@ var CheckItem = function(data)
     this.data                 = data;
     this.containing_checklist = null;
 
+    this.remove = function()
+    {
+        TrelloApi.del("cards/"+this.containing_checklist.card().data.id+"/checkItem/"+this.data.id);
+        return this.containing_checklist;
+    }
+
     this.checklist = function()
     {
         return this.containing_checklist;
@@ -26,6 +32,11 @@ var CheckItem = function(data)
             this.load();
         
         return this.data.url;
+    }
+
+    this.mark = function(state)
+    {
+        TrelloApi.put("cards/"+this.checklist().card().data.id+"/checkItem/"+elem.data.id+"?state="+state);
     }
 
     this.state = function()

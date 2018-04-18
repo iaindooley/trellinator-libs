@@ -6,6 +6,38 @@ var Checklist = function(data)
     this.containing_card = null;
     this.check_items     = null;
 
+    this.deleteItems = function(state)
+    {
+        this.items().each(function(elem)
+        {   
+            if(
+               (elem.state() == state) ||
+               !state
+              )
+                TrelloApi.del("cards/"+this.card().data.id+"/checkItem/"+elem.data.id);
+        }.bind(this));
+        return this;
+    }
+
+    this.reset = function()
+    {
+        this.items().each(function(elem)
+        {   
+            if(elem.state() == "complete")
+                TrelloApi.put("cards/"+this.card().data.id+"/checkItem/"+elem.data.id+"?state=incomplete");
+        }.bind(this));
+        return this;
+    }
+
+    this.markAllItemsComplete = function()
+    {
+        this.items().each(function(elem)
+        {   
+            if(elem.state() == "incomplete")
+                TrelloApi.put("cards/"+this.card().data.id+"/checkItem/"+elem.data.id+"?state=complete");
+        }.bind(this));
+    }
+
     this.convertIntoLinkedCards = function(list,params)
     {
         params.desc = this.card().link();
@@ -46,10 +78,10 @@ var Checklist = function(data)
 
     this.name = function()
     {
-        if(!this.data.name)
+        if(!this.data.name && !this.data.text)
             this.load();
         
-        return this.data.name;
+        return this.data.name ? this.data.name:this.data.text;
     }
 
     this.addUniqueItem = function(name,position)
@@ -72,7 +104,7 @@ var Checklist = function(data)
         if(!position)
             position = "bottom";
 
-        this.added_item = TrelloApi.post("checklists/"+this.data.id+"/checkItems?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position));
+        this.added_item = new CheckItem(TrelloApi.post("checklists/"+this.data.id+"/checkItems?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position))).setContainingChecklist(this);
         return this;
     }
     

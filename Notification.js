@@ -2,6 +2,20 @@ var Notification = function(notification)
 {
     this.notification = notification;
     
+    this.addedChecklist = function(name)
+    {
+        if(!this.notification.action.display.translationKey == "action_add_checklist_to_card")
+            throw new Error("No checklist was added to a card");
+        
+        var ret = new Checklist(this.notification.action.display.entities.checklist);
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new Error("A checklist was added but it was not named: "+name+" it was named: "+ret.name());
+
+        ret.setContainingCard(this.card());
+        return ret;
+    }
+
     this.listBefore = function()
     {
         if(notification.action.data.listBefore)
@@ -48,16 +62,42 @@ var Notification = function(notification)
         return this.card();
     }
 
-    this.actionOnDueDate = function(function_name,signature,params)
+    this.actionOnDueDate = function(function_name,signature,callback)
     {
-        if(!params)
-            params = {};
+        var params = {};
+        
+        if(!callback)
+            callback = function(){}
 
         var card = this.cardDueDateWasAddedTo();
         var trigger_signature = signature+card.data.id;
         clear(trigger_signature);
         params.notification = this;
-        push(new Date(card.due()),{functionName: function_name,parameters: params},trigger_signature);
+        var date = new Date(card.due());
+        callback(date,params);
+        push(date,{functionName: function_name,parameters: params},trigger_signature);
+    }
+
+    this.memberMentionedInComment = function(name)
+    {
+        return this.membersMentionedInComment().findByName(name).first();
+    }
+
+    this.membersMentionedInComment = function()
+    {
+        var comment = this.commentAddedToCard();
+        var ret     = new Array();
+
+        this.board().members().each(function(member)
+        {
+            if(new RegExp(".*@"+member.name()+".*").test(comment.text()))
+                ret.push(member);
+        });
+        
+        if(!ret.length)
+            throw new Error("No members were mentioned in this comment");
+        
+        return new IterableCollection(ret);
     }
 
     this.commentAddedToCard = function()
@@ -102,6 +142,19 @@ var Notification = function(notification)
         return ret;
     }
 
+    this.cardAllChecklistsAreCompleteOn = function()
+    {
+        var item = this.completedChecklist();
+        
+        this.card().checklists().each(function(list)
+        {
+            if(!list.isComplete())
+                throw new Error("There is an incomplete checklist on "+this.card().name()+" name "+list.name());
+        });
+        
+        return this.card();
+    }
+
     this.completedChecklistItem = function(name)
     {
         if(this.notification.action.display.translationKey != "action_completed_checkitem")
@@ -131,28 +184,62 @@ var Notification = function(notification)
         if(this.notification.action.display.translationKey != "action_completed_checkitem")
             throw new Error("No checklist item was completed, therefore no checklist was completed as part of this action");
 
+
         var ret = this.checklist();
         
         if(name && !TrelloApi.nameTest(name,ret.name()))
             throw new Error("The completed checklist was not named "+name);
-        else if(!ret.isComplete())
-            throw new Error("The checklist in which the item was checked is not complete");
+
+        else
+        {
+            if(!ret.isComplete())
+                throw new Error("The checklist in which the item was checked is not complete");
+
+            var completed_actions = new Array();
+    
+            new IterableCollection(TrelloApi.get("cards/"+this.card().data.id+"/actions?filter=updateCheckItemStateOnCard")).each(function(elem)
+            {
+                if(elem.data.checkItem.state == "complete")
+                    completed_actions.push(elem);
+            });
+    
+            if(this.notification.action.id != completed_actions[0].id)
+                throw new Error("This was not the most recent completed notification so couldn't be the one that caused the checklist to be completed");
+        }
         
         ret.setContainingCard(this.card());
         return ret;
     }
 
-    this.listCardWasMovedTo = function()
+    this.listCardWasMovedTo = function(name)
     {
         if(this.notification.action.display.translationKey == "action_move_card_from_list_to_list")
             var ret = new List(this.notification.action.display.entities.listAfter);
         else
             throw new Error("Card was not moved to a list");
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new Error("Card was moved to : "+ret.name()+" rather than "+name);
         
         return ret;
     }
 
-    this.listCardWasAddedTo = function()
+    this.listCardWasCreatedIn = function(name)
+    {
+        if(new IterableCollection(["action_create_card","action_copy_card","action_email_card"]).hasMember(this.notification.action.display.translationKey))
+            var ret = new List(this.notification.action.display.entities.list);
+        else if(new IterableCollection(["action_convert_to_card_from_checkitem"]).hasMember(this.notification.action.display.translationKey))
+            var ret = new List(this.notification.action.data.list);
+        else
+            throw new Error("Card was not created in a list");
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new Error("Card was created in : "+ret.name()+" rather than "+name);
+        
+        return ret;
+    }
+
+    this.listCardWasAddedTo = function(name)
     {
         if(new IterableCollection(["action_create_card","action_copy_card","action_email_card"]).hasMember(this.notification.action.display.translationKey))
             var ret = new List(this.notification.action.display.entities.list);
@@ -162,6 +249,9 @@ var Notification = function(notification)
             var ret = new List(this.notification.action.display.entities.listAfter);
         else
             throw new Error("Card was not added to a list");
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new Error("Card was addd in : "+ret.name()+" rather than "+name);
         
         return ret;
     }
@@ -173,6 +263,9 @@ var Notification = function(notification)
 
     this.card = function()
     {
+        if(!this.notification.action.display.entities.card)
+            throw new Error("No card was part of this notification");
+
         return new Card(this.notification.action.display.entities.card);
     }
 }

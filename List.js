@@ -3,6 +3,12 @@ var List = function(data)
     this.data      = data;
     this.card_list = null;
   
+    this.move = function(board)
+    {
+        TrelloApi.put("lists/"+this.data.id+"/idBoard?value="+board.data.id);
+        return this;
+    }
+
     this.name = function()
     {
         if(!this.data.name && !this.data.text)
@@ -11,6 +17,14 @@ var List = function(data)
         return this.data.name ? this.data.name:this.data.text;
     }
     
+    this.board = function(filter)
+    {
+        if(!this.data.idBoard)
+            this.load();
+        
+        return new Board({id: this.data.idBoard});
+    }
+
     this.card = function(filter)
     {
         return this.cards().findByName(TrelloApi.nameTestData(filter)).first();
