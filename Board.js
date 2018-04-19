@@ -133,8 +133,11 @@ var Board = function(data)
         return ret;
     }
     
-    this.findOrCreateList = function(name)
+    this.findOrCreateList = function(name,pos)
     {      
+      if(!pos)
+        pos = "top";
+      
       try
       {
         var list = this.list({name: name});
@@ -142,7 +145,7 @@ var Board = function(data)
       
       catch(e)
       {
-        var list = new List(TrelloApi.post("lists?name="+encodeURIComponent(name)+"&idBoard="+this.data.id+"&pos=top"));
+        var list = new List(TrelloApi.post("lists?name="+encodeURIComponent(name)+"&idBoard="+this.data.id+"&pos="+pos));
         this.list_of_lists = null;
       }
       
