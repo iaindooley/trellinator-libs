@@ -251,7 +251,7 @@ var Notification = function(notification)
             throw new Error("Card was not added to a list");
 
         if(name && !TrelloApi.nameTest(name,ret.name()))
-            throw new Error("Card was addd in : "+ret.name()+" rather than "+name);
+            throw new Error("Card was added in: \""+ret.name()+"\" rather than "+name);
         
         return ret;
     }
