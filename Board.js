@@ -174,4 +174,10 @@ var Board = function(data)
     {
         this.data = TrelloApi.get("boards/"+this.data.id+"?actions=none&boardStars=none&cards=none&checklists=none&fields=name%2C%20desc%2C%20descData%2C%20closed%2C%20idOrganization%2C%20url%2C%20shortUrl&lists=none&members=none&memberships=none&membersInvited=none");
     }
+
+    if(!this.data.id && this.data.link)
+    {   
+        this.data.id = TrelloApi.boardLinkRegExp().exec(this.data.link)[1];
+        this.load();
+    }
 }
