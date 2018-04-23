@@ -107,7 +107,7 @@ var Notification = function(notification)
         
         var data = {data: {id: this.notification.action.id,
                     text: this.notification.action.data.text}};
-        return new Comment(data);
+        return new Comment(data).setContainingCard(this.card());
     }
 
     this.archivedCard = function()
