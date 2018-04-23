@@ -228,7 +228,7 @@ var Notification = function(notification)
     {
         if(new IterableCollection(["action_create_card","action_copy_card","action_email_card"]).hasMember(this.notification.action.display.translationKey))
             var ret = new List(this.notification.action.display.entities.list);
-        else if(new IterableCollection(["action_move_card_to_board","action_convert_to_card_from_checkitem"]).hasMember(this.notification.action.display.translationKey))
+        else if(new IterableCollection(["action_convert_to_card_from_checkitem"]).hasMember(this.notification.action.display.translationKey))
             var ret = new List(this.notification.action.data.list);
         else
             throw new Error("Card was not created in a list");
@@ -251,7 +251,7 @@ var Notification = function(notification)
             throw new Error("Card was not added to a list");
 
         if(name && !TrelloApi.nameTest(name,ret.name()))
-            throw new Error("Card was addd in : "+ret.name()+" rather than "+name);
+            throw new Error("Card was added in: \""+ret.name()+"\" rather than "+name);
         
         return ret;
     }

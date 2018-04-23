@@ -133,8 +133,11 @@ var Board = function(data)
         return ret;
     }
     
-    this.findOrCreateList = function(name)
+    this.findOrCreateList = function(name,pos)
     {      
+      if(!pos)
+        pos = "top";
+      
       try
       {
         var list = this.list({name: name});
@@ -142,7 +145,7 @@ var Board = function(data)
       
       catch(e)
       {
-        var list = new List(TrelloApi.post("lists?name="+encodeURIComponent(name)+"&idBoard="+this.data.id+"&pos=top"));
+        var list = new List(TrelloApi.post("lists?name="+encodeURIComponent(name)+"&idBoard="+this.data.id+"&pos="+pos));
         this.list_of_lists = null;
       }
       
@@ -170,5 +173,11 @@ var Board = function(data)
     this.load = function()
     {
         this.data = TrelloApi.get("boards/"+this.data.id+"?actions=none&boardStars=none&cards=none&checklists=none&fields=name%2C%20desc%2C%20descData%2C%20closed%2C%20idOrganization%2C%20url%2C%20shortUrl&lists=none&members=none&memberships=none&membersInvited=none");
+    }
+
+    if(!this.data.id && this.data.link)
+    {   
+        this.data.id = TrelloApi.boardLinkRegExp().exec(this.data.link)[1];
+        this.load();
     }
 }

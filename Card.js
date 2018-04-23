@@ -95,6 +95,17 @@ var Card = function(data)
         });
     }
 
+    this.boardsLinkedInAttachments = function()
+    {
+        return this.attachments(TrelloApi.boardLinkRegExp()).transform(function(elem)
+        {
+            if(TrelloApi.cardLinkRegExp().test(elem.url))
+                return new Board({link: elem.url});
+            else
+                return false;
+        });
+    }
+
     this.attachment = function(name)
     {
         return this.attachments(name).first();
