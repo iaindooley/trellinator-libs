@@ -36,10 +36,11 @@ var Card = function(data)
 
     this.board = function()
     {
-        if(!this.data.idBoard)
+        if(!this.data.idBoard && !this.data.board)
             this.load();
         
-        return new Board({id: this.data.idBoard});
+        var data = (this.data.board) ? this.data.board:this.data.idBoard;
+        return new Board(data);
     }
 
     this.comments = function(limit)
@@ -289,24 +290,23 @@ var Card = function(data)
         return new Card(TrelloApi.post("cards?pos="+position+"&idList="+list_id+"&idCardSource="+this.data.id+"&keepFromSource=all"));
     }
 
+    /*Move a card to a list (in any board)*/
     this.moveToList = function(list,position)
     {
         if(!position)
             position = "bottom";
 
         this.moved = TrelloApi.put("cards/"+this.data.id+"?idList="+list.data.id+"&idBoard="+list.board().data.id+"&pos="+position);
-        return this;
+        return this.load();
     }
 
-    this.moveTo = function(data)
+    /*Move a card to a different list within the same board*/
+    this.moveTo = function(data,position)
     {
-        if(!this.data.board)
-            this.load();
+        if(!position)
+            position = (data.position)?data.position:"bottom";
 
-        var list_id = new Board(this.data.board).list({name: data.list}).data.id;
-        var position = (data.position)?data.position:"bottom";
-        this.moved = TrelloApi.put("cards/"+this.data.id+"?idList="+list_id+"&pos="+position);
-        return this;
+        return this.moveToList(this.board().list(nameTestData(data,"list")),position);
     }
     
     this.archive = function()
