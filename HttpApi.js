@@ -27,7 +27,6 @@ HttpApi.call = function(method,url,force_get)
     }
 
     var connector = (typeof UrlFetchApp == "undefined")? new TestConnector():UrlFetchApp;
-    var options
     var resp = connector.fetch(url,params);
 
 
