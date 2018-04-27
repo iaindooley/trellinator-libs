@@ -306,7 +306,7 @@ var Card = function(data)
         if(!position)
             position = (data.position)?data.position:"bottom";
 
-        return this.moveToList(this.board().list(nameTestData(data,"list")),position);
+        return this.moveToList(this.board().list(TrelloApi.nameTestData(data,"list")),position);
     }
     
     this.archive = function()
