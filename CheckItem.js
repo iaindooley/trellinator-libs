@@ -49,10 +49,10 @@ var CheckItem = function(data)
 
     this.name = function()
     {
-        if(!this.data.nameHtml && !this.data.name)
+        if(!this.data.text && !this.data.name)
             this.load();
         
-        return (this.data.name) ? this.data.name:this.data.nameHtml;
+      return (this.data.text)?this.data.text:this.data.name;
     }
 
     this.load = function()
