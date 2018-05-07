@@ -2,6 +2,19 @@ var Notification = function(notification)
 {
     this.notification = notification;
     
+    this.memberAddedToCard = function()
+    {
+      if(this.notification.action.display.translationKey != "action_member_joined_card")
+        throw new Error("No member added to card");
+      
+      return new Member(this.notification.action.member);
+    }
+    
+    this.replyToMember = function(message)
+    {
+      this.card().postComment("@"+this.member().name()+" "+message);
+    }
+    
     this.addedChecklist = function(name)
     {
         if(!this.notification.action.display.translationKey == "action_add_checklist_to_card")
@@ -69,7 +82,19 @@ var Notification = function(notification)
         if(!callback)
             callback = function(){}
 
-        var card = this.cardDueDateWasAddedTo();
+        try
+        {
+          var card = this.cardDueDateWasAddedTo();
+        }
+      
+        catch(e)
+        {
+          var card = this.card();
+          
+          if(!card.due())
+             throw new Error("Unable to action on due date, there is no due date on the card");
+        }
+      
         var trigger_signature = signature+card.data.id;
         clear(trigger_signature);
         params.notification = this;
