@@ -31,11 +31,13 @@ var Checklist = function(data)
 
     this.markAllItemsComplete = function()
     {
-        this.items().each(function(elem)
-        {   
-            if(elem.state() == "incomplete")
-                TrelloApi.put("cards/"+this.card().data.id+"/checkItem/"+elem.data.id+"?state=complete");
-        }.bind(this));
+      this.items().each(function(elem)
+                        {   
+                          if(elem.state() == "incomplete")
+                            TrelloApi.put("cards/"+this.card().data.id+"/checkItem/"+elem.data.id+"?state=complete");
+                        }.bind(this));
+      
+      return this;
     }
 
     this.convertIntoLinkedCards = function(list,params)
