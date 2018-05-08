@@ -13,6 +13,7 @@ var Notification = function(notification)
     this.replyToMember = function(message)
     {
       this.card().postComment("@"+this.member().name()+" "+message);
+      return this.card();
     }
     
     this.addedChecklist = function(name)
