@@ -76,13 +76,14 @@ var Notification = function(notification)
         return this.card();
     }
 
+    this.actionOnDueDateAdded = function(function_name,signature,callback)
+    {
+        var card = this.cardDueDateWasAddedTo();      
+        pushDueDateActionForCard(function_name,signature,callback,card);
+    }
+    
     this.actionOnDueDate = function(function_name,signature,callback)
     {
-        var params = {};
-        
-        if(!callback)
-            callback = function(){}
-
         try
         {
           var card = this.cardDueDateWasAddedTo();
@@ -96,6 +97,16 @@ var Notification = function(notification)
              throw new Error("Unable to action on due date, there is no due date on the card");
         }
       
+        pushDueDateActionForCard(function_name,signature,callback,card);
+    }
+    
+    this.pushDueDateActionForCard = function(function_name,signature,callback,card)
+    {
+        var params = {};
+        
+        if(!callback)
+            callback = function(){}
+            
         var trigger_signature = signature+card.data.id;
         clear(trigger_signature);
         params.notification = this;
