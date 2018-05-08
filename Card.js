@@ -100,7 +100,7 @@ var Card = function(data)
     {
         return this.attachments(TrelloApi.boardLinkRegExp()).transform(function(elem)
         {
-            if(TrelloApi.cardLinkRegExp().test(elem.url))
+            if(TrelloApi.boardLinkRegExp().test(elem.url))
                 return new Board({link: elem.url});
             else
                 return false;
