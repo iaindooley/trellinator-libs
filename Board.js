@@ -11,6 +11,12 @@ var Board = function(data)
         return this.data.name;
     }
     
+    this.rename = function(name)
+    {
+        TrelloApi.put("boards/"+this.data.id+"?name="+encodeURIComponent(name));
+        return this.load();
+    }
+    
     this.link = function()
     {
         return this.shortUrl();
@@ -164,6 +170,12 @@ var Board = function(data)
         return new_board;
     }
 
+    this.inviteMemberByEmail = function(email)
+    {
+        TrelloApi.put("boards/"+this.data.id+"/members/?email="+encodeURIComponent(email)+"&type=normal");
+        return this;
+    }
+    
     this.addMember = function(member)
     {
         TrelloApi.put("boards/"+this.data.id+"/members/"+member.username()+"?type=admin");
@@ -173,6 +185,7 @@ var Board = function(data)
     this.load = function()
     {
         this.data = TrelloApi.get("boards/"+this.data.id+"?actions=none&boardStars=none&cards=none&checklists=none&fields=name%2C%20desc%2C%20descData%2C%20closed%2C%20idOrganization%2C%20url%2C%20shortUrl&lists=none&members=none&memberships=none&membersInvited=none");
+        return this;
     }
 
     if(!this.data.id && this.data.link)
