@@ -1,6 +1,65 @@
 var TrelloApi = function(){};
 TrelloApi.trello_api_key_information = null;
 
+/**
+* query: same as advanced search query in Trello
+* teams: an array of team objects
+*/
+TrelloApi.searchCardsInTeams= function(teams,query)
+{
+  if(teams.constructor === IterableCollection)
+  {
+    var team_ids = encodeURIComponent(teams.transform(function(team)
+                                                      {
+                                                        return team.data.id;
+                                                      }).implodeValues(","));
+  }
+  
+  else if(teams.constructor === Team)
+    var team_ids = teams.data.id;
+  
+  else
+    throw new Error("You need to either pass in a Team object or an IterableCollection of teams to the searchCardsInTeams method");
+  
+  var url = "search?query="+encodeURIComponent(query)+"&idOrganizations="+team_ids+"&modelTypes=cards&board_fields=name%2CidOrganization&boards_limit=10&card_fields=all&cards_limit=10&cards_page=0&card_attachments=false&organization_fields=name%2CdisplayName&organizations_limit=10&member_fields=avatarHash%2CfullName%2Cinitials%2Cusername%2Cconfirmed&members_limit=10";
+
+  return new IterableCollection(TrelloApi.get(url).cards).transform(function(elem)
+             {
+               return new Card(elem);
+             });
+}
+
+/**
+* query: same as advanced search query in Trello
+* boards: an array of board objects or "mine"
+*/
+TrelloApi.searchCardsInBoards = function(boards,query)
+{
+  if(boards.constructor === IterableCollection)
+  {
+    var board_ids = encodeURIComponent(boards.transform(function(board)
+                                                        {
+                                                          return board.data.id;
+                                                        }).implodeValues(","));
+  }
+  
+  else if(boards.constructor === Board)
+    var board_ids = boards.data.id;
+  
+  else if(boards === "mine")
+    board_ids = boards;
+  
+  else
+    throw new Error("You need to either pass in an IterableCollection of Board objects, a single Board object, or the string mine to the searchCardsInBoards method");
+  
+  var url = "search?query="+encodeURIComponent(query)+"&idBoards="+board_ids+"&modelTypes=cards&board_fields=name%2CidOrganization&boards_limit=10&card_fields=all&cards_limit=10&cards_page=0&card_attachments=false&organization_fields=name%2CdisplayName&organizations_limit=10&member_fields=avatarHash%2CfullName%2Cinitials%2Cusername%2Cconfirmed&members_limit=10";
+  return new IterableCollection(TrelloApi.get(url).cards)
+  .transform(function(elem)
+             {
+               return new Card(elem);
+             });
+}
+
 TrelloApi.cardLinkRegExp = function()
 {
     return new RegExp("https:\\/\\/trello\\.com\\/c\\/([A-Za-z0-9]+)","i");
