@@ -305,6 +305,14 @@ var Notification = function(notification)
 
         return new Card(this.notification.action.display.entities.card);
     }
+
+    this.logException = function(message,e)
+    {
+        if(e.constructor == InvalidDataException)
+            writeInfo_(message+": "+e);
+        else
+            throw e;
+    }
 }
 
 Notification.fromDueDateAction = function(params)
