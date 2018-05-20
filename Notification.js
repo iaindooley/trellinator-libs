@@ -5,7 +5,7 @@ var Notification = function(notification)
     this.memberAddedToCard = function()
     {
       if(this.notification.action.display.translationKey != "action_member_joined_card")
-        throw new Error("No member added to card");
+        throw new InvalidActionException("No member added to card");
       
       return new Member(this.notification.action.member);
     }
@@ -19,12 +19,12 @@ var Notification = function(notification)
     this.addedChecklist = function(name)
     {
         if(!this.notification.action.display.translationKey == "action_add_checklist_to_card")
-            throw new Error("No checklist was added to a card");
+            throw new InvalidActionException("No checklist was added to a card");
         
         var ret = new Checklist(this.notification.action.display.entities.checklist);
 
         if(name && !TrelloApi.nameTest(name,ret.name()))
-            throw new Error("A checklist was added but it was not named: "+name+" it was named: "+ret.name());
+            throw new InvalidDataException("A checklist was added but it was not named: "+name+" it was named: "+ret.name());
 
         ret.setContainingCard(this.card());
         return ret;
@@ -35,7 +35,7 @@ var Notification = function(notification)
         if(notification.action.data.listBefore)
             ret = new List(notification.action.data.listBefore);
         else
-            throw new Error("No list before");
+            throw new InvalidActionException("No list before");
         
         return ret;
     }
@@ -45,7 +45,7 @@ var Notification = function(notification)
         if(notification.action.data.listAfter)
             ret = new List(notification.action.data.listAfter);
         else
-            throw new Error("No list after");
+            throw new InvalidActionException("No list after");
         
         return ret;
     }
@@ -55,7 +55,7 @@ var Notification = function(notification)
         if(notification.action.data.list)
             ret = new List(notification.action.data.list);
         else
-            throw new Error("List not updated");
+            throw new InvalidActionException("List not updated");
         
         return ret;
     }
@@ -63,7 +63,7 @@ var Notification = function(notification)
     this.cardWithNameChanged = function()
     {
         if(this.notification.action.display.translationKey != "action_renamed_card")
-            throw new Error("Card name was not changed");
+            throw new InvalidActionException("Card name was not changed");
         
         return this.card();
     }
@@ -71,7 +71,7 @@ var Notification = function(notification)
     this.cardDueDateWasCompletedOn = function()
     {
         if(this.notification.action.display.translationKey != "action_marked_the_due_date_complete")
-            throw new Error("Due date not marked complete");
+            throw new InvalidActionException("Due date not marked complete");
         
         return this.card();
     }
@@ -94,7 +94,7 @@ var Notification = function(notification)
           var card = this.card();
           
           if(!card.due())
-             throw new Error("Unable to action on due date, there is no due date on the card");
+             throw new InvalidActionException("Unable to action on due date, there is no due date on the card");
         }
       
         this.pushDueDateActionForCard(function_name,signature,callback,card);
@@ -132,7 +132,7 @@ var Notification = function(notification)
         });
         
         if(!ret.length)
-            throw new Error("No members were mentioned in this comment");
+            throw new InvalidActionException("No members were mentioned in this comment");
         
         return new IterableCollection(ret);
     }
@@ -140,7 +140,7 @@ var Notification = function(notification)
     this.commentAddedToCard = function()
     {
         if(this.notification.action.display.translationKey != "action_comment_on_card")
-            throw new Error("No comment added as part of this notification");
+            throw new InvalidActionException("No comment added as part of this notification");
         
         var data = {data: {id: this.notification.action.id,
                     text: this.notification.action.data.text}};
@@ -150,7 +150,7 @@ var Notification = function(notification)
     this.archivedCard = function()
     {
         if(this.notification.action.display.translationKey != "action_archived_card")
-            throw new Error("No card was archived in this update");
+            throw new InvalidActionException("No card was archived in this update");
         
         return this.card();
     }
@@ -161,7 +161,7 @@ var Notification = function(notification)
             (this.notification.action.display.translationKey != "action_added_a_due_date")&&
             (this.notification.action.display.translationKey != "action_changed_a_due_date")
           )
-            throw new Error("No due date was added");
+            throw new InvalidActionException("No due date was added");
         
         return this.card();
     }
@@ -169,12 +169,12 @@ var Notification = function(notification)
     this.labelAddedToCard = function(name)
     {
         if(this.notification.action.display.translationKey != "action_add_label_to_card")
-            throw new Error("No label as added to a card");
+            throw new InvalidActionException("No label as added to a card");
         
         var ret = new Label(this.notification.action.data.label);
         
         if(name && (ret.name() != name))
-            throw new Error("Label was added, but was not named: "+name);
+            throw new InvalidActionException("Label was added, but was not named: "+name);
         
         return ret;
     }
@@ -186,7 +186,7 @@ var Notification = function(notification)
         this.card().checklists().each(function(list)
         {
             if(!list.isComplete())
-                throw new Error("There is an incomplete checklist on "+this.card().name()+" name "+list.name());
+                throw new InvalidActionException("There is an incomplete checklist on "+this.card().name()+" name "+list.name());
         });
         
         return this.card();
@@ -195,12 +195,12 @@ var Notification = function(notification)
     this.completedChecklistItem = function(name)
     {
         if(this.notification.action.display.translationKey != "action_completed_checkitem")
-            throw new Error("No checklist item was completed");
+            throw new InvalidActionException("No checklist item was completed");
 
         var ret = new CheckItem(this.notification.action.display.entities.checkitem);
         
         if(name && (ret.name() != name))
-            throw new Error("A checklist item was completed but it was not named: "+name);
+            throw new InvalidActionException("A checklist item was completed but it was not named: "+name);
 
         ret.setContainingChecklist(this.checklist().setContainingCard(this.card()));
         return ret;
@@ -219,18 +219,17 @@ var Notification = function(notification)
     this.completedChecklist = function(name)
     {
         if(this.notification.action.display.translationKey != "action_completed_checkitem")
-            throw new Error("No checklist item was completed, therefore no checklist was completed as part of this action");
-
+            throw new InvalidActionException("No checklist item was completed, therefore no checklist was completed as part of this action");
 
         var ret = this.checklist();
         
         if(name && !TrelloApi.nameTest(name,ret.name()))
-            throw new Error("The completed checklist was not named "+name);
+            throw new InvalidActionException("The completed checklist was not named "+name);
 
         else
         {
             if(!ret.isComplete())
-                throw new Error("The checklist in which the item was checked is not complete");
+                throw new InvalidActionException("The checklist in which the item was checked is not complete");
 
             var completed_actions = new Array();
     
@@ -241,7 +240,7 @@ var Notification = function(notification)
             });
     
             if(this.notification.action.id != completed_actions[0].id)
-                throw new Error("This was not the most recent completed notification so couldn't be the one that caused the checklist to be completed");
+                throw new InvalidActionException("This was not the most recent completed notification so couldn't be the one that caused the checklist to be completed");
         }
         
         ret.setContainingCard(this.card());
@@ -253,10 +252,10 @@ var Notification = function(notification)
         if(this.notification.action.display.translationKey == "action_move_card_from_list_to_list")
             var ret = new List(this.notification.action.display.entities.listAfter);
         else
-            throw new Error("Card was not moved to a list");
+            throw new InvalidActionException("Card was not moved to a list");
 
         if(name && !TrelloApi.nameTest(name,ret.name()))
-            throw new Error("Card was moved to : "+ret.name()+" rather than "+name);
+            throw new InvalidActionException("Card was moved to : "+ret.name()+" rather than "+name);
         
         return ret;
     }
@@ -268,10 +267,10 @@ var Notification = function(notification)
         else if(new IterableCollection(["action_convert_to_card_from_checkitem"]).hasMember(this.notification.action.display.translationKey))
             var ret = new List(this.notification.action.data.list);
         else
-            throw new Error("Card was not created in a list");
+            throw new InvalidActionException("Card was not created in a list");
 
         if(name && !TrelloApi.nameTest(name,ret.name()))
-            throw new Error("Card was created in : "+ret.name()+" rather than "+name);
+            throw new InvalidActionException("Card was created in : "+ret.name()+" rather than "+name);
         
         return ret;
     }
@@ -285,10 +284,10 @@ var Notification = function(notification)
         else if(new IterableCollection(["action_move_card_from_list_to_list"]).hasMember(this.notification.action.display.translationKey))
             var ret = new List(this.notification.action.display.entities.listAfter);
         else
-            throw new Error("Card was not added to a list");
+            throw new InvalidActionException("Card was not added to a list");
 
         if(name && !TrelloApi.nameTest(name,ret.name()))
-            throw new Error("Card was added in: \""+ret.name()+"\" rather than "+name);
+            throw new InvalidActionException("Card was added in: \""+ret.name()+"\" rather than "+name);
         
         return ret;
     }
@@ -301,18 +300,20 @@ var Notification = function(notification)
     this.card = function()
     {
         if(!this.notification.action.display.entities.card)
-            throw new Error("No card was part of this notification");
+            throw new InvalidActionException("No card was part of this notification");
 
         return new Card(this.notification.action.display.entities.card);
     }
+}
 
-    this.logException = function(message,e)
-    {
-        if(e.constructor == InvalidDataException)
-            writeInfo_(message+": "+e);
-        else
-            throw e;
-    }
+Notification.logException = function(message,e)
+{
+    if(e.constructor == InvalidDataException)
+        writeInfo_(message+": "+e);
+    else if(e.constructor == InvalidAction Exception)
+        writeInfo_(message+": "+e);
+    else
+        throw e;
 }
 
 Notification.fromDueDateAction = function(params)
