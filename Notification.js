@@ -310,7 +310,7 @@ Notification.logException = function(message,e)
 {
     if(e.constructor == InvalidDataException)
         writeInfo_(message+": "+e);
-    else if(e.constructor == InvalidAction Exception)
+    else if(e.constructor == InvalidActionException)
         writeInfo_(message+": "+e);
     else
         throw e;
