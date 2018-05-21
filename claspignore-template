@@ -1,0 +1,14 @@
+!apps/trellinator-libs/Board.js
+!apps/trellinator-libs/Card.js
+!apps/trellinator-libs/CheckItem.js
+!apps/trellinator-libs/Checklist.js
+!apps/trellinator-libs/Comment.js
+!apps/trellinator-libs/Exceptions.js
+!apps/trellinator-libs/HttpApi.js
+!apps/trellinator-libs/IterableCollection.js
+!apps/trellinator-libs/Label.js
+!apps/trellinator-libs/List.js
+!apps/trellinator-libs/Member.js
+!apps/trellinator-libs/Notification.js
+!apps/trellinator-libs/Team.js
+!apps/trellinator-libs/TrelloApi.js
