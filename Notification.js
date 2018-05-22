@@ -306,6 +306,12 @@ var Notification = function(notification)
     }
 }
 
+Notification.expectException = function(type,e)
+{
+    if(e.constructor != type)
+        throw e;
+}
+
 Notification.logException = function(message,e)
 {
     if(e.constructor == InvalidDataException)
