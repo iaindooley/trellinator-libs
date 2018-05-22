@@ -99,3 +99,11 @@ function writeInfo_(msg)
 {
     console.log(msg);
 }
+
+const Trellinator = function()
+{
+    this.member = new Member({username: "trellinatordev"});
+
+    for(var key in this.member)
+      this[key] = this.member[key];
+}
