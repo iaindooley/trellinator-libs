@@ -110,7 +110,12 @@ var Trellinator = function()
 
 Trellinator.fake_now = null;
 
+Trellinator.fakeNow = function()
+{
+    return new Date(Trellinator.fake_now);
+}
+
 Trellinator.now = function()
 {
-    return (Trellinator.fake_now) ? Trellinator.fake_now : new Date();
+    return (Trellinator.fake_now) ? Trellinator.fakeNow() : new Date();
 }
