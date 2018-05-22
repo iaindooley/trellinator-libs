@@ -84,14 +84,14 @@ var TestConnector = function()
 TestConnector.test_base_dir = "";
 TestConnector.live_key      = process.argv[2];
 TestConnector.live_token    = process.argv[3];
-TestConnector.nocache       = false;
+TestConnector.prefix        = "";
 
 TestConnector.fixturePath = function(base_dir,url,options)
 {
     var signature =  md5(url+JSON.stringify(options));
     var fixture_dir = path.resolve(base_dir,"./trello_api_fixtures/"+path.basename(process.argv[1])).toString();
     !fs.existsSync(fixture_dir) && fs.mkdirSync(fixture_dir);
-    var fixture_path = fixture_dir+signature;
+    var fixture_path = fixture_dir+"/"+TestConnector.prefix+signature;
     return fixture_path;
 }
 
@@ -100,10 +100,17 @@ function writeInfo_(msg)
     console.log(msg);
 }
 
-const Trellinator = function()
+var Trellinator = function()
 {
     this.member = new Member({username: "trellinatordev"});
 
     for(var key in this.member)
       this[key] = this.member[key];
+}
+
+Trellinator.fake_now = null;
+
+Trellinator.now = function()
+{
+    return (Trellinator.fake_now) ? Trellinator.fake_now : new Date();
 }
