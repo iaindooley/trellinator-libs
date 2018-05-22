@@ -280,14 +280,12 @@ var Card = function(data)
         return new Card(TrelloApi.post("cards?pos="+position+"&idList="+list.data.id+"&idCardSource="+this.data.id+"&keepFromSource=all"));
     }
 
-    this.copyTo = function(data)
+    this.copyTo = function(data,position)
     {
-        if(!this.data.board)
-            this.load();
+        if(!position)
+            position = (data.position)?data.position:"bottom";
 
-        var list_id = new Board(this.data.board).list({name: data.list}).data.id;
-        var position = (data.position)?data.position:"bottom";
-        return new Card(TrelloApi.post("cards?pos="+position+"&idList="+list_id+"&idCardSource="+this.data.id+"&keepFromSource=all"));
+        return this.copyToList(this.board().list(TrelloApi.nameTestData(data,"list")),position);
     }
 
     /*Move a card to a list (in any board)*/
