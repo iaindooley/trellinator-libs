@@ -88,9 +88,18 @@ var IterableCollection = function(obj)
         }
         
         if(!ret)
-            throw new Error("There was no item after: "+expression);
+            throw new InvalidDataException("There was no item after: "+expression);
             
         return ret;
+    }
+
+    this.random = function()
+    {
+        if(!this.length())
+            throw new InvalidDataException("No items in IterableCollection when selecting a random element");
+
+        var keys = Object.keys(this.obj)
+        return this.obj[keys[ keys.length * Math.random() << 0]];
     }
 
     this.first = function()
@@ -104,7 +113,7 @@ var IterableCollection = function(obj)
         }
         
         if(ret === null)
-            throw new Error("No data in IterableCollection: "+this.obj);
+            throw new InvalidDataException("No data in IterableCollection: "+this.obj);
         
         return ret;
     }
