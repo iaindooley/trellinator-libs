@@ -109,7 +109,7 @@ var Notification = function(notification)
             
         var trigger_signature = signature+card.data.id;
         clear(trigger_signature);
-        params.notification = this;
+        params = this.notification;
         var date = new Date(card.due());
         callback(date,params);
         push(date,{functionName: function_name,parameters: params},trigger_signature);
@@ -324,5 +324,12 @@ Notification.logException = function(message,e)
 
 Notification.fromDueDateAction = function(params)
 {
-    return new Notification(params.notification.notification);
+    var ret = null;
+
+    if(params.notification)
+        ret = new Notification(params.notification.notification);
+    else
+        ret = new Notfication(params);
+
+    return ret;
 }
