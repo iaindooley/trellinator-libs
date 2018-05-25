@@ -112,7 +112,7 @@ var Notification = function(notification)
         params = this.notification;
         var date = new Date(card.due());
         callback(date,params);
-        push(date,{functionName: function_name,parameters: params},trigger_signature);
+        ExecutionQueue.push(function_name,params,trigger_signature,date);
     }
 
     this.memberMentionedInComment = function(name)
