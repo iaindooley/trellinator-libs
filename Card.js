@@ -357,6 +357,20 @@ var Card = function(data)
         return this;
     }
 
+    this.copyUniqueChecklist = function(name,to_card)
+    {
+        try
+        {
+            return to_card.checklist(name);
+        }
+        
+        catch(e)
+        {
+            Notification.expectException(InvalidDataException,e);
+            return this.copyChecklist(name,to_card);
+        }
+    }
+
     this.copyChecklist = function(name,to_card)
     {
         return new Checklist(TrelloApi.post("cards/"+to_card.data.id+"/checklists?idChecklistSource="+this.checklist(name).data.id)).setContainingCard(to_card);
