@@ -62,12 +62,12 @@ TrelloApi.searchCardsInBoards = function(boards,query)
 
 TrelloApi.cardLinkRegExp = function()
 {
-    return new RegExp("https:\\/\\/trello\\.com\\/c\\/([A-Za-z0-9]+)","i");
+    return new RegExp(".*https:\\/\\/trello\\.com\\/c\\/([A-Za-z0-9]+)","i");
 }
 
 TrelloApi.boardLinkRegExp = function()
 {
-    return new RegExp("https:\\/\\/trello\\.com\\/b\\/([A-Za-z0-9]+)","i");
+    return new RegExp(".*https:\\/\\/trello\\.com\\/b\\/([A-Za-z0-9]+)","i");
 }
 
 TrelloApi.post = function(baseURL)
