@@ -85,6 +85,7 @@ TestConnector.test_base_dir = "";
 TestConnector.live_key      = process.argv[2];
 TestConnector.live_token    = process.argv[3];
 TestConnector.prefix        = "";
+TestConnector.nocache       = false;
 
 TestConnector.fixturePath = function(base_dir,url,options)
 {
