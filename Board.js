@@ -188,9 +188,20 @@ var Board = function(data)
         return this;
     }
 
+    this.del = function()
+    {
+        return TrelloApi.del("boards/"+this.data.id);
+    }
+
     if(!this.data.id && this.data.link)
     {   
         this.data.id = TrelloApi.boardLinkRegExp().exec(this.data.link)[1];
         this.load();
     }
 }
+
+Board.create = function(data)
+{
+    return new Board(TrelloApi.post("boards/?"+new IterableCollection(data).implode("&",encodeURIComponent)));
+}
+
