@@ -42,6 +42,9 @@ var Checklist = function(data)
 
     this.convertIntoLinkedCards = function(list,params)
     {
+        if(!params)
+            params = {};
+
         params.desc = this.card().link();
 
         this.items().each(function(item)
