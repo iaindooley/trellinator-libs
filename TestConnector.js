@@ -103,13 +103,11 @@ function writeInfo_(msg)
 
 var Trellinator = function()
 {
-    this.member = new Member({username: "trellinatordev"});
+    this.member = new Member({username: Trellinator.username});
 
     for(var key in this.member)
       this[key] = this.member[key];
 }
-
-Trellinator.fake_now = null;
 
 Trellinator.fakeNow = function()
 {
@@ -120,3 +118,7 @@ Trellinator.now = function()
 {
     return (Trellinator.fake_now) ? Trellinator.fakeNow() : new Date();
 }
+
+Trellinator.username = null;
+Trellinator.fake_now = null;
+
