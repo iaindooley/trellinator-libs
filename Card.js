@@ -186,8 +186,12 @@ var Card = function(data)
     
     this.cardLinkedInDescription = function()
     {
-        var parts = TrelloApi.cardLinkRegExp().exec(this.description());
-        return new Card({id: parts[1]});
+        if(parts = TrelloApi.cardLinkRegExp().exec(this.description()))
+            var ret = new Card({id: parts[1]});
+        else
+            throw new InvalidDataException("No card linked in description");
+        
+        return ret;
     }
 
     this.description = function()
