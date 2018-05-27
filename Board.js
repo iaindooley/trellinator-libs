@@ -77,7 +77,7 @@ var Board = function(data)
 
     this.labels = function(data)
     {
-        return this.iterableCollection("boards/"+this.data.id+"/labels?fields=id,name&limit=50",
+        return this.iterableCollection("boards/"+this.data.id+"/labels?fields=id,name&limit=1000",
                                        data,
                                        function(elem)
                                        {
