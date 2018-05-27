@@ -112,12 +112,8 @@ var Board = function(data)
     this.iterableCollection = function(url,data,callback)
     {
         var ret = new IterableCollection(TrelloApi.get(url));
-
         ret.transform(callback);
-
-        if(data && data.name)
-            ret.filterByName(data.name);
-        
+        ret.filterByName(TrelloApi.nameTestData(data));   
         return ret;
     }
 
