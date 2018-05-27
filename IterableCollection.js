@@ -2,6 +2,16 @@ var IterableCollection = function(obj)
 {
     this.obj = obj;
 
+    this.clone = function(callback)
+    {
+        var new_obj = [];
+
+        for(var key in this.obj)
+          new_obj[key] = this.obj[key];
+
+        return new IterableCollection(new_obj);
+    }
+    
     this.hasMember = function(match)
     {
         var ret = false;
