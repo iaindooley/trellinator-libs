@@ -58,7 +58,7 @@ var TestConnector = function()
                     throw new Error("Unable to parse JSON: "+stdout);
                 }
 
-                if(TestConnector.test_base_dir != "")
+                if((TestConnector.test_base_dir != "") && (!TestConnector.nocache))
                 {
                     fs.writeFileSync(fixture_path,stdout);
                     var output = fs.readFileSync(fixture_path).toString();
