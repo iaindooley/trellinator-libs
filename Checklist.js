@@ -5,6 +5,11 @@ var Checklist = function(data)
     this.added_item      = null;
     this.containing_card = null;
     this.check_items     = null;
+  
+    this.setName = function(name)
+    {
+      return TrelloApi.put("checklists/"+this.data.id+"/name?value="+encodeURIComponent(name));
+    }
 
     this.deleteItems = function(state)
     {
