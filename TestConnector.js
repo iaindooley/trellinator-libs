@@ -38,11 +38,11 @@ var TestConnector = function()
                         return encodeURIComponent(elem);
                 });
                 
-                var cmd      = "curl --data \""+data_string+"\" --request "+options.method+" --url '"+live_url+"'";
+                var cmd      = "curl --data \""+data_string+"\" --request "+options.method.toUpperCase()+" --url '"+live_url+"'";
             }
             
             else
-                var cmd      = "curl --request "+options.method+" --url '"+live_url+"'";
+                var cmd      = "curl --request "+options.method.toUpperCase()+" --url '"+live_url+"'";
 
             var stdout = cp.execSync(cmd,{ stdio: ['pipe', 'pipe', 'ignore']});
             
