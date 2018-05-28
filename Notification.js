@@ -329,7 +329,7 @@ Notification.fromDueDateAction = function(params)
     if(params.notification)
         ret = new Notification(params.notification.notification);
     else
-        ret = new Notfication(params);
+        ret = new Notification(params);
 
     return ret;
 }
