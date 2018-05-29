@@ -212,12 +212,20 @@ var Card = function(data)
         if(!this.data.labels)
             this.load();
 
-        var ret = new IterableCollection(this.data.labels);
-
-        ret.transform(function(elem)
+        try
         {
-            return new Label(elem);
-        });
+          var ret = new IterableCollection(this.data.labels);
+          
+          ret.transform(function(elem)
+                        {
+                          return new Label(elem);
+                        });
+        }
+      
+        catch(e)
+        {
+          throw new InvalidDataException("No labels present on card");
+        }
         
         return ret;
     }
