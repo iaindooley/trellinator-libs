@@ -8,7 +8,8 @@ var Checklist = function(data)
   
     this.setName = function(name)
     {
-      return TrelloApi.put("checklists/"+this.data.id+"/name?value="+encodeURIComponent(name));
+      TrelloApi.put("checklists/"+this.data.id+"/name?value="+encodeURIComponent(name));
+      return this;
     }
 
     this.deleteItems = function(state)
