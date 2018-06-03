@@ -414,8 +414,18 @@ var Card = function(data)
 
     this.load = function()
     {
-        this.data = TrelloApi.get("cards/"+this.data.id+"?fields=all&actions=all&attachments=true&attachment_fields=all&member_fields=all&memberVoted_fields=all&checklists=all&checklist_fields=all&board=true&board_fields=all&list=true&pluginData=true&stickers=true&sticker_fields=all");
-        return this;
+      this.last_comment    = null;
+      this.set_due         = null;
+      this.moved           = null;
+      this.set_description = null;
+      this.archived        = null;
+      this.unarchived      = null;
+      this.added_checklist = null;
+      this.checklist_list  = null;
+      this.attached_link   = null;
+      this.added_member    = null;
+      this.data = TrelloApi.get("cards/"+this.data.id+"?fields=all&actions=all&attachments=true&attachment_fields=all&member_fields=all&memberVoted_fields=all&checklists=all&checklist_fields=all&board=true&board_fields=all&list=true&pluginData=true&stickers=true&sticker_fields=all");
+      return this;
     }
 
     this.removeLabel = function(label)
