@@ -1,19 +1,19 @@
 var InvalidDataException = function(msg)
 {
-    this.msg = msg;
+  this.msg = msg+"\n\nSTACK: "+Trellinator.getStack();
     
-    this.toString = function()
-    {
-        return this.msg;
-    }
+  this.toString = function()
+  {
+    return this.msg;
+  }
 }
 
 var InvalidActionException = function(msg)
 {
-    this.msg = msg;
-    
-    this.toString = function()
-    {
-        return this.msg;
-    }
+  this.msg = msg+"\n\nSTACK: "+Trellinator.getStack();
+  
+  this.toString = function()
+  {
+    return this.msg;
+  }
 }
