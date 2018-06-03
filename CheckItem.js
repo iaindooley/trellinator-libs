@@ -36,7 +36,8 @@ var CheckItem = function(data)
 
     this.mark = function(state)
     {
-        TrelloApi.put("cards/"+this.checklist().card().data.id+"/checkItem/"+elem.data.id+"?state="+state);
+      TrelloApi.put("cards/"+this.checklist().card().data.id+"/checkItem/"+this.data.id+"?state="+state);
+      return this;
     }
 
     this.state = function()
