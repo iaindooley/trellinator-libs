@@ -119,6 +119,21 @@ Trellinator.now = function()
     return (Trellinator.fake_now) ? Trellinator.fakeNow() : new Date();
 }
 
+Trellinator.getStack = function()
+{
+  var stack = "";
+
+  try
+  {
+    throw new Error("Whoops!");
+  }
+  catch (e)
+  {
+    stack = e.stack;
+  }
+
+  return stack;
+}
+
 Trellinator.username = null;
 Trellinator.fake_now = null;
-
