@@ -5,7 +5,7 @@ var Notification = function(notification)
     this.memberAddedToCard = function()
     {
       if(
-          (this.notification.action.display.translationKey != "action_member_joined_card") ||
+          (this.notification.action.display.translationKey != "action_member_joined_card") &&
           (this.notification.action.display.translationKey != "action_added_member_to_card")
         )
             throw new InvalidActionException("No member added to card");
