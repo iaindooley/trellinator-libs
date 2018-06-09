@@ -3,6 +3,11 @@ var Member = function(data)
     this.data = data;
     this.list_of_teams = null;
   
+    this.notTrellinator = function()
+    {
+        return (new Trellinator().name() != this.name());
+    }
+
     this.fullName = function()
     {
         if(!this.data.fullName)
