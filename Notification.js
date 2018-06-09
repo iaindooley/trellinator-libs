@@ -3,13 +3,13 @@
 * @constructor
 * @param notification {Object} an object that has been posted
 * to a webhook from the Trello API
-* @classdesc The Notification object takes a JSON formatted
+* @classdesc The Notification object takes a 
 * notification from the Trello API sent to a 
 * webhook and makes it easy to determine what 
 * type of event took place and to get access to
 * the entities that were part of 
-* notification. The notifications passed into
-* this class are always sent to webhooks registered
+* the notification. The notifications passed into
+* this constructor are always sent to webhooks registered
 * at the board level. There are 4 types of method:
 * 
 * - methods that return an object that was the source
@@ -17,7 +17,7 @@
 *   exception if that object is not present which 
 *   indicates in turn that type of notification did
 *   not occur. The first part of the function name
-*   is usually the verb, with the object coming after,
+*   is the verb, with the object coming after,
 *   eg. archivedCard or completedChecklistItem.
 *
 * - methods that return an entity that was part of
@@ -730,7 +730,7 @@ var Notification = function(notification)
 * useful when catching exceptions thrown by 
 * entity classes such as Card and Board. These
 * will throw InvalidDataExceptions but will 
-* never intentionally throw a ReferenceErro
+* never intentionally throw a ReferenceError
 * for example.
 * @param type {Function} the constructor function of an
 * exception, typically one from Exceptions.js
