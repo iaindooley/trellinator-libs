@@ -791,9 +791,9 @@ Notification.expectException = function(type,e)
 Notification.logException = function(message,e)
 {
     if(e.constructor == InvalidDataException)
-        writeInfo_(message+": "+e);
+        Trellinator.log(message+": "+e);
     else if(e.constructor == InvalidActionException)
-        writeInfo_(message+": "+e);
+        Trellinator.log(message+": "+e);
     else
         throw e;
 }
