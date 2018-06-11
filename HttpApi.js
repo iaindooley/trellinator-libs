@@ -1,4 +1,45 @@
+/**
+* @class HttpApi
+* @constructor
+* @classdesc The HttpApi class is mostly used by
+* the TrelloApi class for providing the 
+* functionality for all the Trello entities, however
+* it also provides useful functionality for dealing 
+* with many HTTP APIs, especially those that expect
+* different methods (put, delete, post, get) and 
+* JSON payloads. The main utility of the HttpApi
+* class is that it will allow you to call an API
+* with any method (post, put, delete, get) using
+* a standard query string. This means that, for 
+* example you can formulate a POST request that 
+* will be sent as a POST, by passing in parameters
+* in the query string.
+* 
+* This class also handles switching between the 
+* UrlFetchApp used to make queries in Google Apps
+* Script and the TestConnector class which provides
+* the same functionality (and caches responses) when
+* running your code via node on the command line
+* for automated testing purposes.
+* @example 
+* var url = "https://api.pipedrive.com/v1";
+* HttpApi.call("post",url+"/activities/?subject=example&type=call&deal_id=1420&due_date="+
+* Trellinator.now().stringFormat("YYYY-MM-DD")+"&due_time="+Trellinator.now().addHours(24).stringFormat("HH:MM")+
+* //the "api_token" parameter here is passed to "force_get"
+* //which means it will be sent as part of the query string
+* //even for put/post queries
+* "&api_token=SOMETOKEN&done=1","api_token");
+* 
+*/
 var HttpApi = function(){};
+
+/**
+* @memberof HttpApi
+* @param method {string} one of get, put, delete or post
+* @param url {string} the complete URL including all parameters 
+* @param force_get {string} (optional) force a parameter to be
+*        sent in the GET query string even for post or put queries
+*/
 HttpApi.call = function(method,url,force_get)
 {
     var payload = null;
