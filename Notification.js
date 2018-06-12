@@ -71,6 +71,9 @@
 var Notification = function(notification)
 {
     this.notification = notification;
+    this.board = null;
+    this.member = null;
+    this.card = null;
 
     /**
     * If this notification was the result of
@@ -520,7 +523,10 @@ var Notification = function(notification)
     */
     this.member = function()
     {
-        return new Member(this.notification.action.memberCreator);
+        if(!this.member)
+            this.member = new Member(this.notification.action.memberCreator);
+        
+        return this.member;
     }
 
     /**
@@ -536,7 +542,10 @@ var Notification = function(notification)
     */
     this.board = function()
     {
-        return new Board(this.notification.model);
+        if(!this.board)
+            this.board = new Board(this.notification.model);
+        
+        return this.board;
     }
 
     /**
@@ -554,7 +563,10 @@ var Notification = function(notification)
         if(!this.notification.action.display.entities.card)
             throw new InvalidActionException("No card was part of this notification");
 
-        return new Card(this.notification.action.display.entities.card);
+        if(!this.card)
+            this.card = new Card(this.notification.action.display.entities.card);
+        
+        return this.card;
     }
 
     //This is for internal use only
@@ -596,9 +608,9 @@ var Notification = function(notification)
     //Deprecated: use createdCard instead
     this.listCardWasCreatedIn = function(name)
     {
-        if(new IterableCollection(["action_create_card","action_copy_card","action_email_card"]).hasMember(this.notification.action.display.translationKey))
+        if(["action_create_card","action_copy_card","action_email_card"].indexOf(this.notification.action.display.translationKey) > -1)
             var ret = new List(this.notification.action.display.entities.list);
-        else if(new IterableCollection(["action_convert_to_card_from_checkitem"]).hasMember(this.notification.action.display.translationKey))
+        else if(["action_convert_to_card_from_checkitem"].indexOf(this.notification.action.display.translationKey) > -1)
             var ret = new List(this.notification.action.data.list);
         else
             throw new InvalidActionException("Card was not created in a list");
@@ -612,11 +624,11 @@ var Notification = function(notification)
     //Deprecated: use addedCard instead
     this.listCardWasAddedTo = function(name)
     {
-        if(new IterableCollection(["action_create_card","action_copy_card","action_email_card"]).hasMember(this.notification.action.display.translationKey))
+        if(["action_create_card","action_copy_card","action_email_card"].indexOf(this.notification.action.display.translationKey) > -1)
             var ret = new List(this.notification.action.display.entities.list);
-        else if(new IterableCollection(["action_move_card_to_board","action_convert_to_card_from_checkitem"]).hasMember(this.notification.action.display.translationKey))
+        else if(["action_move_card_to_board","action_convert_to_card_from_checkitem"].indexOf(this.notification.action.display.translationKey) > -1)
             var ret = new List(this.notification.action.data.list);
-        else if(new IterableCollection(["action_move_card_from_list_to_list"]).hasMember(this.notification.action.display.translationKey))
+        else if(["action_move_card_from_list_to_list"].indexOf(this.notification.action.display.translationKey) > -1)
             var ret = new List(this.notification.action.display.entities.listAfter);
         else
             throw new InvalidActionException("Card was not added to a list");
