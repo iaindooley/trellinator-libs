@@ -1,5 +1,6 @@
 /**
 * @class Notification
+* @memberof module:TrellinatorCore
 * @constructor
 * @param notification {Object} an object that has been posted
 * to a webhook from the Trello API
@@ -80,7 +81,7 @@ var Notification = function(notification)
     * a member being added to a card, return
     * an object of type Member, otherwise
     * throw an InvalidActionException
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @throws InvalidActionException
     * @example
     * var notif = new Notification(posted);
@@ -95,7 +96,7 @@ var Notification = function(notification)
     /**
     * If a checklist was completed as part of this notification
     * return a Checklist object, otherwise throw an InvalidActionException
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @param {string|RegExp} optionally pass in a string or RegExp object
     * to match against the name of the completed checklist
     * @throws InvalidActionException
@@ -141,7 +142,7 @@ var Notification = function(notification)
     * board or to a different board) as 
     * part of this notification, otherwise throw
     * an InvalidActionException
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @param {string|RegExp} optionaly pass in a string
     * or RegExp to match against the name of the LIST 
     * into which the card was moved
@@ -168,7 +169,7 @@ var Notification = function(notification)
     * or from a different board) or emailed to 
     * the board. If none of these things happened
     * throws an InvalidActionException
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @param {string|RegExp} optionaly pass in a string
     * or RegExp to match against the name of the LIST 
     * into which the card was added
@@ -193,7 +194,7 @@ var Notification = function(notification)
     * including from a different board or emailed to
     * the board. If none of these things happened
     * throws an InvalidActionException
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @param {string|RegExp} optionaly pass in a string
     * or RegExp to match against the name of the LIST 
     * in which the card was created
@@ -214,7 +215,7 @@ var Notification = function(notification)
     * checklist was added to a card as part
     * of this notification or throw an
     * InvalidActionException
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @param name {string|RegExp} optionally pass in a string or RegExp
     * to match against the name of the checklist that was added to the
     * card
@@ -243,7 +244,7 @@ var Notification = function(notification)
     * was moved out of if a card was
     * moved as part of this notification,
     * or return an InvalidActionException
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @throws InvalidActionException
     * @example
     * new Notification(posted)
@@ -266,7 +267,7 @@ var Notification = function(notification)
     * was moved into if a card was
     * moved as part of this notification,
     * or return an InvalidActionException
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @throws InvalidActionException
     * @example
     * new Notification(posted)
@@ -289,7 +290,7 @@ var Notification = function(notification)
     * it's name changed or throws
     * an InvalidActionException if no
     * list name was changed
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @throws InvalidActionException
     * @example
     * new Notification(posted)
@@ -312,7 +313,7 @@ var Notification = function(notification)
     * name/title of the card was
     * changed or throw an InvalidActionException
     * if no card name was changed
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @throws InvalidActionException
     * @example
     * new Notification(posted)
@@ -332,7 +333,7 @@ var Notification = function(notification)
     * due date was marked complete
     * or throw an InvalidActionException
     * if no due date was completed
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @throws InvalidActionException
     * @example
     * new Notification(posted)
@@ -352,7 +353,7 @@ var Notification = function(notification)
     * This will apply only to members who were mentioned
     * who are part of this board, rather than arbitrary
     * strings preceded by an @ sign
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @param {string|RegExp} optionally pass in a string
     * or RegExp to match against the mentioned member's
     * username
@@ -375,7 +376,7 @@ var Notification = function(notification)
     * are actually on the board, so won't consider
     * any string preceded by an @ sign as a member
     * name
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @throws InvalidActionException
     * @example
     * var notif = new Notification(posted);
@@ -397,7 +398,7 @@ var Notification = function(notification)
     * BEWARE!! It's very easy to create "infinite loops"
     * if you don't filter out comments added by 
     * Trellinator itself.
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @throws InvalidActionException
     * @example
     * var notif = new Notification(posted);
@@ -415,7 +416,7 @@ var Notification = function(notification)
     * Return a Card object if it was archived
     * as part of this notification, or throw
     * an InvalidActionException
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @throws InvalidActionException
     * @example
     * new Notification(posted)
@@ -435,7 +436,7 @@ var Notification = function(notification)
     * Return a Card object if a due 
     * date was added as part of this notification,
     * or throw an InvalidActionException
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @throws InvalidActionException
     * @example
     * new Notification(posted)
@@ -451,7 +452,7 @@ var Notification = function(notification)
     * Return a Label object if a label
     * was added to a card as part of this notification,
     * or throw an InvalidActionException
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @param {string|RegExp} optionally pass in a 
     * string or RegExp to match against the name of
     * the label that was added
@@ -470,7 +471,7 @@ var Notification = function(notification)
     * Return a Card object if all checklists
     * were completed as part of this notification,
     * or throw an InvalidActionException
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @throws InvalidActionException
     * @example
     * new Notification(posted)
@@ -485,7 +486,7 @@ var Notification = function(notification)
     /**
     * Return a CheckItem object if it was
     * marked as complete or throw an InvalidActionException
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @param {string|RegExp} optionally include a string
     * or RegExp object to match against the text of the completed item
     * @throws InvalidActionException
@@ -514,7 +515,7 @@ var Notification = function(notification)
     * notification. Since all notifications are at
     * the board level, this will always return 
     * a valid Member object
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @example
     * var notif = new Notification(posted);
     * var comment = notif.member().name()+" dug a hole");
@@ -534,7 +535,7 @@ var Notification = function(notification)
     * was performed. Since all notifications are at
     * the board level, this will always return 
     * a valid Board object
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @example
     * new Notification(posted)
     * .board().card("Updates")
@@ -553,7 +554,7 @@ var Notification = function(notification)
     * action was performed. If this action
     * was not performed on a card, throw an
     * InvalidActionException
-    * @memberof Notification
+    * @memberof module:TrellinatorCore.Notification
     * @example
     * new Notification(posted)
     * .card().postComment("You rang?");
@@ -569,6 +570,107 @@ var Notification = function(notification)
         return this.card;
     }
 
+    /**
+    * Post a comment on the card associated with
+    * this notification mentioning the member who
+    * initiated the notification
+    * @memberof module:TrellinatorCore.Notification
+    * @param message {string} the message to post, without
+    * a username (this will be added automatically)
+    * @example
+    * new Notification(posted)
+    * .replyToMember("Aaaaaaas yoooooou wiiiiiiiish!");
+    */
+    this.replyToMember = function(message)
+    {
+      this.card().postComment("@"+this.member().name()+" "+message);
+      return this.card();
+    }
+
+    /**
+    * Schedule a function to be executed by the
+    * Execution Queue at some point relative to
+    * the due date added to or edited on a card.
+    * 
+    * By default, will execute on the due date, but
+    * you can optionally pass in a callback to modify
+    * the date relative to the due date of the card.
+    * 
+    * @memberof module:TrellinatorCore.Notification
+    * @param function_name {string} the name of the function to execute
+    * @param signature {string} an arbitrary string but usually just the signature
+    * passed into the original function
+    * @param callback {Function} (optional) a function into which the due date
+    * as a Date object, and a second argument with the notification params that
+    * will be passed into the function
+    * @example
+    * new Notification(posted).actionOnDueDateAdded("doSomething",signature,function(date,params)
+    * {
+    *     date.addDays(3).at("9:00");
+    *     params.arbitrary_string = "I ain't afraid of no ghost";
+    * });
+    */
+    this.actionOnDueDateAdded = function(function_name,signature,callback)
+    {
+        var card = this.cardDueDateWasAddedTo();      
+        this.pushDueDateActionForCard(function_name,signature,callback,card);
+    }
+    
+    /**
+    * Schedule a function to be executed by the
+    * Execution Queue at some point relative to
+    * the due date on a card, even if the due date
+    * was not added as part of the notification.
+    *
+    * It is therefore important to use this in
+    * conjunction with another notification type 
+    * because otherwise any notification for a card
+    * with a due date will schedule the function to
+    * execute.
+    * 
+    * By default, will execute on the due date, but
+    * you can optionally pass in a callback to modify
+    * the date relative to the due date of the card.
+    * 
+    * @memberof module:TrellinatorCore.Notification
+    * @param function_name {string} the name of the function to execute
+    * @param signature {string} an arbitrary string but usually just the signature
+    * passed into the original function
+    * @param callback {Function} (optional) a function into which the due date
+    * as a Date object, and a second argument with the notification params that
+    * will be passed into the function
+    * @example
+    * try
+    * {
+    *     var notif = new Notification(posted);
+    *     notif.createdCard();
+    *     //Action 3 days after the due date on a card only
+    *     //if the card was just created
+    *     notif.actionOnDueDate("doSomething",signature,function(date,params)
+    *     {
+    *         date.addDays(3).at("9:00");
+    *         params.arbitrary_string = "I ain't afraid of no ghost";
+    *     });
+    * }
+    */
+    this.actionOnDueDate = function(function_name,signature,callback)
+    {
+        try
+        {
+          var card = this.cardDueDateWasAddedTo();
+        }
+      
+        catch(e)
+        {
+          var card = this.card();
+          
+          if(!card.due())
+             throw new InvalidActionException("Unable to action on due date, there is no due date on the card");
+        }
+      
+        this.pushDueDateActionForCard(function_name,signature,callback,card);
+    }
+    
     //This is for internal use only
     this.pushDueDateActionForCard = function(function_name,signature,callback,card)
     {
