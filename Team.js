@@ -1,6 +1,12 @@
 var Team = function(data)
 {    
-    this.data          = data;
+    this.data       = data;
+    this.board_list = null;
+
+    this.id = function()
+    {
+        return this.data.id;
+    }
   
     this.name = function()
     {
@@ -10,26 +16,27 @@ var Team = function(data)
         return this.data.displayName;
     }
 
-    this.boards = function(data)
+    this.board = function(data)
     {
-        return this.iterableCollection("organizations/"+this.data.id+"/boards?filter=open&fields=all",
-                                       data,
-                                       function(elem)
-                                       {
-                                           return new Board(elem);
-                                       });
+        return this.boards(data).first();
     }
 
-    this.iterableCollection = function(url,data,callback)
+    this.boards = function(data)
     {
-        var ret = new IterableCollection(TrelloApi.get(url));
-        ret.transform(callback);
-        ret.filterByName(TrelloApi.nameTestData(data));
-        return ret;
+        if(!this.board_list)
+        {
+            this.board_list= new IterableCollection(TrelloApi.get("organizations/"+this.data.id+"/boards?filter=open&fields=all")).transform(function(elem)
+            {
+                return new Board(elem);
+            });
+        }
+
+        return this.board_list.findByName(data);
     }
-    
+
     this.load = function()
     {
+        this.board_list = null;
         this.data = TrelloApi.get("organizations/"+this.data.id);
         return this;
     }

@@ -2,6 +2,14 @@ var Board = function(data)
 {    
     this.data          = data;
     this.list_of_lists = null;
+    this.members_list  = null;
+    this.labels_list   = null;
+    this.card_list     = null;
+
+    this.id = function()
+    {
+        return this.data.id;
+    }
 
     this.name = function()
     {
@@ -62,12 +70,15 @@ var Board = function(data)
 
     this.members = function(data)
     {
-        return this.iterableCollection("boards/"+this.data.id+"/members?fields=fullName,username",
-                                       data,
-                                       function(elem)
-                                       {
-                                           return new Member(elem);
-                                       });
+        if(!this.members_list)
+        {
+            this.members_list = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/members?fields=fullName,username")).transform(function(elem)
+                                {
+                                    return new Member(elem);
+                                });
+        }
+
+        return this.members_list.findByName(data);
     }
     
     this.label = function(data)
@@ -77,62 +88,51 @@ var Board = function(data)
 
     this.labels = function(data)
     {
-        return this.iterableCollection("boards/"+this.data.id+"/labels?fields=id,name&limit=1000",
-                                       data,
-                                       function(elem)
-                                       {
-                                           return new Label(elem);
-                                       });
+        if(!this.labels_list)
+        {
+            this.labels_list = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/labels?fields=id,name&limit=1000")).transform(function(elem)
+                               {
+                                   return new Label(elem);
+                               });
+        }
+        
+        return this.labels_list.findByName(data);
     }
 
     this.list = function(data)
     {
-        return this.lists().findByName(TrelloApi.nameTestData(data)).first();
+        return this.lists(data).first();
     }
 
     this.lists = function(data)
     {
         if(!this.list_of_lists)
         {
-            this.list_of_lists = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/lists?cards=none&card_fields=none&filter=open&fields=all"))
-                                 .transform(function(elem)
+            this.list_of_lists = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/lists?cards=none&card_fields=none&filter=open&fields=all")).transform(function(elem)
                                  {
                                      return new List(elem);
                                  });
         }
       
-        if(filter = TrelloApi.nameTestData(data))
-            var ret = this.list_of_lists.findByName(filter);
-        else
-            var ret = this.list_of_lists;
-
-        return ret;
-    }
-
-    this.iterableCollection = function(url,data,callback)
-    {
-        var ret = new IterableCollection(TrelloApi.get(url));
-        ret.transform(callback);
-        ret.filterByName(TrelloApi.nameTestData(data));   
-        return ret;
+        return this.list_of_lists.findByName(data);
     }
 
     this.card = function(data)
     {
-        return this.cards().findByName(TrelloApi.nameTestData(data)).first();
+        return this.cards(data).first();
     }
 
     this.cards = function(data)
     {
-        var cards = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/cards?fields=id,name"));
-
-        cards.transform(function(card)
+        if(!this.card_list)
         {
-            return new Card(card);
-        });
+            this.card_list = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/cards?fields=id,name")).transform(function(card)
+            {
+                return new Card(card);
+            });
+        }
         
-        var ret = cards.findByName(TrelloApi.nameTestData(data));
-        return ret;
+        return this.card_list.findByName(data);
     }
     
     this.findOrCreateList = function(name,pos)
@@ -180,6 +180,10 @@ var Board = function(data)
 
     this.load = function()
     {
+        this.list_of_lists = null;
+        this.members_list  = null;
+        this.labels_list   = null;
+        this.card_list     = null;
         this.data = TrelloApi.get("boards/"+this.data.id+"?actions=none&boardStars=none&cards=none&checklists=none&fields=name%2C%20desc%2C%20descData%2C%20closed%2C%20idOrganization%2C%20url%2C%20shortUrl&lists=none&members=none&memberships=none&membersInvited=none");
         return this;
     }

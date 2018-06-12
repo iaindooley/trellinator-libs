@@ -2,6 +2,11 @@ var List = function(data)
 {    
     this.data      = data;
     this.card_list = null;
+
+    this.id = function()
+    {
+        return this.data.id;
+    }
   
     this.move = function(board)
     {
@@ -27,23 +32,20 @@ var List = function(data)
 
     this.card = function(filter)
     {
-        return this.cards().findByName(TrelloApi.nameTestData(filter)).first();
+        return this.cards(filter).first();
     }
 
     this.cards = function(filter)
     {
         if(!this.card_list)
         {
-            this.card_list = new IterableCollection(TrelloApi.get("lists/"+this.data.id+"/cards?fields=id,name"));
-
-            this.card_list.transform(function(elem)
+            this.card_list = new IterableCollection(TrelloApi.get("lists/"+this.data.id+"/cards?fields=id,name")).transform(function(elem)
             {
                 return new Card(elem);
             });
         }
 
-        this.card_list.filterByName(TrelloApi.nameTestData(filter));
-        return this.card_list;
+        return this.card_list.findByName(filter);
     }
 
     this.countCards = function(params)
@@ -65,6 +67,7 @@ var List = function(data)
 
     this.load = function()
     {
+        this.card_list = null;
         this.data = TrelloApi.get("lists/"+this.data.id+"?fields=all");
         return this;
     }

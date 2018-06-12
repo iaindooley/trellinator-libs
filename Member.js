@@ -2,7 +2,13 @@ var Member = function(data)
 {    
     this.data = data;
     this.list_of_teams = null;
+    this.board_list  = null;
   
+    this.id = function()
+    {
+        return this.data.id;
+    }
+
     this.notTrellinator = function()
     {
         return (new Trellinator().name() != this.name());
@@ -18,21 +24,20 @@ var Member = function(data)
 
     this.team = function(name)
     {
-        return this.teams().findByName(name).first();
+        return this.teams(name).first();
     }
     
-    this.teams = function()
+    this.teams = function(name)
     {
         if(!this.list_of_teams)
         {
-            this.list_of_teams = new IterableCollection(TrelloApi.get("/members/"+this.username()+"/organizations?filter=all&fields=all"))
-                                 .transform(function(elem)
+            this.list_of_teams = new IterableCollection(TrelloApi.get("/members/"+this.username()+"/organizations?filter=all&fields=all")).transform(function(elem)
                                  {
                                      return new Team(elem);
                                  });
         }
         
-        return this.list_of_teams;
+        return this.list_of_teams.findByName(name);
     }
 
     this.username = function()
@@ -50,6 +55,9 @@ var Member = function(data)
     
     this.load = function()
     {
+        this.list_of_teams = null;
+        this.board_list  = null;
+
         if(this.data.id)
             var toload = this.data.id;
         else if(this.data.username)
@@ -63,25 +71,20 @@ var Member = function(data)
     
     this.board = function(data)
     {
-        return this.boards().findByName(TrelloApi.nameTestData(data)).first();
+        return this.boards(data).first();
     }
 
     this.boards = function(data)
     {
-        return this.iterableCollection("members/"+this.username()+"/boards?filter=open&fields=all&lists=open&memberships=none&organization_fields=name%2CdisplayName",
-                                       data,
-                                       function(elem)
-                                       {
-                                           return new Board(elem);
-                                       });
-    }
-
-    this.iterableCollection = function(url,data,callback)
-    {
-        var ret = new IterableCollection(TrelloApi.get(url));
-        ret.transform(callback);
-        ret.filterByName(TrelloApi.nameTestData(data));
-        return ret;
+        if(!this.board_list)
+        {
+            this.board_list = new IterableCollection(TrellApi.get("members/"+this.username()+"/boards?filter=open&fields=all&lists=open&memberships=none&organization_fields=name%2CdisplayName")).transform(function(elem)
+                              {
+                                  return new Board(elem);
+                              });
+        }
+        
+        return this.board_list.findByName(data);
     }
 
     if(!this.data.id && this.data.username)
