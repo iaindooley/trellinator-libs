@@ -5,6 +5,11 @@ var Checklist = function(data)
     this.added_item      = null;
     this.containing_card = null;
     this.check_items     = null;
+
+    this.id = function()
+    {
+        return this.data.id;
+    }
   
     this.setName = function(name)
     {

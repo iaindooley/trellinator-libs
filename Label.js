@@ -1,6 +1,11 @@
 var Label = function(data)
 {    
     this.data  = data;
+
+    this.id = function()
+    {
+        return this.data.id;
+    }
   
     this.name = function()
     {

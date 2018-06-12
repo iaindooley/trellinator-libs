@@ -3,6 +3,11 @@ var Comment = function(data)
     this.data = data;
     this.containing_card = null;
 
+    this.id = function()
+    {
+        return this.data.id;
+    }
+
     this.card = function()
     {
       return this.containing_card;

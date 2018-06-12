@@ -3,6 +3,11 @@ var CheckItem = function(data)
     this.data                 = data;
     this.containing_checklist = null;
 
+    this.id = function()
+    {
+        return this.data.id;
+    }
+
     this.remove = function()
     {
         TrelloApi.del("cards/"+this.containing_checklist.card().data.id+"/checkItem/"+this.data.id);
