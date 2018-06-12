@@ -1,13 +1,30 @@
+/**
+* @class Team
+* @memberof module:TrelloEntities
+* @constructor
+*/
 var Team = function(data)
 {    
     this.data       = data;
     this.board_list = null;
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Team
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.id = function()
     {
         return this.data.id;
     }
   
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Team
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.name = function()
     {
         if(!this.data.displayName)
@@ -16,11 +33,23 @@ var Team = function(data)
         return this.data.displayName;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Team
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.board = function(data)
     {
         return this.boards(data).first();
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Team
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.boards = function(data)
     {
         if(!this.board_list)
@@ -34,6 +63,12 @@ var Team = function(data)
         return this.board_list.findByName(data);
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Team
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.load = function()
     {
         this.board_list = null;

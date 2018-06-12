@@ -1,3 +1,8 @@
+/**
+* @class Card
+* @memberof module:TrelloEntities
+* @constructor
+*/
 var Card = function(data)
 {    
     this.data            = data;
@@ -5,11 +10,23 @@ var Card = function(data)
     this.labels_list     = null;
     this.members_list    = null;
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.id = function()
     {
         return this.data.id;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.removeChecklistItemByName = function(name)
     {
         this.checklists().each(function(list)
@@ -24,6 +41,12 @@ var Card = function(data)
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.dueComplete = function()
     {
         if(typeof this.data.dueComplete == "undefined")
@@ -32,6 +55,12 @@ var Card = function(data)
         return this.data.dueComplete;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.board = function()
     {
         if(!this.data.idBoard && !this.data.board)
@@ -41,6 +70,12 @@ var Card = function(data)
         return new Board(data);
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.comments = function(limit)
     {
         if(!limit)
@@ -53,12 +88,24 @@ var Card = function(data)
         });
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.moveToNextList = function()
     {
         this.moveTo({list: this.board().lists().itemAfter(this.currentList().name()).name(),position: "top"});
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.currentList = function()
     {
         if(!this.data.list)
@@ -67,6 +114,12 @@ var Card = function(data)
         return new List(this.data.list);
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.allChecklistsComplete = function()
     {
         var ret = true;
@@ -83,6 +136,12 @@ var Card = function(data)
         return ret;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.cardsLinkedInAttachments = function()
     {
         return this.attachments(TrelloApi.cardLinkRegExp()).transform(function(elem)
@@ -94,6 +153,12 @@ var Card = function(data)
         });
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.boardsLinkedInAttachments = function()
     {
         return this.attachments(TrelloApi.boardLinkRegExp()).transform(function(elem)
@@ -105,11 +170,23 @@ var Card = function(data)
         });
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.attachment = function(name)
     {
         return this.attachments(name).first();
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.attachments = function(name)
     {
         if(!this.data.attachments)
@@ -118,6 +195,12 @@ var Card = function(data)
         return new IterableCollection(this.data.attachments);
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.link = function()
     {
         if(!this.data.shortLink)
@@ -126,6 +209,12 @@ var Card = function(data)
         return "https://trello.com/c/"+this.data.shortLink;
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.attachLink = function(data)
     {
         if(data.url)
@@ -144,12 +233,24 @@ var Card = function(data)
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.setName = function(name)
     {
         TrelloApi.put("cards/"+this.data.id+"?name="+encodeURIComponent(name));
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.name = function()
     {
         if(!this.data.name && !this.data.text)
@@ -158,17 +259,35 @@ var Card = function(data)
         return this.data.name ? this.data.name:this.data.text;
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.addMember = function(member)
     {
         TrelloApi.post("cards/"+this.data.id+"/idMembers?value="+member.data.id);
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.member = function(data)
     {
         return this.members(data).first();
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.members = function(data)
     {
         if(!this.members_list)
@@ -185,6 +304,12 @@ var Card = function(data)
         return this.members_list.findByName(data);
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.cardLinkedInDescription = function()
     {
         if(parts = TrelloApi.cardLinkRegExp().exec(this.description()))
@@ -195,6 +320,12 @@ var Card = function(data)
         return ret;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.description = function()
     {
         if(!this.data.desc)
@@ -203,11 +334,23 @@ var Card = function(data)
         return this.data.desc;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.label = function(data)
     {
         return this.labels(data).first();
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.labels = function(data)
     {
         if(!this.labels_list)
@@ -232,18 +375,36 @@ var Card = function(data)
         return this.labels_list.findByName(name);
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.setDescription = function(desc)
     {
         TrelloApi.put("cards/"+this.data.id+"?desc="+encodeURIComponent(desc));
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.postComment = function(comment_text)
     {
         TrelloApi.post("cards/"+this.data.id+"/actions/comments?text="+encodeURIComponent(comment_text));
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.due = function()
     {
         if(!this.data.due)
@@ -252,6 +413,12 @@ var Card = function(data)
         return this.data.due;
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.removeAllMembers = function()
     {
         this.members().each(function(elem)
@@ -262,30 +429,60 @@ var Card = function(data)
         return this;
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.removeMember = function(member)
     {
         TrelloApi.del("cards/"+this.data.id+"/idMembers/"+member.data.id);
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.markDueDateComplete = function()
     {
         TrelloApi.put("cards/"+this.data.id+"?dueComplete=true");
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.removeDueDate = function()
     {
         TrelloApi.put("cards/"+this.data.id+"?due=null");
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.setDue = function(datetime)
     {
         TrelloApi.put("cards/"+this.data.id+"?due="+encodeURIComponent(datetime));
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.copyToList = function(list,position)
     {
         if(!position)
@@ -294,6 +491,12 @@ var Card = function(data)
         return new Card(TrelloApi.post("cards?pos="+position+"&idList="+list.data.id+"&idCardSource="+this.data.id+"&keepFromSource=all"));
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.copyTo = function(data,position)
     {
         if(!position)
@@ -303,6 +506,12 @@ var Card = function(data)
     }
 
     /*Move a card to a list (in any board)*/
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.moveToList = function(list,position)
     {
         if(!position)
@@ -313,6 +522,12 @@ var Card = function(data)
     }
 
     /*Move a card to a different list within the same board*/
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.moveTo = function(data,position)
     {
         if(!position)
@@ -321,23 +536,47 @@ var Card = function(data)
         return this.moveToList(this.board().list(TrelloApi.nameTestData(data,"list")),position);
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.archive = function()
     {
         TrelloApi.put("cards/"+this.data.id+"?closed=true");
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.unArchive = function()
     {
         TrelloApi.put("cards/"+this.data.id+"?closed=false");
         return this;
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.checklist = function(name)
     {
         return this.checklists(name).first();
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.checklists = function(name)
     {
         if(!this.checklist_list)         
@@ -351,6 +590,12 @@ var Card = function(data)
         return this.checklist_list.findByName(name);
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.checkItemByName = function(name)
     {
         this.checklists().each(function(checklist)
@@ -365,12 +610,24 @@ var Card = function(data)
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.completeAllItemsOnChecklist = function(name)
     {
         this.checklist(name).markAllItemsComplete();
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.copyUniqueChecklist = function(name,to_card)
     {
         try
@@ -385,17 +642,35 @@ var Card = function(data)
         }
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.copyChecklist = function(name,to_card)
     {
         return new Checklist(TrelloApi.post("cards/"+to_card.data.id+"/checklists?idChecklistSource="+this.checklist(name).data.id)).setContainingCard(to_card);
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.removeChecklist = function(checklist)
     {
         TrelloApi.del("cards/"+this.data.id+"/checklists/"+checklist.data.id);
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.addChecklist = function(name,callback)
     {
         try
@@ -413,6 +688,12 @@ var Card = function(data)
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.load = function()
     {
         this.checklist_list  = null;
@@ -428,6 +709,12 @@ var Card = function(data)
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.addLabel = function(label_name)
     {
         try
@@ -444,6 +731,12 @@ var Card = function(data)
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.addNewLabels = function(new_labels)
     {
         new_labels.each(function(label)
@@ -461,6 +754,12 @@ var Card = function(data)
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.applyLabelIds = function(label_ids)
     {
         label_ids.each(function(id)
@@ -485,11 +784,23 @@ var Card = function(data)
     }
 }
 
+/**
+* Ohai there
+* @memberof module:TrelloEntities.Card
+* @example
+* new Notification(posted).board().id();
+*/
 Card.create = function(list,data)
 {
     return new Card(TrelloApi.post("cards?idList="+list.data.id+"&"+new IterableCollection(data).implode("&",encodeURIComponent)));
 }
 
+/**
+* Ohai there
+* @memberof module:TrelloEntities.Card
+* @example
+* new Notification(posted).board().id();
+*/
 Card.findOrCreate = function(list,data)
 {
     var cards = list.cards(data);

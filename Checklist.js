@@ -1,3 +1,8 @@
+/**
+* @class Checklist
+* @memberof module:TrelloEntities
+* @constructor
+*/
 var Checklist = function(data)
 {
     this.data            = data;
@@ -6,17 +11,35 @@ var Checklist = function(data)
     this.containing_card = null;
     this.check_items     = null;
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.id = function()
     {
         return this.data.id;
     }
   
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.setName = function(name)
     {
       TrelloApi.put("checklists/"+this.data.id+"/name?value="+encodeURIComponent(name));
       return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.deleteItems = function(state)
     {
         this.items().each(function(elem)
@@ -30,6 +53,12 @@ var Checklist = function(data)
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.reset = function()
     {
         this.items().each(function(elem)
@@ -40,6 +69,12 @@ var Checklist = function(data)
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.markAllItemsComplete = function()
     {
       this.items().each(function(elem)
@@ -51,6 +86,12 @@ var Checklist = function(data)
       return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.convertIntoLinkedCards = function(list,params)
     {
         if(!params)
@@ -65,6 +106,12 @@ var Checklist = function(data)
         }.bind(this));
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.isComplete = function()
     {
         var ret = true;
@@ -81,17 +128,35 @@ var Checklist = function(data)
         return ret;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.card = function()
     {
         return this.containing_card;
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.setContainingCard = function(card)
     {
         this.containing_card = card;
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.name = function()
     {
         if(!this.data.name && !this.data.text)
@@ -100,6 +165,12 @@ var Checklist = function(data)
         return this.data.name ? this.data.name:this.data.text;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.addUniqueItem = function(name,position)
     {
         try
@@ -115,6 +186,12 @@ var Checklist = function(data)
         return this;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.addItem = function(name,position)
     {
         if(!position)
@@ -124,6 +201,12 @@ var Checklist = function(data)
         return this;
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.items = function()
     {
         if(!this.item_list)
@@ -137,6 +220,12 @@ var Checklist = function(data)
         return this.item_list;
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.load = function()
     {
         this.data = TrelloApi.get("checklists/"+this.data.id+"?cards=all&checkItems=all&checkItem_fields=all&fields=all");

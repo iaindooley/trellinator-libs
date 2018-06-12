@@ -1,19 +1,42 @@
+/**
+* @class Member
+* @memberof module:TrelloEntities
+* @constructor
+*/
 var Member = function(data)
 {    
     this.data = data;
     this.list_of_teams = null;
     this.board_list  = null;
   
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Member
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.id = function()
     {
         return this.data.id;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Member
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.notTrellinator = function()
     {
         return (new Trellinator().name() != this.name());
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Member
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.fullName = function()
     {
         if(!this.data.fullName)
@@ -22,11 +45,23 @@ var Member = function(data)
         return this.data.fullName;
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Member
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.team = function(name)
     {
         return this.teams(name).first();
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Member
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.teams = function(name)
     {
         if(!this.list_of_teams)
@@ -40,11 +75,23 @@ var Member = function(data)
         return this.list_of_teams.findByName(name);
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Member
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.username = function()
     {
         return this.name();
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Member
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.name = function()
     {
         if(!this.data.username)
@@ -53,6 +100,12 @@ var Member = function(data)
         return this.data.username;
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Member
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.load = function()
     {
         this.list_of_teams = null;
@@ -69,11 +122,23 @@ var Member = function(data)
         return this;
     }
     
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Member
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.board = function(data)
     {
         return this.boards(data).first();
     }
 
+    /**
+    * Ohai there
+    * @memberof module:TrelloEntities.Member
+    * @example
+    * new Notification(posted).board().id();
+    */
     this.boards = function(data)
     {
         if(!this.board_list)
@@ -96,4 +161,10 @@ var Member = function(data)
     }
 }
 
+/**
+* Ohai there
+* @memberof module:TrelloEntities.Member
+* @example
+* new Notification(posted).board().id();
+*/
 Member.mock_member_username = null;
