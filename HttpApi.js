@@ -1,5 +1,6 @@
 /**
 * @class HttpApi
+* @memberof module:TrellinatorCore
 * @constructor
 * @classdesc The HttpApi class is mostly used by
 * the TrelloApi class for providing the 
@@ -34,7 +35,7 @@
 var HttpApi = function(){};
 
 /**
-* @memberof HttpApi
+* @memberof module:TrellinatorCore.HttpApi
 * @param method {string} one of get, put, delete or post
 * @param url {string} the complete URL including all parameters 
 * @param force_get {string} (optional) force a parameter to be

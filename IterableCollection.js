@@ -1,5 +1,6 @@
 /**
 * @class IterableCollection
+* @memberof module:TrellinatorCore
 * @constructor
 * @param obj {Object} an object or Array that you would
 *                     like to iterate over
@@ -24,7 +25,7 @@ var IterableCollection = function(obj)
     * all objects returned from a callback. The
     * callback can modify the object if required,
     * 
-    * @memberof IterableCollection
+    * @memberof module:TrellinatorCore.IterableCollection
     * @param comparator {Function} a callback
     * function to use in order to identify what
     * objects you're looking for
@@ -69,7 +70,7 @@ var IterableCollection = function(obj)
     * common separator, optionally with each
     * value being augmented by a callback, similar to
     * Array.join()
-    * @memberof IterableCollection
+    * @memberof module:TrellinatorCore.IterableCollection
     * @param separator {string} (optional) the string to
     *        separate each value in the return string, 
     *        defaults to &
@@ -120,7 +121,7 @@ var IterableCollection = function(obj)
     * key=value pairs separated by a separator,
     * optionally with each value being augmented
     * by a callback (basically for creating query strings)
-    * @memberof IterableCollection
+    * @memberof module:TrellinatorCore.IterableCollection
     * @param separator {string} (optional) the separator
     *        to be included between each key=value pair
     *        defaults to &
@@ -176,7 +177,7 @@ var IterableCollection = function(obj)
     * in a Trello board that appears after a list
     * with a given name.
     * 
-    * @memberof IterableCollection
+    * @memberof module:TrellinatorCore.IterableCollection
     * @param expression {string|RegExp} a string or RegExp
     * indicating the element after which you'd like to find
     * the next item.
@@ -235,7 +236,7 @@ var IterableCollection = function(obj)
 
     /**
     * Return a random element from this collection
-    * @memberof IterableCollection
+    * @memberof module:TrellinatorCore.IterableCollection
     * @throws InvalidDataException
     */
     this.random = function()
@@ -249,7 +250,7 @@ var IterableCollection = function(obj)
 
     /**
     * Return the first element from this collection
-    * @memberof IterableCollection
+    * @memberof module:TrellinatorCore.IterableCollection
     * @throws InvalidDataException
     */
     this.first = function()
@@ -271,7 +272,7 @@ var IterableCollection = function(obj)
     /**
     * Iterate over this collection, passing
     * each element into a callback function
-    * @memberof IterableCollection
+    * @memberof module:TrellinatorCore.IterableCollection
     * @param callback {Function} the function
     * into which each element will be passed.
     * The first parameter passed in is the element
@@ -312,7 +313,7 @@ var IterableCollection = function(obj)
     * without modifying the collection, use find()
     * instead of transform().
     * 
-    * @memberof IterableCollection
+    * @memberof module:TrellinatorCore.IterableCollection
     * @param callback {Function} a call back that
     * accepts an element of this collection and
     * optionally a second argument which is the key
@@ -336,7 +337,7 @@ var IterableCollection = function(obj)
     
     /**
     * Return the number of items in this collection
-    * @memberof IterableCollection
+    * @memberof module:TrellinatorCore.IterableCollection
     */
     this.length = function()
     {
@@ -348,7 +349,7 @@ var IterableCollection = function(obj)
     * by name() method, compared with a string
     * or RegExp, or object with a "name" 
     * parameter
-    * @memberof IterableCollection
+    * @memberof module:TrellinatorCore.IterableCollection
     * @param expression {string|RegExp} the expression
     * to compare to the name of each element to find
     */
@@ -373,7 +374,7 @@ var IterableCollection = function(obj)
     /**
     * Return the object as an Array, preserving
     * keys
-    * @memberof IterableCollection
+    * @memberof module:TrellinatorCore.IterableCollection
     */
     this.asArray = function()
     {
