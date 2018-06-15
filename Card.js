@@ -372,7 +372,7 @@ var Card = function(data)
             }
         }
         
-        return this.labels_list.findByName(name);
+        return this.labels_list.findByName(data);
     }
     
     /**
