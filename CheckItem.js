@@ -93,6 +93,14 @@ var CheckItem = function(data)
     }
 
     /**
+    * @memberof module:TrelloEntities.Card
+    */
+    this.isComplete = function()
+    {
+        return this.state() == "complete";
+    }
+
+    /**
     * Ohai there
     * @memberof module:TrelloEntities.Card
     * @example

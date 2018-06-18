@@ -66,7 +66,7 @@ var Card = function(data)
         if(!this.data.idBoard && !this.data.board)
             this.load();
         
-        var data = (this.data.board) ? this.data.board:this.data.idBoard;
+        var data = (this.data.board) ? this.data.board:{id: this.data.idBoard};
         return new Board(data);
     }
 
