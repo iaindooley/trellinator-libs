@@ -90,6 +90,8 @@ TestConnector.nocache       = false;
 TestConnector.fixturePath = function(base_dir,url,options)
 {
     var signature =  md5(url+JSON.stringify(options));
+    var api_cache_dir = path.resolve(base_dir,"./trello_api_fixtures/").toString();
+    !fs.existsSync(api_cache_dir) && fs.mkdirSync(api_cache_dir);
     var fixture_dir = path.resolve(base_dir,"./trello_api_fixtures/"+path.basename(process.argv[1])).toString();
     !fs.existsSync(fixture_dir) && fs.mkdirSync(fixture_dir);
     var fixture_path = fixture_dir+"/"+TestConnector.prefix+signature;
