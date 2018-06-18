@@ -409,12 +409,12 @@ Board.findOrCreate = function(data)
 {
     try
     {
-        return new Trellinator().board(data.name);
+        return new Trellinator().board(data);
     }
     
     catch(e)
     {
         Notification.expectException(InvalidDataException,e);
-        return Board.create(data);
+        return Board.create({name: TrelloApi.nameTestData(data)});
     }
 }
