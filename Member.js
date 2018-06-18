@@ -53,7 +53,20 @@ var Member = function(data)
     */
     this.team = function(name)
     {
-        return this.teams(name).first();
+        var ret = null;
+
+        try
+        {
+            ret = this.teams(name).first();
+        }
+        
+        catch(e)
+        {
+            Notification.expectException(InvalidDataException,e);
+            ret = new Team(TrelloApi.post("organizations?displayName="+encodeURIComponent(name)));
+        }
+        
+        return ret;
     }
     
     /**
