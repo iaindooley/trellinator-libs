@@ -1,21 +1,37 @@
 /**
 * @class Checklist
+* @param data (Object} key/value pairs of 
+* information, must at least contain "id",
+* can basically just pass in response from Trello API
 * @memberof module:TrelloEntities
 * @constructor
+* @classdesc The Checklist class represents
+* a Checklist in Trello. You will typically interact
+* with the Checklist object as the return value
+* of methods on the Card object.
+*
+* @example
+* card.checklist("Something").items().each(function(item)
+* {
+*     card.postComment(item.name()+" is "+item.state());
+* });
+* @example
+* card.addChecklist("New List",function(cl)
+* {
+*     cl.addItem("New Item");
+* });
 */
 var Checklist = function(data)
 {
     this.data            = data;
     this.item_list       = null;
-    this.added_item      = null;
     this.containing_card = null;
-    this.check_items     = null;
 
     /**
-    * Ohai there
+    * Return the id of this checklist
     * @memberof module:TrelloEntities.Checklist
     * @example
-    * new Notification(posted).board().id();
+    * card.checklist("Something").id();
     */
     this.id = function()
     {
@@ -23,22 +39,25 @@ var Checklist = function(data)
     }
   
     /**
-    * Ohai there
+    * Set the name of this checklist
     * @memberof module:TrelloEntities.Checklist
+    * @param name {string} the new name for the checklist
     * @example
-    * new Notification(posted).board().id();
+    * card.checklist("Old Name").setName("New Name");
     */
     this.setName = function(name)
     {
       TrelloApi.put("checklists/"+this.data.id+"/name?value="+encodeURIComponent(name));
+      this.data.name = name;
       return this;
     }
 
     /**
-    * Ohai there
+    * Delete all items matching the given state
     * @memberof module:TrelloEntities.Checklist
+    * @param state {string} either complete or incomplete
     * @example
-    * new Notification(posted).board().id();
+    * card.checklist("Something").deleteItems("complete");
     */
     this.deleteItems = function(state)
     {
@@ -48,16 +67,17 @@ var Checklist = function(data)
                (elem.state() == state) ||
                !state
               )
-                TrelloApi.del("cards/"+this.card().data.id+"/checkItem/"+elem.data.id);
+                TrelloApi.del("cards/"+this.card().id()+"/checkItem/"+elem.data.id);
         }.bind(this));
+        this.item_list = null;
         return this;
     }
 
     /**
-    * Ohai there
+    * Mark all items incomplete
     * @memberof module:TrelloEntities.Checklist
     * @example
-    * new Notification(posted).board().id();
+    * card.checklist("Something").reset();
     */
     this.reset = function()
     {
@@ -66,14 +86,15 @@ var Checklist = function(data)
             if(elem.state() == "complete")
                 TrelloApi.put("cards/"+this.card().data.id+"/checkItem/"+elem.data.id+"?state=incomplete");
         }.bind(this));
+        this.item_list = null;
         return this;
     }
 
     /**
-    * Ohai there
+    * Mark all items complete
     * @memberof module:TrelloEntities.Checklist
     * @example
-    * new Notification(posted).board().id();
+    * card.checklist("Something").markAllItemsComplete();
     */
     this.markAllItemsComplete = function()
     {
@@ -83,14 +104,37 @@ var Checklist = function(data)
                             TrelloApi.put("cards/"+this.card().data.id+"/checkItem/"+elem.data.id+"?state=complete");
                         }.bind(this));
       
+      this.item_list = null;
       return this;
     }
 
     /**
-    * Ohai there
+    * Convert this checklist into a list of links 
+    * to newly created cards in the given list, with
+    * each card being named after the original checklist
+    * item and each checklist item being linked to the
+    * newly created card. Each newly created card
+    * has a link to the source card in the description.
     * @memberof module:TrelloEntities.Checklist
+    * @param list {List} the list in which to create the new cards
+    * @param params {Object} (optional) an optional set of key/value
+    * pairs in an Object to use when creating the cards, the list
+    * of allowed attributes is at {@link https://developers.trello.com/reference/#cards-2}
     * @example
-    * new Notification(posted).board().id();
+    * //Convert into linked cards with each card having 
+    * //the same labels and members as the original card
+    * var member_ids = card.members().find(function(member)
+    * {
+    *     return member.id();
+    * }).implodeValues(",");
+    * var label_ids = card.labels().find(function(label)
+    * {
+    *     return label.id();
+    * }).implodeValues(",");
+    * card.checklist("Something")
+    * .convertIntoLinkedCards(card.board().findOrCreateList(card.name()+" Linked Cards"),
+    *                         {idLabels: label_ids,
+    *                          idMembers: member_ids});
     */
     this.convertIntoLinkedCards = function(list,params)
     {
@@ -104,13 +148,17 @@ var Checklist = function(data)
             params.name = item.name();
             item.setName(Card.create(list,params).link());
         }.bind(this));
+        this.item_list = null;
+        return this;
     }
 
     /**
-    * Ohai there
+    * Return true if all items in this checklist 
+    * are complete
     * @memberof module:TrelloEntities.Checklist
     * @example
-    * new Notification(posted).board().id();
+    * if(card.checklist("Something").isComplete())
+    *     card.postComment("Something is complete");
     */
     this.isComplete = function()
     {
@@ -129,33 +177,21 @@ var Checklist = function(data)
     }
 
     /**
-    * Ohai there
+    * Return the card that this checklist is on
     * @memberof module:TrelloEntities.Checklist
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).completedChecklist().card().postComment("Well done!");
     */
     this.card = function()
     {
         return this.containing_card;
     }
-    
-    /**
-    * Ohai there
-    * @memberof module:TrelloEntities.Checklist
-    * @example
-    * new Notification(posted).board().id();
-    */
-    this.setContainingCard = function(card)
-    {
-        this.containing_card = card;
-        return this;
-    }
 
     /**
-    * Ohai there
+    * Return the name of this checklist
     * @memberof module:TrelloEntities.Checklist
     * @example
-    * new Notification(posted).board().id();
+    * card.postComment(new Notification(posted).completedChecklist().name()+" was completed");
     */
     this.name = function()
     {
@@ -166,10 +202,16 @@ var Checklist = function(data)
     }
 
     /**
-    * Ohai there
+    * Add an item to this checklist if an item with the
+    * same name does not already exist
     * @memberof module:TrelloEntities.Checklist
+    * @param name {string} the name for the checklist item
+    * @param position {int} (optional) where to add the item
     * @example
-    * new Notification(posted).board().id();
+    * card.addChecklist("Some List",function(list)
+    * {
+    *     list.addUniqueItem(card.link());
+    * });
     */
     this.addUniqueItem = function(name,position)
     {
@@ -180,6 +222,7 @@ var Checklist = function(data)
         
         catch(e)
         {
+            Notification.expectException(InvalidDataException,e);
             this.addItem(name,position);
         }
         
@@ -187,35 +230,53 @@ var Checklist = function(data)
     }
 
     /**
-    * Ohai there
+    * Add an item to this checklist, even if it 
+    * already exists
     * @memberof module:TrelloEntities.Checklist
+    * @param name {string} the name for the checklist item
+    * @param position {int} (optional) where to add the item
     * @example
-    * new Notification(posted).board().id();
+    * card.addChecklist("Some List",function(list)
+    * {
+    *     list.addItem(card.link());
+    * });
     */
     this.addItem = function(name,position)
     {
         if(!position)
             position = "bottom";
 
-        this.added_item = new CheckItem(TrelloApi.post("checklists/"+this.data.id+"/checkItems?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position))).setContainingChecklist(this);
+        new CheckItem(TrelloApi.post("checklists/"+this.data.id+"/checkItems?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position))).setContainingChecklist(this);
+        this.item_list = null;
         return this;
     }
     
     /**
+    * Return an item from this checklist by name
+    * or RegExp
     * @memberof module:TrelloEntities.Checklist
+    * @param name {string|RegExp} the name or regex to match against the
+    * item name
+    * @example
+    * card.checklist("Something").item(new RegExp("Iain's.*")).markComplete();
     */
-    this.item = function(data)
+    this.item = function(name)
     {
-        return this.items(data).first();
+        return this.items(name).first();
     }
 
     /**
-    * Ohai there
+    * Return an IterableCollection of checklist items
+    * optionally filered by name or RegExp
     * @memberof module:TrelloEntities.Checklist
+    * @param name {string|RegExp} filter the list by string or RegExp
     * @example
-    * new Notification(posted).board().id();
+    * card.checklist("Something").items(new RegExp("Iain's.*")).each(function(item)
+    * {
+    *     item.remove();
+    * });
     */
-    this.items = function(data)
+    this.items = function(name)
     {
         if(!this.item_list)
         {
@@ -225,18 +286,20 @@ var Checklist = function(data)
             }.bind(this));
         }
 
-        return this.item_list.findByName(data);
+        return this.item_list.findByName(name);
     }
     
-    /**
-    * Ohai there
-    * @memberof module:TrelloEntities.Checklist
-    * @example
-    * new Notification(posted).board().id();
-    */
+    //INTERNAL USE ONLY
     this.load = function()
     {
         this.data = TrelloApi.get("checklists/"+this.data.id+"?cards=all&checkItems=all&checkItem_fields=all&fields=all");
+        return this;
+    }
+
+    //INTERNAL USE ONLY
+    this.setContainingCard = function(card)
+    {
+        this.containing_card = card;
         return this;
     }
 }
