@@ -1,7 +1,35 @@
 /**
 * @class Card
 * @memberof module:TrelloEntities
+* @param data (Object} key/value pairs of 
+* information, must at least contain "id",
+* can basically just pass in response from Trello API
 * @constructor
+* @classdesc The Card class represents
+* a Card in Trello. Not every Notification will
+* have a card object associated with it because
+* all Trellinator webhooks are registered at the
+* board level (so for example a notification about
+* the name of a list being updated won't have a 
+* card object associated with it).
+* 
+* Cards are loaded from Boards or Lists, and must
+* be created in a List.
+*
+* @example
+* new Notification(posted).card().postComment("Hello world!");
+* @example
+* new Trellinator().board("Some Board").card(new RegExp("Find me.*"));
+* @example
+* new Notifiation(posted).board().list("ToDo").cards().first().moveToNextList();
+* @example
+* Card.create(new Trellinator().board("Some board").list("ToDo"),"Do it!");
+* @xample
+* Card.create(new Trellinator().board("Some board").list("ToDo"),{name: "Do it!"});
+* @xample
+* Card.findOrCreate(new Trellinator().board("Some board").list("ToDo"),"Do it!");
+* @xample
+* Card.findOrCreate(new Trellinator().board("Some board").list("ToDo"),{name: "Do it!"});
 */
 var Card = function(data)
 {    
@@ -11,10 +39,10 @@ var Card = function(data)
     this.members_list    = null;
 
     /**
-    * Ohai there
+    * Returns the card ID
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).card().id();
     */
     this.id = function()
     {
@@ -22,10 +50,14 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Removes any item from any checklist on 
+    * this card matching the string or RegExp
+    * passed in
     * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} the text (exact or regex match) 
+    * of the checklist item to remove
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).card().removeChecklistItemByName(new RegExp("Milk.*"));
     */
     this.removeChecklistItemByName = function(name)
     {
@@ -38,14 +70,19 @@ var Card = function(data)
             });
         });
         
+        this.checklist_list = null;
         return this;
     }
 
     /**
-    * Ohai there
+    * Return true if the due date on this 
+    * card has been marked complete
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * var card = new Notification(posted).card();
+    *
+    * if(card.dueComplete())
+    *     card.moveToNextList();
     */
     this.dueComplete = function()
     {
@@ -56,10 +93,16 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Return the Board object that this card
+    * is on
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * var card = new Notification(posted).card();
+    * card.board().card(card.name()).each(function(loop)
+    * {
+    *     if(loop.id() != card.id())
+    *         loop.postComments("Twinsies with "+card.link());
+    * }
     */
     this.board = function()
     {
@@ -71,10 +114,15 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Return a list of comments from this card
     * @memberof module:TrelloEntities.Card
+    * @param limit {int} (optional) limit the number of comments
+    * returned, default limit is 20
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).card().comments().each(function(comment)
+    * {
+    *     Card.create(new Trellinator().board("Some Board").list("ToDo"),comment);
+    * });
     */
     this.comments = function(limit)
     {
@@ -89,22 +137,25 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Move the card to the next list in the same board
+    * or throw InvalidDataException if there is no next
+    * list
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).card().moveToNextList();
     */
     this.moveToNextList = function()
     {
         this.moveTo({list: this.board().lists().itemAfter(this.currentList().name()).name(),position: "top"});
+        this.data.list = null;
         return this;
     }
 
     /**
-    * Ohai there
+    * Return the List this card is currently in
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).archivedCard().currentList().archive();
     */
     this.currentList = function()
     {
@@ -115,10 +166,20 @@ var Card = function(data)
     }
     
     /**
-    * Ohai there
+    * Return true if all checklists on a card
+    * are complete
     * @memberof module:TrelloEntities.Card
+    * @see Notification.completedAllChecklists()
     * @example
-    * new Notification(posted).board().id();
+    * new Trellinator().board("Some Board").list("Doing").cards().each(function(card)
+    * {
+    *     if(card.allChecklistsComplete())
+    *         card.moveToNextList();
+    * });
+    * @example
+    * //This is not part of this class, but a common use case you 
+    * //should be aware of instead
+    * new Notification(posted).completedAllChecklists().moveToNextList();
     */
     this.allChecklistsComplete = function()
     {
@@ -137,10 +198,10 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Return an IterableCollection of all cards linked as attachments
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).card().cardsLinkedInAttachments().first().postComment("Hello from over here");
     */
     this.cardsLinkedInAttachments = function()
     {
@@ -154,10 +215,13 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Return an IterableCollection of all boards linked as attachments
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).card().boardsLinkedInAttachments().first().list("ToDo").cards().each(function(card)
+    * {
+    *     card.postComment("Ger er done!");
+    * });
     */
     this.boardsLinkedInAttachments = function()
     {
@@ -171,10 +235,12 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Fetch the first attachment on the card. Name filtering
+    * not implemented yet
     * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} not yet implemented
     * @example
-    * new Notification(posted).board().id();
+    * Trellinator.log(new Notification(posted).card().attachment());
     */
     this.attachment = function(name)
     {
@@ -182,10 +248,16 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Get all attachments on the card, filtering
+    * not implemented
     * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} name or RegExp, not 
+    * yet implemented
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).card().attachments().each(function(att)
+    * {
+    *     Trellinator.log(att);
+    * });
     */
     this.attachments = function(name)
     {
@@ -196,10 +268,11 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Return a link to this card
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * var notif = new Notification(posted);
+    * notif.card().cardsLinkedInAttachments().first().checkItemByName(notif.card().link());
     */
     this.link = function()
     {
@@ -210,10 +283,27 @@ var Card = function(data)
     }
     
     /**
-    * Ohai there
+    * Add a link attachment to this card
     * @memberof module:TrelloEntities.Card
+    * @param data {string|Object} either a string that is a fully 
+    * formed URL, or an object that contains at least either
+    * an attribute link or url, and optionally one of these as
+    * well as a name attribute
     * @example
-    * new Notification(posted).board().id();
+    * var notif = new Notification(posted);
+    *
+    * var notif.card().addChecklist("Linked Cards",function(list)
+    * {
+    *     notif.board().list("ToDo").cards().each(function(card)
+    *     {
+    *         list.addItem(card.link());
+    *         card.attachLink(notif.card().link());
+    *     });
+    * });
+    * @example
+    * new Notification(posted).card().attachLink({name: "A Popular Search Engine",url: "https://www.google.com/"});
+    * @example
+    * new Notification(posted).card().attachLink({name: "A Popular Search Engine",link: "https://www.google.com/"});
     */
     this.attachLink = function(data)
     {
@@ -234,22 +324,25 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Set the name of this card
     * @memberof module:TrelloEntities.Card
+    * @param name {string} the new name for the card
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).card().setName("UPDATED");
     */
     this.setName = function(name)
     {
         TrelloApi.put("cards/"+this.data.id+"?name="+encodeURIComponent(name));
+        this.data.name = name;
         return this;
     }
 
     /**
-    * Ohai there
+    * Return the name of this card (also sometimes
+    * called the title of the card)
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * Trellinator.log(new Notification(posted).card().name());
     */
     this.name = function()
     {
@@ -260,35 +353,53 @@ var Card = function(data)
     }
     
     /**
-    * Ohai there
+    * Add a member to this card
     * @memberof module:TrelloEntities.Card
+    * @param member {Member} a Member object to add to the
+    * card
     * @example
-    * new Notification(posted).board().id();
+    * var notif = new Notification();
+    * var created = notif.createdCard();
+    *
+    * notif.board().members().each(function(member)
+    * {
+    *     notif.card().addMember(member);
+    * });
     */
     this.addMember = function(member)
     {
         TrelloApi.post("cards/"+this.data.id+"/idMembers?value="+member.data.id);
+        this.members_list    = null;
         return this;
     }
 
     /**
-    * Ohai there
+    * Return a Member of this card matching
+    * the given name/regex
     * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} a name or RegExp to match
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).card().member("iaindooley");
     */
-    this.member = function(data)
+    this.member = function(name)
     {
-        return this.members(data).first();
+        return this.members(name).first();
     }
     
     /**
-    * Ohai there
+    * Return an IterableCollection of Members on this card
+    * optionally filtered by name using a string or RegExp
     * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} a name or RegExp to filter by
     * @example
-    * new Notification(posted).board().id();
+    * var card = new Notification(posted).archivedCard();
+    *
+    * card.members().each(function(member)
+    * {
+    *     card.postComment("@"+member.name()+" this card was archived");
+    * });
     */
-    this.members = function(data)
+    this.members = function(name)
     {
         if(!this.members_list)
         {
@@ -301,14 +412,15 @@ var Card = function(data)
             });
         }
                        
-        return this.members_list.findByName(data);
+        return this.members_list.findByName(name);
     }
     
     /**
-    * Ohai there
+    * Return a Card if there is one linked in the
+    * description of this card
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).archivedCard().cardLinkedInDescription().postComment("Your pal was archived");
     */
     this.cardLinkedInDescription = function()
     {
@@ -321,10 +433,12 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Return the description of this card
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * var card = new Notification(posted).changedCardName();
+    * 
+    * card.setDescription(Trellinator.now().toLocaleString()+" updated to "+card.name()+"\n\n"+card.description());
     */
     this.description = function()
     {
@@ -335,23 +449,33 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Return a Label if it is on this card, or throw
+    * InvalidDataException if it isn't on the card
     * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} a string or RegExp to match
+    * the label name against
     * @example
-    * new Notification(posted).board().id();
+    * //check if a due date was marked complete on a card with label starting with "Process"
+    * new Notification(posted).completedDueDate().label(new RegExp("Process.*"));
     */
-    this.label = function(data)
+    this.label = function(name)
     {
-        return this.labels(data).first();
+        return this.labels(name).first();
     }
 
     /**
-    * Ohai there
+    * Return an IterableCollection of Label objects that
+    * are on this card optionally filtered by name/regexp
     * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} a string or RegExp to filter
+    * against
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).card().labels().each(function(label)
+    * {
+    *     Trellinator.log(label.name());
+    * });
     */
-    this.labels = function(data)
+    this.labels = function(name)
     {
         if(!this.labels_list)
         {
@@ -372,26 +496,35 @@ var Card = function(data)
             }
         }
         
-        return this.labels_list.findByName(data);
+        return this.labels_list.findByName(name);
     }
     
     /**
-    * Ohai there
+    * Set the description of this card
     * @memberof module:TrelloEntities.Card
+    * @param desc {string} The description to set on the card
     * @example
-    * new Notification(posted).board().id();
+    * var card = new Notification(posted).archivedCard();
+    * card.setDescription("Archived on: "+Trellinator.now().toLocaleString()+"\n\n"+card.description());
     */
     this.setDescription = function(desc)
     {
         TrelloApi.put("cards/"+this.data.id+"?desc="+encodeURIComponent(desc));
+        this.data.desc = desc;
         return this;
     }
 
     /**
-    * Ohai there
+    * Post a comment to this card
     * @memberof module:TrelloEntities.Card
+    * @param comment_text {string} the text to post
     * @example
-    * new Notification(posted).board().id();
+    * var card = new Notification(posted).movedCard("Done");
+    * 
+    * card.members().each(function(member)
+    * {
+    *     card.postComment("@"+member.name()+" this card was moved to the Done list");
+    * });
     */
     this.postComment = function(comment_text)
     {
@@ -400,10 +533,11 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Return the due date for this Card, which 
+    * can be passed into the constructor of a Date object
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * new Date(new Notification(posted).card().due());
     */
     this.due = function()
     {
@@ -414,10 +548,10 @@ var Card = function(data)
     }
     
     /**
-    * Ohai there
+    * Remove all members from this card
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).movedCard("Done").removeAllMembers();
     */
     this.removeAllMembers = function()
     {
@@ -426,62 +560,83 @@ var Card = function(data)
             this.removeMember(elem);
         }.bind(this));
       
+        this.members_list = null;
         return this;
     }
     
     /**
-    * Ohai there
+    * Remove a member from this card
     * @memberof module:TrelloEntities.Card
+    * @param member {Member} a Member object to remove from this
+    * card
     * @example
-    * new Notification(posted).board().id();
+    * var notif  = new Notification(posted);
+    * 
+    * if(new RegExp("Remove.*").test(notif.addedComment().text()))
+    * {
+    *    notif.card().removeMember(notif.member());
+    * }
     */
     this.removeMember = function(member)
     {
         TrelloApi.del("cards/"+this.data.id+"/idMembers/"+member.data.id);
+        this.members_list = null;
         return this;
     }
 
     /**
-    * Ohai there
+    * Mark the due date on this card complete
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * //Mark the due date complete on a card that was moved into the Done list
+    * new Notification(posted).movedCard("Done").markDueDateComplete();
     */
     this.markDueDateComplete = function()
     {
         TrelloApi.put("cards/"+this.data.id+"?dueComplete=true");
+        this.data.dueComplete = true;
         return this;
     }
 
     /**
-    * Ohai there
+    * Clear the due date on this card
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * //Remove the due date on a card that was moved to the Backlog list
+    * new Notification(posted).movedCard("Backlog").removeDueDate();
     */
     this.removeDueDate = function()
     {
         TrelloApi.put("cards/"+this.data.id+"?due=null");
+        this.data.due = null;
         return this;
     }
 
     /**
-    * Ohai there
+    * Set the due date on this card
     * @memberof module:TrelloEntities.Card
+    * @param datetime {Date} a Date object
     * @example
-    * new Notification(posted).board().id();
+    * //When a card is created in the ToDo list set it due in 3 days time at 9am 
+    * new Notification(posted).createdCard("ToDo").setDue(Trellinator.now().plusDays(3).at("9:00"));
     */
     this.setDue = function(datetime)
     {
         TrelloApi.put("cards/"+this.data.id+"?due="+encodeURIComponent(datetime));
+        this.data.due = datetime;
         return this;
     }
 
     /**
-    * Ohai there
+    * Copy this card to a given List, optionally to 
+    * a specific position, and return the copy
     * @memberof module:TrelloEntities.Card
+    * @param list {List} a List object to copy this card to
+    * @param position {string|int} either top, bottom or a number
     * @example
-    * new Notification(posted).board().id();
+    * var list = new Trellinator().board("Some Board").findOrCreateList("ToDo");
+    * //Copy the card to a list ToDo in the board Some Board in position 2
+    * new Notification(posted).card().copyToList(list,2);
     */
     this.copyToList = function(list,position)
     {
@@ -492,25 +647,31 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Copy this card to a list on the same board
+    * and return the copy
     * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} a string list name, or 
+    * regex (if multiple matches, the first matching list will be used
+    * @param position {string|int} top, bottom or a number
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).card().copyTo("ToDo","top");
     */
-    this.copyTo = function(data,position)
+    this.copyTo = function(name,position)
     {
         if(!position)
-            position = (data.position)?data.position:"bottom";
+            position = (name.position)?name.position:"bottom";
 
-        return this.copyToList(this.board().list(TrelloApi.nameTestData(data,"list")),position);
+        return this.copyToList(this.board().list(TrelloApi.nameTestData(name,"list")),position);
     }
 
-    /*Move a card to a list (in any board)*/
     /**
-    * Ohai there
+    * Move a card to a given List
     * @memberof module:TrelloEntities.Card
+    * @param list {List} a list object to move the card to
+    * @param position {string|int} top, bottom or a number (defaults to bottom)
     * @example
-    * new Notification(posted).board().id();
+    * var to_list = new Trellinator().board("Other Board").list("ToDo");
+    * new Notification(posted).createdCard("Doing").moveToList(to_list,"top");
     */
     this.moveToList = function(list,position)
     {
@@ -518,29 +679,32 @@ var Card = function(data)
             position = "bottom";
 
         TrelloApi.put("cards/"+this.data.id+"?idList="+list.data.id+"&idBoard="+list.board().data.id+"&pos="+position);
-        return this.load();
+        this.data.list = null;
+        return this;
     }
 
-    /*Move a card to a different list within the same board*/
     /**
-    * Ohai there
+    * Move a card to a list within the same board
     * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} the name or a regex to match a 
+    * list within the same board to move the card to
+    * @param position {string|int} (optional) top, bottom or a number, default bottom
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).archivedCard().unArchive().moveTo("Graveyard","top");
     */
-    this.moveTo = function(data,position)
+    this.moveTo = function(name,position)
     {
         if(!position)
-            position = (data.position)?data.position:"bottom";
+            position = (name.position)?name.position:"bottom";
 
-        return this.moveToList(this.board().list(TrelloApi.nameTestData(data,"list")),position);
+        return this.moveToList(this.board().list(TrelloApi.nameTestData(name,"list")),position);
     }
     
     /**
-    * Ohai there
+    * Archive this card
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).movedCard("Done").archive();
     */
     this.archive = function()
     {
@@ -549,10 +713,10 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Unarchive this card
     * @memberof module:TrelloEntities.Card
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).archivedCard().unArchive();
     */
     this.unArchive = function()
     {
@@ -561,10 +725,13 @@ var Card = function(data)
     }
     
     /**
-    * Ohai there
+    * Return a checklist from this card of the given
+    * name if it exists or throw InvalidDataException
     * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} a name or RegExp to match against
+    * the checklist name (first will be returned if multiple match)
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).movedCard("Done").checklist(new RegExp("Process.*")).markAllItemsComplete();
     */
     this.checklist = function(name)
     {
@@ -572,10 +739,15 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Return an IterableCollection of Checklist objects
+    * optionally filtered by name/RegExp
     * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} a string or regex to filter the list by
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).completedDueDate().checklists(new RegExp("Process.*")).each(function(list)
+    * {
+    *     list.markAllItemsComplete();
+    * });
     */
     this.checklists = function(name)
     {
@@ -591,10 +763,14 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Check any item in any checklist with the given
+    * name or matching RegExp
     * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} the name of the checklist item
+    * to complete, or a RegExp (all matching items will be completed)
     * @example
-    * new Notification(posted).board().id();
+    * var card = new Notification(posted).archivedCard();
+    * cards.cardsLinkedInAttachments().first().checkItemByName(card.link());
     */
     this.checkItemByName = function(name)
     {
@@ -607,26 +783,23 @@ var Card = function(data)
             }.bind(this));
         }.bind(this));
         
+        this.checklist_list  = null;
         return this;
     }
 
     /**
-    * Ohai there
+    * Copy a checklist from this card, to another
+    * card if it doesn't already exist on that card
+    * and return either the new checklist or the 
+    * checklist that already existed
     * @memberof module:TrelloEntities.Card
-    * @example
-    * new Notification(posted).board().id();
-    */
-    this.completeAllItemsOnChecklist = function(name)
-    {
-        this.checklist(name).markAllItemsComplete();
-        return this;
-    }
-
-    /**
-    * Ohai there
-    * @memberof module:TrelloEntities.Card
-    * @example
-    * new Notification(posted).board().id();
+    * @param name {string|RegExp} the name of the checklist
+    * to copy, can be a string or RegExp, if more than one matches
+    * will just copy the first found
+    * @param to_card {Card} the card to copy the checklist to
+    * var notif = new Notification(posted);
+    * //Copy a checklist to a card if it was moved or added to the ToDo list
+    * notif.board().card("Templates").copyUniqueChecklist("Some Procedure",notif.addedCard("ToDo"));
     */
     this.copyUniqueChecklist = function(name,to_card)
     {
@@ -643,10 +816,17 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Copy a checklist to another card from this card
+    * even if it already exists on the target card
+    * and return the new checklist
     * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} the name of the checklist to
+    * copy, if multiple matches will just take the first found
+    * @param to_card {Card} the card to copy the checklist to
     * @example
-    * new Notification(posted).board().id();
+    * var notif = new Notification(posted);
+    * //Copy a checklist to a card if it was moved or added to the ToDo list
+    * notif.board().card("Templates").copyChecklist("Some Procedure",notif.addedCard("ToDo"));
     */
     this.copyChecklist = function(name,to_card)
     {
@@ -654,22 +834,33 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Remove a checklist from this card
     * @memberof module:TrelloEntities.Card
+    * @param checklist {Checklist} the checklist to remove
     * @example
-    * new Notification(posted).board().id();
+    * var card = new Notification(posted).movedCard("Done");
+    * card.removeChecklist(card.checklist("Some Process"));
     */
     this.removeChecklist = function(checklist)
     {
         TrelloApi.del("cards/"+this.data.id+"/checklists/"+checklist.data.id);
+        this.checklist_list  = null;
         return this;
     }
 
     /**
-    * Ohai there
+    * Add a checklist to this card, or pass an
+    * existing checklist into the callback if it already
+    * exists on this card
     * @memberof module:TrelloEntities.Card
+    * @param name {string} The name of the checklist to add
+    * @param callback {Function} a callback which will recieve
+    * the new or existing Checklist object to add items to it
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).movedCard("ToDo").addChecklist("Do Stuff",function(cl)
+    * {
+    *     cl.addItem("Did you do this yet?");
+    * });
     */
     this.addChecklist = function(name,callback)
     {
@@ -689,53 +880,52 @@ var Card = function(data)
     }
 
     /**
-    * Ohai there
+    * Remove a label from this card by label object
     * @memberof module:TrelloEntities.Card
+    * @param label {Label} a Label object to remove from this card
     * @example
-    * new Notification(posted).board().id();
+    * var notif = new Notification(posted);
+    * notif.card().removeLabel(notif.board().label("Some Label"));
     */
-    this.load = function()
-    {
-        this.checklist_list  = null;
-        this.labels_list     = null;
-        this.members_list    = null;
-        this.data = TrelloApi.get("cards/"+this.data.id+"?fields=all&actions=all&attachments=true&attachment_fields=all&members=true&member_fields=all&memberVoted_fields=all&checklists=all&checklist_fields=all&board=true&board_fields=all&list=true&pluginData=true&stickers=true&sticker_fields=all");
-        return this;
-    }
-
     this.removeLabel = function(label)
     {
-        TrelloApi.del("cards/"+this.data.id+"/idLabels/"+label.data.id);
+        TrelloApi.del("cards/"+this.data.id+"/idLabels/"+label.id());
+        this.labels_list = null;
         return this;
     }
 
     /**
-    * Ohai there
+    * Add a label to the card by name, whether it 
+    * already exists in the board or not
     * @memberof module:TrelloEntities.Card
+    * @param label_name {string} The name of the label to add
     * @example
-    * new Notification(posted).board().id();
+    * new Notification(posted).card().addLabel("New");
     */
     this.addLabel = function(label_name)
     {
         try
         {
-            var label = this.board().label({name: label_name});
-            this.applyLabelIds(new IterableCollection([label.data.id]));
+            var label = this.board().label(label_name);
+            this.applyLabelIds(new IterableCollection([label.id()]);
         }
         
         catch(e)
         {
+            Notification.expectExceptiom(InvalidDataException,e);
             this.addNewLabels(new IterableCollection([label_name]));
         }
         
+        this.labels_list = null;
         return this;
     }
 
     /**
-    * Ohai there
+    * Add new labels that don't already exist to a card
+    * by name. You should just use the addLabel() method instead
     * @memberof module:TrelloEntities.Card
-    * @example
-    * new Notification(posted).board().id();
+    * @param new_labels {Array} an array of label names to create
+    * on this board and added to the card
     */
     this.addNewLabels = function(new_labels)
     {
@@ -751,14 +941,15 @@ var Card = function(data)
             }
         }.bind(this));
         
+        this.labels_list = null;
         return this;
     }
 
     /**
-    * Ohai there
+    * Add existing labels to a card by ID. You should just
+    * use the addLabel method instead
     * @memberof module:TrelloEntities.Card
-    * @example
-    * new Notification(posted).board().id();
+    * @param label_ids {Array} an array of label_ids
     */
     this.applyLabelIds = function(label_ids)
     {
@@ -774,8 +965,36 @@ var Card = function(data)
             }
         }.bind(this));
 
+        this.labels_list = null;
         return this;
     }
+
+    /**
+    * Reset cached objects and load data from Trello.
+    * You may find this is required sometimes to force
+    * a reload of an object, but you shouldn't use this
+    * habitually.
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).card().load().currentList();
+    */
+    this.load = function()
+    {
+        this.checklist_list  = null;
+        this.labels_list     = null;
+        this.members_list    = null;
+        this.data = TrelloApi.get("cards/"+this.data.id+"?fields=all&actions=all&attachments=true&attachment_fields=all&members=true&member_fields=all&memberVoted_fields=all&checklists=all&checklist_fields=all&board=true&board_fields=all&list=true&pluginData=true&stickers=true&sticker_fields=all");
+        return this;
+    }
+
+
+    //DEPRECATED
+    this.completeAllItemsOnChecklist = function(name)
+    {
+        this.checklist(name).markAllItemsComplete();
+        return this;
+    }
+
     
     if(!this.data.id && this.data.link)
     {
@@ -785,22 +1004,36 @@ var Card = function(data)
 }
 
 /**
-* Ohai there
+* Create a new card in the given list with the
+* given name, or key/value pairs in an object, using
+* parameters from {@link https://developers.trello.com/reference/#cards-2}
 * @memberof module:TrelloEntities.Card
+* @param list {List} a List to add the card to 
+* @param data {string|Object} either a card name to use 
+* or an Object of key/value pairs
 * @example
-* new Notification(posted).board().id();
+* Card.create(new Trellinator().board("Some Board").list("ToDo"),"Hi there!");
+* @example
+* Card.create(new Trellinator().board("Some Board").list("ToDo"),{name: "Hi there!",pos:"top"});
 */
 Card.create = function(list,data)
 {
     if(typeof data === "string")
         data = {name: data};
 
-    return new Card(TrelloApi.post("cards?idList="+list.data.id+"&"+new IterableCollection(data).implode("&",encodeURIComponent)));
+    return new Card(TrelloApi.post("cards?idList="+list.id()+"&"+new IterableCollection(data).implode("&",encodeURIComponent)));
 }
 
 /**
-* Ohai there
+* Find a card or create it if it doesn't already with
+* either just a string name, or an Object with key/value
+* pairs from {@link https://developers.trello.com/reference/#cards-2}
+* exist, in the given list
 * @memberof module:TrelloEntities.Card
+* @param list {List} a List object to find or create the card in
+* @param data {string|Object} either the name of the card, or an Object
+* with at least a name attribute to be used to find the card, and then
+* data to be used when creating the card
 * @example
 * new Notification(posted).board().id();
 */
