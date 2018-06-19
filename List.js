@@ -1,18 +1,37 @@
 /**
 * @class List
 * @memberof module:TrelloEntities
+* @param data (Object} key/value pairs of 
+* information, must at least contain "id",
+* can basically just pass in response from Trello API
 * @constructor
+* @classdesc The List class represents
+* a List in Trello. 
+* 
+* You will mostly deal with lists in IterableCollections
+* returned from Board methods.
+*
+* @example
+* new Trellinator().board("Some board").findOrCreateList("ToDo");
+* @example
+* new Trellinator().board("Some board").list("ToDo").cards().first().postComment("Me first!");
+* @example
+* new Trellinator().board("Some Board").lists().each(function(list)
+* {
+*     list.cards().first().postComment("Me first!");
+* });
 */
 var List = function(data)
 {    
-    this.data      = data;
-    this.card_list = null;
+    this.data         = data;
+    this.card_list    = null;
+    this.board_object = null;
 
     /**
-    * Ohai there
+    * Return the id of this List
     * @memberof module:TrelloEntities.List
     * @example
-    * new Notification(posted).board().id();
+    * board.list("Some List").id();
     */
     this.id = function()
     {
@@ -20,22 +39,26 @@ var List = function(data)
     }
   
     /**
-    * Ohai there
+    * Move a list to a different board
     * @memberof module:TrelloEntities.List
+    * @param board {Board} the board to move this list to
     * @example
-    * new Notification(posted).board().id();
+    * var to_board = new Trellinator().board("Some Board");
+    * new Notification(posted).addedCard().currentList().move(to_board);
     */
     this.move = function(board)
     {
-        TrelloApi.put("lists/"+this.data.id+"/idBoard?value="+board.data.id);
+        TrelloApi.put("lists/"+this.data.id+"/idBoard?value="+board.id());
+        this.data.idBoard = null;
+        this.board_object = null;
         return this;
     }
 
     /**
-    * Ohai there
+    * Return the name of this List
     * @memberof module:TrelloEntities.List
     * @example
-    * new Notification(posted).board().id();
+    * card.currentList().name();
     */
     this.name = function()
     {
@@ -46,37 +69,51 @@ var List = function(data)
     }
     
     /**
-    * Ohai there
+    * Return the board that contains this list
     * @memberof module:TrelloEntities.List
     * @example
-    * new Notification(posted).board().id();
+    * card.currentList().board();
     */
-    this.board = function(filter)
+    this.board = function()
     {
         if(!this.data.idBoard)
             this.load();
         
-        return new Board({id: this.data.idBoard});
+        this.board_object = new Board({id: this.data.idBoard});
+        return this.board_object;
     }
 
     /**
-    * Ohai there
+    * Return a Card from this list, filtered by
+    * name or regex
     * @memberof module:TrelloEntities.List
+    * @param name {string|RegExp} a string or RegEx to match against the name
+    * of the cards, if multiple match the first will be returned
     * @example
-    * new Notification(posted).board().id();
+    * card.currentList().card("Another Card");
+    * @example
+    * card.currentList().card(new RegExp("Process.*"));
     */
-    this.card = function(filter)
+    this.card = function(name)
     {
-        return this.cards(filter).first();
+        return this.cards(name).first();
     }
 
     /**
-    * Ohai there
+    * Return an IterableCollection of cards in this
+    * list, optionally filtered by name using a 
+    * string or regex
     * @memberof module:TrelloEntities.List
+    * @param name {string|RegExp} a string or regex to match against
+    * the names of cards in this list
     * @example
-    * new Notification(posted).board().id();
+    * card.currentList().cards(new RegExp(card.name()+".*")).each(function(loop)
+    * {
+    *     if(loop.id() != card.id())
+    *         loop.postComment("Twinsies!");
+    * });
     */
-    this.cards = function(filter)
+    this.cards = function(name)
     {
         if(!this.card_list)
         {
@@ -86,54 +123,57 @@ var List = function(data)
             });
         }
 
-        return this.card_list.findByName(filter);
+        return this.card_list.findByName(name);
     }
 
     /**
-    * Ohai there
+    * Return the number of cards in this list
     * @memberof module:TrelloEntities.List
     * @example
-    * new Notification(posted).board().id();
+    * card.currentList().countCards();
     */
-    this.countCards = function(params)
+    this.countCards = function()
     {
         return this.cards().length();
     }
     
     /**
-    * Ohai there
+    * Set a new name for this list
     * @memberof module:TrelloEntities.List
     * @example
-    * new Notification(posted).board().id();
+    * card.currentList().setName("I have "+card.name());
     */
-    this.rename = function(new_name)
+    this.setName = function(new_name)
     {
-        var updated = TrelloApi.put("lists/"+this.data.id+"/name?value="+encodeURIComponent(new_name));
-        this.data.name = updated.name;
-        return updated;
+        this.rename(new_name);
     }
     
     /**
-    * Ohai there
+    * Archive this list
     * @memberof module:TrelloEntities.List
     * @example
-    * new Notification(posted).board().id();
+    * card.currentList().archive();
     */
     this.archive = function()
     {
         TrelloApi.put("lists/"+this.data.id+"?closed=true");
+        return this;
     }
 
-    /**
-    * Ohai there
-    * @memberof module:TrelloEntities.List
-    * @example
-    * new Notification(posted).board().id();
-    */
+    //INTERNAL USE ONLY
     this.load = function()
     {
         this.card_list = null;
+        this.board_object = null;
         this.data = TrelloApi.get("lists/"+this.data.id+"?fields=all");
+        return this;
+    }
+
+    //DEPRECATED used setName
+    this.rename = function(new_name)
+    {
+        var updated = TrelloApi.put("lists/"+this.data.id+"/name?value="+encodeURIComponent(new_name));
+        this.data.name = new_name;
         return this;
     }
 }
