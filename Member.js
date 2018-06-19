@@ -1,7 +1,29 @@
 /**
 * @class Member
 * @memberof module:TrelloEntities
+* @param data (Object} key/value pairs of 
+* information, must at least contain "id"
+* or a "username", but can basically just
+* pass in response from Trello API
 * @constructor
+* @classdesc The Member class represents
+* a Member in Trello. 
+*
+* You will usually deal with Member as part of an
+* IterableCollection or returned from Board and
+* Card methods, however the Trellinator class is a 
+* special instance of Member, so when you do
+* new Trellinator() the object you get back inherits
+* all the behaviour of Member.
+*
+* @example
+* card.members().first().name();
+* @example
+* new Trellinator().board("Some Board");
+* @example
+* new Trellinator().team("Some Team");
+* @example
+* new Member({username: "iaindooley"});
 */
 var Member = function(data)
 {    
@@ -10,10 +32,10 @@ var Member = function(data)
     this.board_list  = null;
   
     /**
-    * Ohai there
+    * Return the id of this Member
     * @memberof module:TrelloEntities.Member
     * @example
-    * new Notification(posted).board().id();
+    * card.members().first().id();
     */
     this.id = function()
     {
@@ -21,10 +43,16 @@ var Member = function(data)
     }
 
     /**
-    * Ohai there
+    * If this member is NOT the Trellinator
+    * member, useful for excluding functionality
+    * when a notification is caused by an 
+    * action performed by Trellinator
     * @memberof module:TrelloEntities.Member
     * @example
-    * new Notification(posted).board().id();
+    * var notif = new Notification(posted);
+    * 
+    * if(notif.member().notTrellinator())
+    *     notif.replyToMember("Your wish is my command!");
     */
     this.notTrellinator = function()
     {
@@ -32,10 +60,11 @@ var Member = function(data)
     }
 
     /**
-    * Ohai there
+    * Return the full name of this Member
     * @memberof module:TrelloEntities.Member
     * @example
-    * new Notification(posted).board().id();
+    * var notif = new Notification(posted);
+    * notif.replyToMember("Your name is: "+notif.member().fullName());
     */
     this.fullName = function()
     {
@@ -46,10 +75,12 @@ var Member = function(data)
     }
 
     /**
-    * Ohai there
+    * Return a team this member has access
+    * to, or create a new team if one doesn't exist
     * @memberof module:TrelloEntities.Member
+    * @param name {string} the team name
     * @example
-    * new Notification(posted).board().id();
+    * new Trellinator().team("New or Existing Team");
     */
     this.team = function(name)
     {
@@ -70,10 +101,14 @@ var Member = function(data)
     }
     
     /**
-    * Ohai there
+    * Return an IterableCollection of Teams this 
+    * Member has access to, optionally filtered by
+    * a string/regex
     * @memberof module:TrelloEntities.Member
+    * @param name {string|RegExp} the string or RegExp to match with the
+    * team names
     * @example
-    * new Notification(posted).board().id();
+    * new Trellinator().teams(new RegExp("Internal.*"));
     */
     this.teams = function(name)
     {
@@ -89,10 +124,11 @@ var Member = function(data)
     }
 
     /**
-    * Ohai there
+    * Return the username of this Member
+    * this is an alias of the name() method
     * @memberof module:TrelloEntities.Member
     * @example
-    * new Notification(posted).board().id();
+    * card.members().first().username();
     */
     this.username = function()
     {
@@ -100,10 +136,10 @@ var Member = function(data)
     }
 
     /**
-    * Ohai there
+    * Return the username of this Member
     * @memberof module:TrelloEntities.Member
     * @example
-    * new Notification(posted).board().id();
+    * card.members().first().name();
     */
     this.name = function()
     {
@@ -112,13 +148,46 @@ var Member = function(data)
 
         return this.data.username;
     }
-    
+
     /**
-    * Ohai there
+    * Return a board this member 
+    * has access to
     * @memberof module:TrelloEntities.Member
+    * @param name {string|RegExp} a string or RegExp to 
+    * match against the board names
     * @example
-    * new Notification(posted).board().id();
+    * new Trellinator().board("My Personal Tasks");
     */
+    this.board = function(name)
+    {
+        return this.boards(name).first();
+    }
+
+    /**
+    * Return an IterableCollection of boards this
+    * member has access to, filtered optionally
+    * by name using a string or regex
+    * @memberof module:TrelloEntities.Member
+    * @param name {string|RegExp} a string or RegExp to 
+    * match against the name of boards this member has
+    * access to
+    * @example
+    * new Notification(posted).member().boards(new RegExp("Internal.*"));
+    */
+    this.boards = function(name)
+    {
+        if(!this.board_list)
+        {
+            this.board_list = new IterableCollection(TrelloApi.get("members/"+this.username()+"/boards?filter=open&fields=all&lists=open&memberships=none&organization_fields=name%2CdisplayName")).transform(function(elem)
+                              {
+                                  return new Board(elem);
+                              });
+        }
+        
+        return this.board_list.findByName(name);
+    }
+    
+    //INTERNAL USE ONLY
     this.load = function()
     {
         this.list_of_teams = null;
@@ -135,35 +204,6 @@ var Member = function(data)
         return this;
     }
     
-    /**
-    * Ohai there
-    * @memberof module:TrelloEntities.Member
-    * @example
-    * new Notification(posted).board().id();
-    */
-    this.board = function(data)
-    {
-        return this.boards(data).first();
-    }
-
-    /**
-    * Ohai there
-    * @memberof module:TrelloEntities.Member
-    * @example
-    * new Notification(posted).board().id();
-    */
-    this.boards = function(data)
-    {
-        if(!this.board_list)
-        {
-            this.board_list = new IterableCollection(TrelloApi.get("members/"+this.username()+"/boards?filter=open&fields=all&lists=open&memberships=none&organization_fields=name%2CdisplayName")).transform(function(elem)
-                              {
-                                  return new Board(elem);
-                              });
-        }
-        
-        return this.board_list.findByName(data);
-    }
 
     if(!this.data.id && this.data.username)
     {
@@ -175,7 +215,11 @@ var Member = function(data)
 }
 
 /**
-* Ohai there
+* If you need to test adding a particular
+* member by username to a card based on some
+* action, you can use this mock_member_username
+* to inject a different username to use when loading
+* any member by username
 * @memberof module:TrelloEntities.Member
 * @example
 * new Notification(posted).board().id();
