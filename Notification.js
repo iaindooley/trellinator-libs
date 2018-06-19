@@ -302,18 +302,13 @@ var Notification = function(notification)
     * @throws InvalidActionException
     * @example
     * new Notification(posted)
-    * .updatedList()
+    * .changedListName()
     * .cards().first()
     * .postComment("My name changed");
     */
-    this.updatedList = function()
+    this.changedListName = function()
     {
-        if(notification.action.data.list)
-            ret = new List(notification.action.data.list);
-        else
-            throw new InvalidActionException("List not updated");
-        
-        return ret;
+        return this.updatedList();
     }
 
     /**
@@ -325,15 +320,12 @@ var Notification = function(notification)
     * @throws InvalidActionException
     * @example
     * new Notification(posted)
-    * .cardWithNameChanged()
+    * .changedCardName()
     * .postComment("how dare you!");
     */
-    this.cardWithNameChanged = function()
+    this.changedCardName = function()
     {
-        if(this.notification.action.display.translationKey != "action_renamed_card")
-            throw new InvalidActionException("Card name was not changed");
-        
-        return this.card();
+        return this.cardWithNameChanged();
     }
 
     /**
@@ -843,6 +835,26 @@ var Notification = function(notification)
         });
         
         return this.card();
+    }
+
+    //DEPRECATED: use changedCardName()
+    this.cardWithNameChanged = function()
+    {
+        if(this.notification.action.display.translationKey != "action_renamed_card")
+            throw new InvalidActionException("Card name was not changed");
+        
+        return this.card();
+    }
+
+    //DEPRECATED: use changedListName
+    this.updatedList = function()
+    {
+        if(notification.action.data.list)
+            ret = new List(notification.action.data.list);
+        else
+            throw new InvalidActionException("List not updated");
+        
+        return ret;
     }
 }
 
