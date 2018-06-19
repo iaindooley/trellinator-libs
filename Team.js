@@ -93,6 +93,7 @@ var Team = function(data)
     * @param type {string} either "admin" or "normal", optional, default normal
     * @example
     * new Trellinator().team("Some Team").addMember("team@theprocedurepeople.com","Cool Folks","admin");
+    */
     this.addMember = function(email,full_name,type)
     {
         if(!type)
