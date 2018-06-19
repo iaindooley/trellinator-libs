@@ -202,12 +202,20 @@ var Checklist = function(data)
     }
     
     /**
+    * @memberof module:TrelloEntities.Checklist
+    */
+    this.item = function(data)
+    {
+        return this.items(data).first();
+    }
+
+    /**
     * Ohai there
     * @memberof module:TrelloEntities.Checklist
     * @example
     * new Notification(posted).board().id();
     */
-    this.items = function()
+    this.items = function(data)
     {
         if(!this.item_list)
         {
@@ -217,7 +225,7 @@ var Checklist = function(data)
             }.bind(this));
         }
 
-        return this.item_list;
+        return this.item_list.findByName(data);
     }
     
     /**

@@ -157,22 +157,9 @@ var Board = function(data)
     * @example
     * new Notification(posted).board().id();
     */
-    this.moveAllCards = function(data)
+    this.moveAllCards = function(from_list,to_list)
     {
-        //data.from == RegExp, data.to == RegExp
-        var lists = TrelloApi.get("boards/"+this.data.id+"/lists?cards=none&card_fields=none&filter=open&fields=all");
-        var from_list = null;
-        var to_list = null;
-
-        for(var key in lists)
-        {
-            if(TrelloApi.nameTest(data.from,lists[key].name))
-                from_list = lists[key];
-            else if(TrelloApi.nameTest(data.to,lists[key].name))
-                to_list = lists[key];
-        }
-        
-        var ret = new IterableCollection(TrelloApi.post("lists/"+from_list.id+"/moveAllCards?idBoard="+to_list.idBoard+"&idList="+to_list.id));
+        var ret = new IterableCollection(TrelloApi.post("lists/"+from_list.id()+"/moveAllCards?idBoard="+to_list.board().id()+"&idList="+to_list.id()));
         
         ret.transform(function(elem)
         {
@@ -412,4 +399,22 @@ var Board = function(data)
 Board.create = function(data)
 {
     return new Board(TrelloApi.post("boards/?"+new IterableCollection(data).implode("&",encodeURIComponent)));
+}
+
+/**
+* If a board with the same name already exists
+* return it, otherwise create a new board
+*/
+Board.findOrCreate = function(data)
+{
+    try
+    {
+        return new Trellinator().board(data);
+    }
+    
+    catch(e)
+    {
+        Notification.expectException(InvalidDataException,e);
+        return Board.create({name: TrelloApi.nameTestData(data)});
+    }
 }

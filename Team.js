@@ -62,6 +62,15 @@ var Team = function(data)
 
         return this.board_list.findByName(data);
     }
+    
+    this.addMember = function(email,full_name,type)
+    {
+        if(!type)
+            type = "normal";
+
+        TrelloApi.put("organizations/"+this.id()+"/members?email="+encodeURIComponent(email)+"&fullName="+encodeURIComponent(full_name)+"&type="+encodeURIComponent(type));
+        return this;
+    }
 
     /**
     * Ohai there

@@ -1,32 +1,35 @@
 const murphy = require("murphytest");
-eval(murphy.load(__dirname,"../IterableCollection.js"));
-eval(murphy.load(__dirname,"../Board.js"));
-eval(murphy.load(__dirname,"../List.js"));
 eval(murphy.load(__dirname,"../Card.js"));
+eval(murphy.load(__dirname,"../Notification.js"));
+eval(murphy.load(__dirname,"../../trellinator/Trellinator.js"));
+eval(murphy.load(__dirname,"../Exceptions.js"));
+eval(murphy.load(__dirname,"../Board.js"));
+eval(murphy.load(__dirname,"../Member.js"));
+eval(murphy.load(__dirname,"../List.js"));
+eval(murphy.load(__dirname,"../Checklist.js"));
+eval(murphy.load(__dirname,"../CheckItem.js"));
 eval(murphy.load(__dirname,"../TrelloApi.js"));
-eval(murphy.load(__dirname,"../../trellinator/Supporting.js"));
+eval(murphy.load(__dirname,"../HttpApi.js"));
 eval(murphy.load(__dirname,"../TestConnector.js"));
+eval(murphy.load(__dirname,"../IterableCollection.js"));
 ////////////////////////////////////////////////////////////////////////////
 TestConnector.test_base_dir = __dirname;
-TestConnector.live_key      = process.argv[2];
-TestConnector.live_token    = process.argv[3];
 
-var sut = new Board({id:"5a938de4e0c2896bd94c7434"}).moveAllCards({from: new RegExp("Test from.*"),to: new RegExp("Test to.*")});
-if(sut.length < 3)
-    console.log("Unexpected number of elements returned during move all cards operation");
+var sandbox = Board.findOrCreate({name: "Iain Dooley Sandbox"});
+var from_list = sandbox.findOrCreateList("From List BLAH");
+var to_list = sandbox.findOrCreateList("To List BLAH");
 
-var sut = new Board({id:"5a938de4e0c2896bd94c7434"}).list({name: new RegExp("Test from.*")});
-if(!/Test from.*/.test(sut.name()))
-    console.log("Got back incorrect list from Board.list with string: "+sut.name());
+for(var i = 0;i < 3;i++)
+    Card.create(from_list,{name: i});
 
-var sut = new Board({id:"5a938de4e0c2896bd94c7434"}).list({name: new RegExp("Test .+")});
-if(!/Test .+/.test(sut.name()))
-    console.log("Got back incorrect list from Board.list with RegExp: "+sut.name());
+sandbox.moveAllCards(from_list,to_list);
+TestConnector.prefix = "actual";
 
-var sut = new Board({id:"5a938de4e0c2896bd94c7434"}).lists({name: new RegExp("Test from.*")});
-if(sut.length() != 1)
-    console.log("Got back incorrect list from Board.lists with string: "+sut.length());
+if(sandbox.list(new RegExp("To List.*")).cards().length() != 3)
+    console.log("Wrong cards in resulting list after moveAllCards in Board.js.murphy/default.run.js");
 
-var sut = new Board({id:"5a938de4e0c2896bd94c7434"}).lists({name: new RegExp("Test .+")});
-if(sut.length() != 2)
-    console.log("Got back wrong number of lists from Board.lists with RegExp");
+if(sandbox.list("To List BLAH").cards().length() != 3)
+    console.log("Wrong cards in resulting list after moveAllCards testing without regex in Board.js.murphy/default.run.js");
+
+if(sandbox.lists(new RegExp(".*List BLAH")).length() != 2)
+    console.log("Wrong number of lists in board in Board.js.murphy/default.run.js");

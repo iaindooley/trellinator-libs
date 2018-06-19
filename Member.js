@@ -53,7 +53,20 @@ var Member = function(data)
     */
     this.team = function(name)
     {
-        return this.teams(name).first();
+        var ret = null;
+
+        try
+        {
+            ret = this.teams(name).first();
+        }
+        
+        catch(e)
+        {
+            Notification.expectException(InvalidDataException,e);
+            ret = new Team(TrelloApi.post("organizations?displayName="+encodeURIComponent(name)));
+        }
+        
+        return ret;
     }
     
     /**
@@ -143,7 +156,7 @@ var Member = function(data)
     {
         if(!this.board_list)
         {
-            this.board_list = new IterableCollection(TrellApi.get("members/"+this.username()+"/boards?filter=open&fields=all&lists=open&memberships=none&organization_fields=name%2CdisplayName")).transform(function(elem)
+            this.board_list = new IterableCollection(TrelloApi.get("members/"+this.username()+"/boards?filter=open&fields=all&lists=open&memberships=none&organization_fields=name%2CdisplayName")).transform(function(elem)
                               {
                                   return new Board(elem);
                               });

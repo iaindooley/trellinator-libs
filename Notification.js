@@ -80,9 +80,9 @@
 var Notification = function(notification)
 {
     this.notification = notification;
-    this.board = null;
-    this.member = null;
-    this.card = null;
+    this.board_object = null;
+    this.member_object = null;
+    this.card_object = null;
 
     /**
     * If this notification was the result of
@@ -532,10 +532,10 @@ var Notification = function(notification)
     */
     this.member = function()
     {
-        if(!this.member)
-            this.member = new Member(this.notification.action.memberCreator);
+        if(!this.member_object)
+            this.member_object = new Member(this.notification.action.memberCreator);
         
-        return this.member;
+        return this.member_object;
     }
 
     /**
@@ -551,10 +551,10 @@ var Notification = function(notification)
     */
     this.board = function()
     {
-        if(!this.board)
-            this.board = new Board(this.notification.model);
+        if(!this.board_object)
+            this.board_object = new Board(this.notification.model);
         
-        return this.board;
+        return this.board_object;
     }
 
     /**
@@ -572,10 +572,10 @@ var Notification = function(notification)
         if(!this.notification.action.display.entities.card)
             throw new InvalidActionException("No card was part of this notification");
 
-        if(!this.card)
-            this.card = new Card(this.notification.action.display.entities.card);
+        if(!this.card_object)
+            this.card_object = new Card(this.notification.action.display.entities.card);
         
-        return this.card;
+        return this.card_object;
     }
 
     /**
