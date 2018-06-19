@@ -325,11 +325,12 @@ var Board = function(data)
     /**
     * Find an existing list, creating it if it doesn't exist
     * @memberof module:TrelloEntities.Board
-    * @example
     * @param name {string} the name of the list to find, creating it if it doesn't exist
     * @param pos {string} (optional) either "bottom" or "top" where "bottom" is furthest
     * to the right of the window and "top" is furthest to the left
     * Card.create(new Notification(posted).board().findOrCreateList("ToDo"),{name: "Do this!"});
+    * @example
+    * Card.create(new Notification(posted).board().findOrCreateList("ToDo"),{name: "Hi there!"});
     */
     this.findOrCreateList = function(name,pos)
     {      
@@ -467,6 +468,9 @@ var Board = function(data)
 */
 Board.create = function(data)
 {
+    if(typeof data === "string")
+        data = {name: data};
+
     return new Board(TrelloApi.post("boards/?"+new IterableCollection(data).implode("&",encodeURIComponent)));
 }
 
