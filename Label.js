@@ -1,17 +1,31 @@
 /**
 * @class Label
 * @memberof module:TrelloEntities
+* @param data (Object} key/value pairs of 
+* information, must at least contain "id",
+* can basically just pass in response from Trello API
 * @constructor
+* @classdesc The Label class represents
+* a Label in Trello. 
+*
+* You will mostly deal with this in an IterableCollection
+* returned from methods in Card and Board.
+*
+* @example
+* new Trellinator().board().labels().each(function(label)
+* {
+*     card.addLabel(label.name());
+* });
 */
 var Label = function(data)
 {    
     this.data  = data;
 
     /**
-    * Ohai there
+    * Return the id of this Label
     * @memberof module:TrelloEntities.Label
     * @example
-    * new Notification(posted).board().id();
+    * card.label("Something").id();
     */
     this.id = function()
     {
@@ -19,10 +33,10 @@ var Label = function(data)
     }
   
     /**
-    * Ohai there
+    * Return the name of this Label
     * @memberof module:TrelloEntities.Label
     * @example
-    * new Notification(posted).board().id();
+    * card.labels().first().name();
     */
     this.name = function()
     {
@@ -32,12 +46,7 @@ var Label = function(data)
         return this.data.name;
     }
     
-    /**
-    * Ohai there
-    * @memberof module:TrelloEntities.Label
-    * @example
-    * new Notification(posted).board().id();
-    */
+    //INTERNAL USE ONLY
     this.load = function()
     {
         this.data = TrelloApi.get("labels/"+this.data.id+"?fields=all");
