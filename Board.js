@@ -157,6 +157,8 @@ var Board = function(data)
             return new Card(elem);
         });
         
+        from_list.card_list = null;
+        to_list.card_list = null;
         return ret;
     }
     
