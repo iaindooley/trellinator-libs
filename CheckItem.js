@@ -49,7 +49,7 @@ var CheckItem = function(data)
     this.remove = function()
     {
         TrelloApi.del("cards/"+this.containing_checklist.card().data.id+"/checkItem/"+this.data.id);
-        this.containing_checklist.check_items = null;
+        this.containing_checklist.item_list = null;
         return this.containing_checklist;
     }
 
@@ -80,17 +80,26 @@ var CheckItem = function(data)
 
     /**
     * Change the state of this item to
-    * either complete or incomplete
+    * complete
     * @memberof module:TrelloEntities.CheckItem
-    * @param state {string} either complete or incomplete
     * @example
-    * card.checklist("Something").items().first().mark("complete");
+    * card.checklist("Something").items().first().markComplete();
     */
-    this.mark = function(state)
+    this.markComplete = function()
     {
-      TrelloApi.put("cards/"+this.checklist().card().data.id+"/checkItem/"+this.data.id+"?state="+state);
-      this.data.state = state;
-      return this;
+        this.mark("complete");
+    }
+
+    /**
+    * Change the state of this item to
+    * incomplete
+    * @memberof module:TrelloEntities.CheckItem
+    * @example
+    * card.checklist("Something").items().first().markIncomplete();
+    */
+    this.markIncomplete = function()
+    {
+        this.mark("incomplete");
     }
 
     /**
@@ -149,5 +158,13 @@ var CheckItem = function(data)
             this.load();
         
         return this.data.state;
+    }
+
+    //INTERNAL USE ONLY
+    this.mark = function(state)
+    {
+      TrelloApi.put("cards/"+this.checklist().card().data.id+"/checkItem/"+this.data.id+"?state="+state);
+      this.data.state = state;
+      return this;
     }
 }
