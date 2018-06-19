@@ -680,7 +680,7 @@ var Card = function(data)
 
         TrelloApi.put("cards/"+this.data.id+"?idList="+list.data.id+"&idBoard="+list.board().data.id+"&pos="+position);
         this.data.list = null;
-        to_list.card_list = null;
+        list.card_list = null;
         return this;
     }
 
