@@ -792,6 +792,9 @@ var Card = function(data)
 */
 Card.create = function(list,data)
 {
+    if(typeof data === "string")
+        data = {name: data};
+
     return new Card(TrelloApi.post("cards?idList="+list.data.id+"&"+new IterableCollection(data).implode("&",encodeURIComponent)));
 }
 
