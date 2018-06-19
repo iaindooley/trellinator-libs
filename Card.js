@@ -907,7 +907,7 @@ var Card = function(data)
         try
         {
             var label = this.board().label(label_name);
-            this.applyLabelIds(new IterableCollection([label.id()]);
+            this.applyLabelIds(new IterableCollection([label.id()]));
         }
         
         catch(e)
