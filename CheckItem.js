@@ -30,7 +30,7 @@ var CheckItem = function(data)
 
     /**
     * Return the id of this item
-    * @memberof module:TrelloEntities.Card
+    * @memberof module:TrelloEntities.CheckItem
     * @example
     * card.checklist("Something").item("Blah").id();
     */
@@ -42,7 +42,7 @@ var CheckItem = function(data)
     /**
     * Remove this item from it's containing checklist
     * and return the checklist
-    * @memberof module:TrelloEntities.Card
+    * @memberof module:TrelloEntities.CheckItem
     * @example
     * card.checklist("Something").item("Blah").remove();
     */
@@ -55,7 +55,7 @@ var CheckItem = function(data)
 
     /**
     * Return the containing Checklist
-    * @memberof module:TrelloEntities.Card
+    * @memberof module:TrelloEntities.CheckItem
     * @example
     * card.checklist("Something").item("Blah").checklist().item("Blah");//AARRGH!
     */
@@ -66,7 +66,7 @@ var CheckItem = function(data)
 
     /**
     * Set the text for this item (ie. it's name)
-    * @memberof module:TrelloEntities.Card
+    * @memberof module:TrelloEntities.CheckItem
     * @param name {string} the text to appear for the checklist item
     * @example
     * card.checklist("Something").items().first().setName("Blah");
@@ -81,7 +81,7 @@ var CheckItem = function(data)
     /**
     * Change the state of this item to
     * either complete or incomplete
-    * @memberof module:TrelloEntities.Card
+    * @memberof module:TrelloEntities.CheckItem
     * @param state {string} either complete or incomplete
     * @example
     * card.checklist("Something").items().first().mark("complete");
@@ -95,7 +95,7 @@ var CheckItem = function(data)
 
     /**
     * Return true of this is complete
-    * @memberof module:TrelloEntities.Card
+    * @memberof module:TrelloEntities.CheckItem
     * @example
     * if(card.checklist("Something").items().first().isComplete())
     *     card.postComment("The first item in the Something checklist is complete");
@@ -107,7 +107,7 @@ var CheckItem = function(data)
 
     /**
     * Return the name (ie. full text) for this item
-    * @memberof module:TrelloEntities.Card
+    * @memberof module:TrelloEntities.CheckItem
     * @example
     * card.checklist("Something").items().first().name();
     */
