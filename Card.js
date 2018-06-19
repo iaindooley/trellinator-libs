@@ -146,8 +146,7 @@ var Card = function(data)
     */
     this.moveToNextList = function()
     {
-        this.moveTo({list: this.board().lists().itemAfter(this.currentList().name()).name(),position: "top"});
-        this.data.list = null;
+        this.moveTo(this.board().lists().itemAfter(this.currentList().name()).name(),"top");
         return this;
     }
 
@@ -643,6 +642,7 @@ var Card = function(data)
         if(!position)
             position = "bottom";
 
+        list.card_list = null;
         return new Card(TrelloApi.post("cards?pos="+position+"&idList="+list.data.id+"&idCardSource="+this.data.id+"&keepFromSource=all"));
     }
 
@@ -680,6 +680,7 @@ var Card = function(data)
 
         TrelloApi.put("cards/"+this.data.id+"?idList="+list.data.id+"&idBoard="+list.board().data.id+"&pos="+position);
         this.data.list = null;
+        to_list.card_list = null;
         return this;
     }
 
@@ -709,6 +710,7 @@ var Card = function(data)
     this.archive = function()
     {
         TrelloApi.put("cards/"+this.data.id+"?closed=true");
+        this.currentList().card_list = null;
         return this;
     }
 
@@ -721,6 +723,7 @@ var Card = function(data)
     this.unArchive = function()
     {
         TrelloApi.put("cards/"+this.data.id+"?closed=false");
+        this.currentList().card_list = null;
         return this;
     }
     
