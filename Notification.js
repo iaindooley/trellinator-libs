@@ -1,4 +1,12 @@
 /**
+* These are the classes that form the basis
+* of the Trellinator, concerning the execution
+* of functions in response to Notifications
+* or as part of Time Triggers or in the 
+* Execution Queue
+* @module TrellinatorCore
+*/
+/**
 * @class Notification
 * @memberof module:TrellinatorCore
 * @constructor
