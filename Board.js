@@ -486,12 +486,14 @@ Board.create = function(data)
 * @memberof module:TrelloEntities.Board
 * @param data {string|Object} either a board name or an
 * object of key/value pairs at least containing name
+* @param global_command_group {string} (optional) a global command group
+* to add the board to if a new one is created
 * @example
 * Card.create(Board.findOrCreate("New Board").findOrCreateList("ToDo"),{name: "Hi there!"});
 * @example
 * Board.findOrCreate({name: "Hi there!",idOrganization: new Trellinator().team("Some Team").id()});
 */
-Board.findOrCreate = function(data)
+Board.findOrCreate = function(data,global_command_group)
 {
     try
     {
@@ -501,6 +503,8 @@ Board.findOrCreate = function(data)
     catch(e)
     {
         Notification.expectException(InvalidDataException,e);
-        return Board.create(data);
+        var ret = Board.create(data);
+        Trellinator.addBoardToGlobalCommandGroup(ret,global_command_group);
+        return ret;
     }
 }
