@@ -915,7 +915,7 @@ var Card = function(data)
         
         catch(e)
         {
-            Notification.expectExceptiom(InvalidDataException,e);
+            Notification.expectException(InvalidDataException,e);
             this.addNewLabels(new IterableCollection([label_name]));
         }
         
