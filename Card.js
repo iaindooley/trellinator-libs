@@ -129,7 +129,7 @@ var Card = function(data)
         if(!limit)
             limit = 20;
 
-        return new IterableCollection(TrelloApi.get("cards/"+this.data.id+"/actions?filter=commentCard&limit="+limit))
+        return new IterableCollection(TrelloApi.get("cards/"+this.data.id+"/actions?filter=copyCommentCard,commentCard&limit="+limit))
                                                .transform(function(elem)
         {
             return new Comment(elem);
