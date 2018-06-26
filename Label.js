@@ -20,6 +20,7 @@
 var Label = function(data)
 {    
     this.data  = data;
+    this.containing_card  = null;
 
     /**
     * Return the id of this Label
@@ -30,6 +31,34 @@ var Label = function(data)
     this.id = function()
     {
         return this.data.id;
+    }
+    
+    /**
+    * Set the containing card that will be
+    * returned from the card() method
+    * @memberof module:TrelloEntities.Label
+    */
+    this.setContainingCard = function(card)
+    {
+        this.containing_card = card;
+        return this;
+    }
+
+    /**
+    * Return the card that this label is on
+    * if any (usually returns null unless
+    * this label was returned from a Notification
+    * where a label was added to a card, or 
+    * from a card.label() method)
+    * @memberof module:TrelloEntities.Label
+    * @example
+    * new Notification(posted).addedLabel()
+    *                         .card()
+    *                         .postComment("Hi there!");
+    */
+    this.card = function()
+    {
+        return this.containing_card;
     }
   
     /**

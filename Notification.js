@@ -820,7 +820,7 @@ var Notification = function(notification)
         if(name && (ret.name() != name))
             throw new InvalidActionException("Label was added, but was not named: "+name);
         
-        return ret;
+        return ret.setContainingCard(this.card());
     }
 
     //Deprecated: use completedAllChecklists instead

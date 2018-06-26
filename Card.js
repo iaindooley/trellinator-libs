@@ -485,8 +485,8 @@ var Card = function(data)
             {
               this.labels_list = new IterableCollection(this.data.labels).transform(function(elem)
               {
-                  return new Label(elem);
-              });
+                  return new Label(elem).setContainingCard(this);
+              }.bind(this));
             }
             
             catch(e)
