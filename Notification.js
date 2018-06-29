@@ -464,7 +464,7 @@ var Notification = function(notification)
     */
     this.addedLabel = function(name)
     {
-        return this.labelAddedToCard();
+        return this.labelAddedToCard(name);
     }
 
     /**
