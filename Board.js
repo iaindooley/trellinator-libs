@@ -378,12 +378,17 @@ var Board = function(data)
     * Add a member to the board by email address
     * @memberof module:TrelloEntities.Board
     * @param email {string} the email of the user to invite (can be new or existing Trello user)
+    * @param type {string} admin or normal, defaults to admin
     * @example
     * new Notification(posted).board().inviteMemberByEmail("user@example.org");
     */
-    this.inviteMemberByEmail = function(email)
+    this.inviteMemberByEmail = function(email,type)
     {
-        TrelloApi.put("boards/"+this.data.id+"/members/?email="+encodeURIComponent(email)+"&type=normal");
+        if(!type)
+          type = "admin";
+      
+        TrelloApi.put("boards/"+this.data.id+"/members/?email="+encodeURIComponent(email)+"&type="+type);
+        this.members_list  = null;
         return this;
     }
     
@@ -391,12 +396,17 @@ var Board = function(data)
     * Add a Trello member to a board
     * @memberof module:TrelloEntities.Board
     * @param member {Member} a Member object to add to this board
+    * @param type {string} admin or normal, defaults to admin
     * @example
     * new Trellinator().board("Some Board").addMember(new Notification(posted).member());
     */
-    this.addMember = function(member)
+    this.addMember = function(member,type)
     {
-        TrelloApi.put("boards/"+this.data.id+"/members/"+member.username()+"?type=admin");
+        if(!type)
+          type = "admin";
+      
+        TrelloApi.put("boards/"+this.data.id+"/members/"+member.username()+"?type="+type);
+        this.members_list  = null;
         return this;
     }
 
