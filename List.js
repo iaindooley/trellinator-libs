@@ -169,7 +169,10 @@ var List = function(data)
     */
     this.copy = function(pos)
     {
-        return new List(TrelloApi.post("lists?name="+encodeURIComponent(this.name())+"&idBoard="+this.board().id()+"&idListSource="+this.id()+"&pos="+pos));
+      if(!pos)
+        pos = "top";
+      
+      return new List(TrelloApi.post("lists?name="+encodeURIComponent(this.name())+"&idBoard="+this.board().id()+"&idListSource="+this.id()+"&pos="+pos));
     }
 
     /**
@@ -182,7 +185,7 @@ var List = function(data)
     * var to_list = new Trellinator().board("Another").list("Finish");
     * from_list.moveAllCards(to_list);
     */
-    this.moveAllCards = function(from_list,to_list)
+    this.moveAllCards = function(to_list)
     {
         new IterableCollection(TrelloApi.post("lists/"+this.id()+"/moveAllCards?idBoard="+to_list.board().id()+"&idList="+to_list.id()));
         this.card_list = null;
