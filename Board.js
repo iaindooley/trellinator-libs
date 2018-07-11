@@ -138,31 +138,6 @@ var Board = function(data)
     }
   
     /**
-    * Move all cards from one list to another
-    * @memberof module:TrelloEntities.Board
-    * @param from_list {List} a List object to move all cards from
-    * @param to_list {List} a List object to move all cards to
-    * @example
-    * var notif = new Notification(posted);
-    * var from_list = notif.board().list("Start");
-    * var to_list = new Trellinator().board("Another").list("Finish");
-    * notif.board().moveAllCards(from_list,to_list);
-    */
-    this.moveAllCards = function(from_list,to_list)
-    {
-        var ret = new IterableCollection(TrelloApi.post("lists/"+from_list.id()+"/moveAllCards?idBoard="+to_list.board().id()+"&idList="+to_list.id()));
-        
-        ret.transform(function(elem)
-        {
-            return new Card(elem);
-        });
-        
-        from_list.card_list = null;
-        to_list.card_list = null;
-        return ret;
-    }
-    
-    /**
     * Fetch a member of the board by 
     * name
     * @memberof module:TrelloEntities.Board
@@ -336,9 +311,6 @@ var Board = function(data)
     */
     this.findOrCreateList = function(name,pos)
     {      
-      if(!pos)
-        pos = "top";
-      
       try
       {
         var list = this.list(name);
@@ -346,11 +318,31 @@ var Board = function(data)
       
       catch(e)
       {
-        var list = new List(TrelloApi.post("lists?name="+encodeURIComponent(name)+"&idBoard="+this.data.id+"&pos="+pos));
-        this.list_of_lists = null;
+          this.createList(name,pos);
       }
       
       return list;
+    }
+
+    /**
+    * Create a list even if a list with the same name
+    * already exists
+    * @memberof module:TrelloEntities.Board
+    * @param name {string} the name of the list to find, creating it if it doesn't exist
+    * @param pos {string} (optional) either "bottom" or "top" where "bottom" is furthest
+    * to the right of the window and "top" is furthest to the left
+    * Card.create(new Notification(posted).board().createList("ToDo"),{name: "Do this!"});
+    * @example
+    * Card.create(new Notification(posted).board().createList("ToDo"),{name: "Hi there!"});
+    */
+    this.createList = function(name,pos)
+    {
+        if(!pos)
+            pos = "top";
+
+        var list = new List(TrelloApi.post("lists?name="+encodeURIComponent(name)+"&idBoard="+this.data.id+"&pos="+pos));
+        this.list_of_lists = null;
+        return list;
     }
     
     /**
@@ -458,6 +450,21 @@ var Board = function(data)
             this.load();
         
         return this.data.shortUrl;
+    }
+
+    //DEPRECATED: use List.moveAllCards
+    this.moveAllCards = function(from_list,to_list)
+    {
+        var ret = new IterableCollection(TrelloApi.post("lists/"+from_list.id()+"/moveAllCards?idBoard="+to_list.board().id()+"&idList="+to_list.id()));
+        
+        ret.transform(function(elem)
+        {
+            return new Card(elem);
+        });
+        
+        from_list.card_list = null;
+        to_list.card_list = null;
+        return ret;
     }
 
     if(!this.data.id && this.data.link)
