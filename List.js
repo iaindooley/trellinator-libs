@@ -160,6 +160,36 @@ var List = function(data)
         return this;
     }
 
+    /**
+    * Copy this list
+    * @memberof module:TrelloEntities.List
+    * @example
+    * var notif = new Notification(posted);
+    * notif.board().copy();
+    */
+    this.copy = function(pos)
+    {
+        return new List(TrelloApi.post("lists?name="+encodeURIComponent(this.name())+"&idBoard="+this.board().id()+"&idListSource="+this.id()+"&pos="+pos));
+    }
+
+    /**
+    * Move all cards from this list to another
+    * @memberof module:TrelloEntities.List
+    * @param to_list {List} a List object to move all cards to
+    * @example
+    * var notif = new Notification(posted);
+    * var from_list = notif.board().list("Start");
+    * var to_list = new Trellinator().board("Another").list("Finish");
+    * from_list.moveAllCards(to_list);
+    */
+    this.moveAllCards = function(from_list,to_list)
+    {
+        new IterableCollection(TrelloApi.post("lists/"+this.id()+"/moveAllCards?idBoard="+to_list.board().id()+"&idList="+to_list.id()));
+        this.card_list = null;
+        to_list.card_list = null;
+        return this;
+    }
+
     //INTERNAL USE ONLY
     this.load = function()
     {
