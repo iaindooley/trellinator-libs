@@ -866,6 +866,7 @@ var Notification = function(notification)
 * will throw InvalidDataExceptions but will 
 * never intentionally throw a ReferenceError
 * for example.
+* @memberof module:TrellinatorCore.Notification
 * @param type {Function} the constructor function of an
 * exception, typically one from Exceptions.js
 * @param e {Object} the exception you caught
@@ -907,6 +908,7 @@ Notification.expectException = function(type,e)
 * for expected exceptions and then taking some
 * other action, but halting execution if the
 * exception was not expected
+* @memberof module:TrellinatorCore.Notification
 * @param message {string} prepend the exception message
 * @param e {Object} the exception that was caught
 * @example
