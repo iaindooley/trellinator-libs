@@ -137,6 +137,24 @@ var Card = function(data)
     }
 
     /**
+    * Return the date/time this card was moved
+    * into it's current list
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).card().movedToList().toLocaleString();
+    */
+    this.movedToList = function()
+    {
+        var res = TrelloApi.get("cards/"+this.data.id+"/actions?filter=updateCard:idList&limit=1");
+        
+        if(!res.length)
+            res = TrelloApi.get("cards/"+this.data.id+"/actions?filter=createCard&limit=1");
+        
+        var ret = new Date(res[0].date);
+        return ret;
+    }
+
+    /**
     * Move the card to the next list in the same board
     * or throw InvalidDataException if there is no next
     * list
