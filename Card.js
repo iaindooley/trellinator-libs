@@ -1011,7 +1011,12 @@ var Card = function(data)
         this.checklist_list  = null;
         this.labels_list     = null;
         this.members_list    = null;
+        var attempt = this.data.id;
         this.data = TrelloApi.get("cards/"+this.data.id+"?fields=all&actions=all&attachments=true&attachment_fields=all&members=true&member_fields=all&memberVoted_fields=all&checklists=all&checklist_fields=all&board=true&board_fields=all&list=true&pluginData=true&stickers=true&sticker_fields=all");
+        
+        if(!this.data)
+            throw new InvalidDataException("Unable to load card with id: "+attempt);
+
         return this;
     }
 
