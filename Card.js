@@ -183,6 +183,9 @@ var Card = function(data)
         if(!this.data.list)
             this.load();
         
+        if(!this.data.list)
+            throw new InvalidDataException("Card is not in a list: "+this.id());
+
         return new List(this.data.list);
     }
     
