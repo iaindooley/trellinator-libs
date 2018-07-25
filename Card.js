@@ -150,7 +150,11 @@ var Card = function(data)
         if(!res.length)
             res = TrelloApi.get("cards/"+this.data.id+"/actions?filter=createCard&limit=1");
         
-        var ret = new Date(res[0].date);
+        if(res.length)
+          var ret = new Date(res[0].date);
+        else
+          var ret = Trellinator.now();
+      
         return ret;
     }
 
