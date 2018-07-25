@@ -318,7 +318,7 @@ var Board = function(data)
       
       catch(e)
       {
-          this.createList(name,pos);
+          var list = this.createList(name,pos);
       }
       
       return list;
