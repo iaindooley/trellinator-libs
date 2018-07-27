@@ -24,6 +24,7 @@ eval(murphy.load(__dirname,"../TrelloApi.js"));
 //eval(murphy.load(__dirname,"notifications/default.run.js/some_event.js"));
 //SET SOME MOCKING VARIABLES
 TestConnector.test_base_dir = __dirname;
+Trellinator.override_token = "dc1aaaa44446d40ba7a6c1f87e19c222bd172b165b7d5075ec428749e7437181";
 /*OPTIONAL
 TestConnector.fake_now = new Date("2001-01-01");
 TestConnector.prefix = "actual";
