@@ -184,7 +184,15 @@ var Card = function(data)
     */
     this.moveToNextList = function()
     {
-        this.moveTo(this.currentList().board().lists().itemAfter(this.currentList().name()).name(),"top");
+        this.moveToList(
+          this.currentList()
+          .board()
+          .lists()
+          .itemAfter(this.currentList().id(),
+                     function(test,elem)
+                     {
+                       return test == elem.id();
+                     }),"top");
         return this;
     }
 
