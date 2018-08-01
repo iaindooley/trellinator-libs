@@ -37,6 +37,7 @@ var Card = function(data)
     this.checklist_list  = null;
     this.labels_list     = null;
     this.members_list    = null;
+    this.current_list = null;
 
     /**
     * Returns the card ID
@@ -180,13 +181,26 @@ var Card = function(data)
     */
     this.currentList = function()
     {
-        if(!this.data.list)
-            this.load();
-        
-        if(!this.data.list)
-            throw new InvalidDataException("Card is not in a list: "+this.id());
-
-        return new List(this.data.list);
+      var ret = null;
+      
+      if(!this.data.list && !this.current_list)
+          this.load();
+      
+      if(this.current_list)
+          ret = this.current_list;
+      
+      else if(this.data.list)
+          ret = new List(this.data.list);
+      
+      if(!ret)
+        throw new InvalidDataException("Card is not in a list: "+this.id());        
+      
+      return ret;
+    }
+    
+    this.setCurrentList = function(list)
+    {
+      this.current_list = list;
     }
     
     /**
@@ -705,6 +719,14 @@ var Card = function(data)
 
         TrelloApi.put("cards/"+this.data.id+"?idList="+list.data.id+"&idBoard="+list.board().data.id+"&pos="+position);
         this.data.list = null;
+        
+        if(this.current_list)
+        {
+            this.current_list.card_list = null;
+            this.current_list = null;
+        }
+
+        this.current_list = null;
         list.card_list = null;
         return this;
     }
@@ -1011,6 +1033,7 @@ var Card = function(data)
         this.checklist_list  = null;
         this.labels_list     = null;
         this.members_list    = null;
+        this.current_list = null;
         var attempt = this.data.id;
         this.data = TrelloApi.get("cards/"+this.data.id+"?fields=all&actions=all&attachments=true&attachment_fields=all&members=true&member_fields=all&memberVoted_fields=all&checklists=all&checklist_fields=all&board=true&board_fields=all&list=true&pluginData=true&stickers=true&sticker_fields=all");
         

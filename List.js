@@ -123,7 +123,7 @@ var List = function(data)
             });
         }
 
-        return this.card_list.findByName(name);
+        return this.card_list.findByName(name).setCurrentList(this);
     }
 
     /**
