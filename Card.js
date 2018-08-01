@@ -107,11 +107,26 @@ var Card = function(data)
     */
     this.board = function()
     {
-        if(!this.data.idBoard && !this.data.board)
-            this.load();
+        var ret = null;
+
+        if(this.current_list)
+        {
+            ret = this.current_list.board();
+        }
         
-        var data = (this.data.board) ? this.data.board:{id: this.data.idBoard};
-        return new Board(data);
+        else
+        {
+            if(!this.data.idBoard && !this.data.board)
+                this.load();
+            
+            var data = (this.data.board) ? this.data.board:{id: this.data.idBoard};
+            ret = new Board(data);
+        }
+        
+        if(!ret)
+            throw new InvalidDataException("Board not found for card: "+this.id());
+        
+        return ret;
     }
 
     /**
@@ -169,7 +184,7 @@ var Card = function(data)
     */
     this.moveToNextList = function()
     {
-        this.moveTo(this.board().lists().itemAfter(this.currentList().name()).name(),"top");
+        this.moveTo(this.currentList().board().lists().itemAfter(this.currentList().name()).name(),"top");
         return this;
     }
 
@@ -201,6 +216,7 @@ var Card = function(data)
     this.setCurrentList = function(list)
     {
       this.current_list = list;
+      return this;
     }
     
     /**

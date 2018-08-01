@@ -76,11 +76,22 @@ var List = function(data)
     */
     this.board = function()
     {
-        if(!this.data.idBoard)
+        if(!this.data.idBoard && !this.board_object)
             this.load();
         
-        this.board_object = new Board({id: this.data.idBoard});
+        if(!this.board_object && this.data.idBoard)
+            this.board_object = new Board({id: this.data.idBoard});
+
+        if(!this.board_object)
+            throw new InvalidDataException("List is not in a board: "+this.id());
+
         return this.board_object;
+    }
+    
+    this.setBoard = function(board)
+    {
+        this.board_object = board;
+        return this;
     }
 
     /**
@@ -119,11 +130,11 @@ var List = function(data)
         {
             this.card_list = new IterableCollection(TrelloApi.get("lists/"+this.data.id+"/cards?fields=id,name")).transform(function(elem)
             {
-                return new Card(elem);
-            });
+                return new Card(elem).setCurrentList(this);
+            }.bind(this));
         }
 
-        return this.card_list.findByName(name).setCurrentList(this);
+        return this.card_list.findByName(name);
     }
 
     /**
