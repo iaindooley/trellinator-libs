@@ -256,8 +256,8 @@ var Board = function(data)
         {
             this.list_of_lists = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/lists?cards=none&card_fields=none&filter=open&fields=all")).transform(function(elem)
                                  {
-                                     return new List(elem);
-                                 });
+                                     return new List(elem).setBoard(this);
+                                 }.bind(this));
         }
       
         return this.list_of_lists.findByName(name);
