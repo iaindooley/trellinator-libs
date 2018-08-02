@@ -1042,6 +1042,82 @@ var Card = function(data)
         this.labels_list = null;
         return this;
     }
+    
+    /**
+    * Add a custom or default sticker.
+    * @param sticker {string} To add a custom sticker, pass in the ID of a custom
+    * sticker, fetched with Member.customStickers, for
+    * example new Trellinator().customStickers() if your 
+    * custom sticker list was created by your Trellinator
+    * user. Note that custom stickers are only avialable in business/enterprise
+    * class accounts. Otherwise you can pass in a predefined sticker from this list:
+    * Standard stickers (available in free accounts):
+    * - check
+    * - heart
+    * - warning
+    * - clock
+    * - smile
+    * - laugh
+    * - huh
+    * - frown
+    * - thumbsup
+    * - thumbsdown
+    * - star
+    * - rocketship
+    * Premium stickers (business/enterprise class only):
+    * - taco-love
+    * - taco-confused
+    * - taco-cool
+    * - taco-angry
+    * - taco-celebrate
+    * - taco-robot
+    * - taco-alert
+    * - taco-active
+    * - taco-money
+    * - taco-reading
+    * - taco-trophy
+    * - taco-sleeping
+    * - taco-pixel
+    * - taco-proto
+    * - taco-embarrassed
+    * - taco-clean
+    * - pete-happy
+    * - pete-love
+    * - pete-broken
+    * - pete-alert
+    * - pete-talk
+    * - pete-vacation
+    * - pete-confused
+    * - pete-shipped
+    * - pete-busy
+    * - pete-completed
+    * - pete-space
+    * - pete-sketch
+    * - pete-ghost
+    * - pete-award
+    * - pete-music
+    * @param top {int} (optional) y co-ordinate between -60 and 100 default 0
+    * @param left {int} (optional) x co-ordinate between -60 and 100 default 0 
+    * @param rotate {int} (optional) degree of rotation between 0 and 360 default 0
+    * @param z {int} (optional) z-index (ie. if this should sit "on top" of other stickers) 0 is highest, ie. "on top" of everything else, and is the default
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).card().addSticker("pete-happy");
+    */
+    this.addSticker = function(sticker,top,left,rotate,z)
+    {
+        if(!top)
+            top = 0;
+        if(!left)
+            left = 0;
+        if(!rotate)
+            rotate = 0;
+        if(!z)
+            z = 10;
+
+        TrelloApi.post("cards/"+this.id()+"/stickers/?image="+encodeURIComponent(sticker)+"&top="+parseInt(top)+"&left="+parseInt(left)+"&rotate="+parseInt(rotate)+"&zIndex="+parseInt(z));
+        return this;
+    }
 
     /**
     * Reset cached objects and load data from Trello.
