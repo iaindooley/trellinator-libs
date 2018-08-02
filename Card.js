@@ -1051,6 +1051,7 @@ var Card = function(data)
     * custom sticker list was created by your Trellinator
     * user. Note that custom stickers are only avialable in business/enterprise
     * class accounts. Otherwise you can pass in a predefined sticker from this list:
+    * 
     * Standard stickers (available in free accounts):
     * - check
     * - heart
@@ -1064,6 +1065,7 @@ var Card = function(data)
     * - thumbsdown
     * - star
     * - rocketship
+    * 
     * Premium stickers (business/enterprise class only):
     * - taco-love
     * - taco-confused
