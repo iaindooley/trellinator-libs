@@ -1120,6 +1120,21 @@ var Card = function(data)
         TrelloApi.post("cards/"+this.id()+"/stickers/?image="+encodeURIComponent(sticker)+"&top="+parseInt(top)+"&left="+parseInt(left)+"&rotate="+parseInt(rotate)+"&zIndex="+parseInt(z));
         return this;
     }
+    
+    /**
+    * Remove all stickers from a card
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).card().removeAllStickers();
+    */
+    this.removeAllStickers = function()
+    {
+        new IterableCollection(TrelloApi.get("cards/"+this.id()+"/stickers")).each(function(sticker)
+        {
+            TrelloApi.del("cards/"+this.id()+"/stickers/"+sticker.id);
+        }.bind(this));
+        return this;
+    }
 
     /**
     * Reset cached objects and load data from Trello.

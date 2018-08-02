@@ -41,6 +41,35 @@ var Member = function(data)
     {
         return this.data.id;
     }
+    
+    /**
+    * Fetch a custom sticker by name
+    * @memberof module:TrelloEntities.Member
+    * @example
+    * card.members().first().id();
+    */
+    this.customSticker = function(name)
+    {
+        return this.customStickers().find(function(sticker)
+        {
+          if(sticker.url.indexOf("/"+name.replace(/ /g,"_")+".png") > -1)
+            return sticker;
+          else
+            return false;
+        }).first();
+    }
+
+    /**
+    * Fetch a list of custom sticker IDs
+    * for use with the Card.addSticker method
+    * @memberof module:TrelloEntities.Member
+    * @example
+    * new Trellinator().customStickers();
+    */
+    this.customStickers = function(name)
+    {
+        return new IterableCollection(TrelloApi.get("members/"+this.name()+"/customStickers"));
+    }
 
     /**
     * If this member is NOT the Trellinator
