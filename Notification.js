@@ -817,7 +817,7 @@ var Notification = function(notification)
         
         var ret = new Label(this.notification.action.data.label);
         
-        if(name && (ret.name() != name))
+        if(name && !TrelloApi.nameTest(name,ret.name()))
             throw new InvalidActionException("Label was added, but was not named: "+name);
         
         return ret.setContainingCard(this.card());
