@@ -1201,22 +1201,22 @@ Card.create = function(list,data)
 * Find a card or create it if it doesn't already with
 * either just a string name, or an Object with key/value
 * pairs from {@link https://developers.trello.com/reference/#cards-2}
-* exist, in the given list
+* exist, in the given list. The card can exist anywhere
+* on the same board as the target list, but will be created
+* in the target list if it doesn't exist.
 * @memberof module:TrelloEntities.Card
 * @param list {List} a List object to find or create the card in
 * @param data {string|Object} either the name of the card, or an Object
 * with at least a name attribute to be used to find the card, and then
 * data to be used when creating the card
 * @example
-* new Notification(posted).board().id();
+* Card.findOrCreate(new Trellinator().board("My Board").list("Inbox"),"New Card Name");
 */
 Card.findOrCreate = function(list,data)
 {
-    var cards = list.cards(data);
-    
     try
     {
-        var ret = cards.first();
+        var ret = list.board().card(data);
     }
     
     catch(e)
