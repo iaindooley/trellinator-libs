@@ -248,6 +248,35 @@ var Notification = function(notification)
     }
 
     /**
+    * Return a Board object that a card was moved
+    * from or throw InvalidActionException.
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .boardBefore().name();
+    */
+    this.boardBefore = function()
+    {
+        try
+        {
+            var ret = this.listBefore().board();
+        }
+        
+        catch(e)
+        {
+            Notification.expectException(InvalidActionException,e);
+            
+            if(!this.notification.action.data.boardSource)
+                throw new InvalidActionException("No boardSource, no listBefore");
+
+            var ret = new Board(this.notification.action.data.boardSource);
+        }
+
+        return ret;
+    }
+
+    /**
     * Return a List object that a card
     * was moved out of if a card was
     * moved as part of this notification,
@@ -696,7 +725,8 @@ var Notification = function(notification)
     //Deprecated: use movedCard instead
     this.listCardWasMovedTo = function(name)
     {
-        if(this.notification.action.display.translationKey == "action_move_card_from_list_to_list")
+
+        if(["action_move_card_to_board","action_move_card_from_list_to_list"].indexOf(this.notification.action.display.translationKey) > -1)
             var ret = new List(this.notification.action.display.entities.listAfter);
         else
             throw new InvalidActionException("Card was not moved to a list");
