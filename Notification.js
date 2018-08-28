@@ -98,7 +98,7 @@ var Notification = function(notification)
     */
     this.addedMemberToCard = function()
     {
-        return memberAddedToCard();
+        return this.memberAddedToCard();
     }
 
     /**
