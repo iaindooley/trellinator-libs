@@ -725,9 +725,10 @@ var Notification = function(notification)
     //Deprecated: use movedCard instead
     this.listCardWasMovedTo = function(name)
     {
-
-        if(["action_move_card_to_board","action_move_card_from_list_to_list"].indexOf(this.notification.action.display.translationKey) > -1)
+        if(["action_move_card_from_list_to_list"].indexOf(this.notification.action.display.translationKey) > -1)
             var ret = new List(this.notification.action.display.entities.listAfter);
+        else if(["action_move_card_to_board"].indexOf(this.notification.action.display.translationKey) > -1)
+            var ret = this.card().currentList();
         else
             throw new InvalidActionException("Card was not moved to a list");
 
