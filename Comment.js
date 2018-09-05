@@ -70,6 +70,22 @@ var Comment = function(data)
         return this.text();
     }
     
+    /**
+    * Delete this comment, works only if you have 
+    * more permissions than the person who made the
+    * comment, you made the comment or the person
+    * who made the comment has deleted their account
+    * Returns the containing card
+    * @memberof module:TrelloEntities.Comment
+    * @example
+    * card.comments().first().del();
+    */
+    this.del = function()
+    {
+        TrelloApi.del("actions/"+this.id());
+        return this.card();
+    }
+    
     //INTERNAL USE ONLY
     this.setContainingCard = function(card)
     {
