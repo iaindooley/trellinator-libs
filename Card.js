@@ -326,7 +326,10 @@ var Card = function(data)
         if(!this.data.attachments)
             this.load();
 
-        return new IterableCollection(this.data.attachments);
+        return new IterableCollection(this.data.attachments).find(function(elem)
+        {
+            return new Attachment(elem);
+        });
     }
 
     /**

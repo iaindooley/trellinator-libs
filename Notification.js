@@ -540,6 +540,121 @@ var Notification = function(notification)
     }
 
     /**
+    * Return an Attachment object which will
+    * hold a reference to the Card object via
+    * the card() method, if an attachment was
+    * added to a card as part of this notification
+    * and that attachment was a Trello Board
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .attachedBoard()
+    * .card().postComment("I have a Trello Board");
+    */
+    this.attachedBoard = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_add_attachment_to_card")
+            throw new InvalidActionException("No attachment was added to a card");
+        
+        ret = new Attachment(this.notification.action.display.entities.attachment);
+        
+        if(!ret.isBoard())
+            throw new InvalidActionException("An attachment was added but it wasn't a board");
+
+        return ret.setContainingCard(this.card());
+    }
+
+    /**
+    * Return an Attachment object which will
+    * hold a reference to the Card object via
+    * the card() method, if an attachment was
+    * added to a card as part of this notification
+    * and that attachment was a Trello card
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .attachedCard()
+    * .card().postComment("I have a Trello Card");
+    */
+    this.attachedCard = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_add_attachment_to_card")
+            throw new InvalidActionException("No attachment was added to a card");
+        
+        ret = new Attachment(this.notification.action.display.entities.attachment);
+        
+        if(!ret.isCard())
+            throw new InvalidActionException("An attachment was added but it wasn't a card");
+
+        return ret.setContainingCard(this.card());
+    }
+
+    /**
+    * Return an Attachment object which will
+    * hold a reference to the Card object via
+    * the card() method, if an attachment was
+    * added to a card as part of this notification
+    * and that attachment was a file optionally with
+    * a file name matching a regex or string passed in
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionaly pass in a string
+    * or RegExp to match against the name of the file
+    * (not the name of the attachment)
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .attachedFile(new RegExp("*.pdf","i"))
+    * .card().postComment("I have a PDF file");
+    */
+    this.attachedFile = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_add_attachment_to_card")
+            throw new InvalidActionException("No attachment was added to a card");
+        
+        ret = new Attachment(this.notification.action.display.entities.attachment);
+
+        if(!ret.isFile())
+            throw new InvalidActionException("An attachment was added but it wasn't a file");
+        if(name && !TrelloApi.nameTest(name,ret.link()))
+            throw new InvalidActionException("Attachment with url: "+ret.link()+" did not match: "+name);
+        
+        return ret.setContainingCard(this.card());
+    }
+
+    /**
+    * Return an Attachment object which will
+    * hold a reference to the Card object via
+    * the card() method, if an attachment was
+    * added to a card as part of this notification
+    * and that attachment was a link/URL, optionally
+    * matching a regex or string passed in
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionaly pass in a string
+    * or RegExp to match against the URL of the attachment
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .attachedLink(new RegExp("*google.com*"))
+    * .card().postComment("I have a new Google link");
+    */
+    this.attachedLink = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_add_attachment_to_card")
+            throw new InvalidActionException("No attachment was added to a card");
+        
+        ret = new Attachment(this.notification.action.display.entities.attachment);
+        
+        if(!ret.isLink())
+            throw new InvalidActionException("An attachment was added but it wasn't a link");
+        if(name && !TrelloApi.nameTest(name,ret.link()))
+            throw new InvalidActionException("Attachment with url: "+ret.link()+" did not match "+name);
+
+        return ret.setContainingCard(this.card());
+    }
+
+    /**
     * Return the Member object who initiated this
     * notification. Since all notifications are at
     * the board level, this will always return 
