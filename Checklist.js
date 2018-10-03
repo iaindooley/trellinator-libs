@@ -166,6 +166,9 @@ var Checklist = function(data)
 
         if(!this.data.checkItems)
             this.load();
+      //If we don't have any checkitems for some reason, then we are by definition complete
+      if(!this.data.checkItems)
+        return true;
         
         new IterableCollection(this.data.checkItems).each(function(elem)
         {
@@ -293,6 +296,10 @@ var Checklist = function(data)
     this.load = function()
     {
         this.data = TrelloApi.get("checklists/"+this.data.id+"?cards=all&checkItems=all&checkItem_fields=all&fields=all");
+      
+      if(!this.data)
+        throw new InvalidDataException("We appear to not exist ... ");
+      
         return this;
     }
 
