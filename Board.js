@@ -407,6 +407,20 @@ var Board = function(data)
     }
 
     /**
+    * Remove a Trello member from a board
+    * @memberof module:TrelloEntities.Board
+    * @param member {Member} a Member object to remove from this board
+    * @example
+    * new Trellinator().board("Some Board").removeMember(new Notification(posted).member());
+    */
+    this.removeMember = function(member)
+    {
+        TrelloApi.del("boards/"+this.data.id+"/members/"+member.username());
+        this.members_list  = null;
+        return this;
+    }
+
+    /**
     * Delete this board
     * @memberof module:TrelloEntities.Board
     * @example
