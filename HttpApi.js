@@ -84,7 +84,7 @@ HttpApi.call = function(method,url,force_get)
   
     catch(e)
     {
-       writeInfo_("Unable to parse response: "+resp+" from URL: "+url+" with method: "+method+". Got error: "+e);
+       throw new InvalidRequestException(resp);
     }
   
     return ret;

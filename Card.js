@@ -433,8 +433,20 @@ var Card = function(data)
     */
     this.addMember = function(member)
     {
-        TrelloApi.post("cards/"+this.data.id+"/idMembers?value="+member.data.id);
-        this.members_list    = null;
+        try
+        {
+            TrelloApi.post("cards/"+this.data.id+"/idMembers?value="+member.data.id);
+            this.members_list    = null;
+        }
+        
+        catch(e)
+        {
+            Notification.expectException(InvalidRequestException,e);
+            
+            if(e.toString().indexOf("member is already on the card") == -1)
+                throw e;
+        }
+
         return this;
     }
 

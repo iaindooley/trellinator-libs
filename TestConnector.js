@@ -48,16 +48,6 @@ var TestConnector = function()
             
             if(stdout)
             {
-                try
-                {
-                    JSON.parse(stdout);
-                }
-                
-                catch(e)
-                {
-                    throw new Error("Unable to parse JSON: "+stdout);
-                }
-
                 if((TestConnector.test_base_dir != "") && (!TestConnector.nocache))
                 {
                     fs.writeFileSync(fixture_path,stdout);
@@ -66,6 +56,17 @@ var TestConnector = function()
                 
                 else
                     var output = stdout.toString();
+
+                try
+                {
+                    JSON.parse(stdout);
+                }
+                
+                catch(e)
+                {
+                    throw new InvalidRequestException(stdout);
+                }
+
             }
         }
 

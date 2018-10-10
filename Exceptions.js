@@ -116,3 +116,26 @@ var InvalidActionException = function(msg)
     return this.msg;
   }
 }
+
+/**
+* @class InvalidRequestException
+* @memberof module:Exceptions
+* @constructor
+* @param msg {string} the exception message
+* @classdesc thrown by the {@link module:TrellinatorCore.HttpApi}
+* class when an error parsing JSON output occurs
+*/
+var InvalidRequestException = function(msg)
+{
+  this.msg = msg+"\n\nSTACK: "+Trellinator.getStack();
+  
+  /**
+  * Return a string representation of this message
+  * which will include the full stack
+  * @memberof module:Exceptions.InvalidDataException
+  */
+  this.toString = function()
+  {
+    return this.msg;
+  }
+}
