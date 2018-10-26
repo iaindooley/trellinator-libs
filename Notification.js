@@ -291,8 +291,8 @@ var Notification = function(notification)
     */
     this.listBefore = function()
     {
-        if(notification.action.data.listBefore)
-            ret = new List(notification.action.data.listBefore);
+        if(this.notification.action.data.listBefore)
+            ret = new List(this.notification.action.data.listBefore);
         else
             throw new InvalidActionException("No list before");
         
@@ -314,11 +314,67 @@ var Notification = function(notification)
     */
     this.listAfter = function()
     {
-        if(notification.action.data.listAfter)
-            ret = new List(notification.action.data.listAfter);
+        if(this.notification.action.data.listAfter)
+            ret = new List(this.notification.action.data.listAfter);
         else
             throw new InvalidActionException("No list after");
         
+        return ret;
+    }
+
+    /**
+    * Return a List object that was created
+    * or moved from another board
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * Card.create(new Notification(posted)
+    * .addedList(),"Welcome to the list!");
+    */
+    this.addedList = function()
+    {
+        
+        if(["action_added_list_to_board","action_move_list_to_board"].indexOf(this.notification.action.display.translationKey) > -1)
+            ret = new List(this.notification.action.data.list);
+        else
+            throw new InvalidActionException("No list added");
+
+        return ret;
+    }
+
+    /**
+    * Return a List object that was created
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * Card.create(new Notification(posted)
+    * .createdList(),"Welcome to the list!");
+    */
+    this.createdList = function()
+    {
+        if(["action_added_list_to_board"].indexOf(this.notification.action.display.translationKey) > -1)
+            ret = new List(this.notification.action.data.list);
+        else
+            throw new InvalidActionException("No list created");
+
+        return ret;
+    }
+
+    /**
+    * Return a List object that was archived
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .archivedList().unArchive();
+    */
+    this.archivedList = function()
+    {
+        if(["action_archived_list"].indexOf(this.notification.action.display.translationKey) > -1)
+            ret = new List(this.notification.action.data.list);
+        else
+            throw new InvalidActionException("No list archived");
+
         return ret;
     }
 
@@ -995,8 +1051,8 @@ var Notification = function(notification)
     //DEPRECATED: use changedListName
     this.updatedList = function()
     {
-        if(notification.action.data.list)
-            ret = new List(notification.action.data.list);
+        if(this.notification.action.data.list)
+            ret = new List(this.notification.action.data.list);
         else
             throw new InvalidActionException("List not updated");
         
