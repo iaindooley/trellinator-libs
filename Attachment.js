@@ -103,23 +103,18 @@ var Attachment = function(data)
     }
     
     /**
-    * Archive this list
+    * All attachments in Trello are links
     * @memberof module:TrelloEntities.List
     * @example
     * card.currentList().archive();
     */
     this.isLink = function()
     {
-        if(this.data.previews && !this.data.previews.length)
-            return true;
-        else if(this.data.previews && this.data.previews.length)
-            return false;
-        else
-            return !this.data.previewUrl;
+        return true;
     }
     
     /**
-    * Archive this list
+    * Is this link a board?
     * @memberof module:TrelloEntities.List
     * @example
     * card.currentList().archive();
@@ -130,7 +125,7 @@ var Attachment = function(data)
     }
 
     /**
-    * Archive this list
+    * Is this link a trello board?
     * @memberof module:TrelloEntities.List
     * @example
     * card.currentList().archive();
@@ -140,12 +135,7 @@ var Attachment = function(data)
         return TrelloApi.cardLinkRegExp().test(this.data.url);
     }
 
-    /**
-    * Archive this list
-    * @memberof module:TrelloEntities.List
-    * @example
-    * card.currentList().archive();
-    */
+    //DEPRECATED: all attachments are links
     this.isFile = function()
     {
         return !this.isLink();
