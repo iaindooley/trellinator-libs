@@ -172,6 +172,18 @@ var List = function(data)
     }
 
     /**
+    * Unarchive this list
+    * @memberof module:TrelloEntities.List
+    * @example
+    * card.currentList().unArchive();
+    */
+    this.unArchive = function()
+    {
+        TrelloApi.put("lists/"+this.data.id+"?closed=false");
+        return this;
+    }
+
+    /**
     * Copy this list
     * @memberof module:TrelloEntities.List
     * @example
