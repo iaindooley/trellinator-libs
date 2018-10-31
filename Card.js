@@ -387,6 +387,33 @@ var Card = function(data)
         TrelloApi.post(url);
         return this;
     }
+    
+    /**
+    * Download a file from a URL to Google Drive, then add it
+    * as a link to the card. I can't see a good way to add a file
+    * directly by URL either from the internet or from Google Drive
+    * so this should be updated at some point.
+    * @memberof module:TrelloEntities.Card
+    * @param data {string|Object} either a string that is a fully 
+    * formed URL, or an object that contains at least either
+    * an attribute link or url, and optionally one of these as
+    * well as a name attribute
+    * @example
+    * var notif = new Notification(posted);
+    * card.attachFile(notif.card().attachments().first().link());
+    */
+    this.attachFile = function(data)
+    {
+        if(data.url)
+            var link = data.url;
+        else if(typeof data.link == "string")
+            var link = data.link;
+        else
+            var link = data;
+      
+      var file = Trellinator.downloadFileToGoogleDrive(link);
+      this.attachLink({name: file.getName(),url: file.getUrl()});
+    }
 
     /**
     * Set the name of this card
