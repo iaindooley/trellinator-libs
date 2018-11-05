@@ -726,7 +726,7 @@ var Card = function(data)
     */
     this.setDue = function(datetime)
     {
-        TrelloApi.put("cards/"+this.data.id+"?due="+encodeURIComponent(datetime));
+        TrelloApi.put("cards/"+this.data.id+"?due="+encodeURIComponent(datetime.toUTCString()));
         this.data.due = datetime;
         return this;
     }
