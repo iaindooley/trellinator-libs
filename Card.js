@@ -328,7 +328,12 @@ var Card = function(data)
 
         return new IterableCollection(this.data.attachments).find(function(elem)
         {
-            return new Attachment(elem);
+            var ret = new Attachment(elem);
+            
+            if(name && !TrelloApi.nameTest(name,ret.text()))
+                ret = false;
+            
+            return ret;
         });
     }
 
