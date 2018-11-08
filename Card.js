@@ -977,14 +977,19 @@ var Card = function(data)
     * @param name {string} The name of the checklist to add
     * @param callback {Function} a callback which will recieve
     * the new or existing Checklist object to add items to it
+    * @param position {string} (optional) top, bottom, a number, defaults
+    * to "bottom"
     * @example
     * new Notification(posted).movedCard("ToDo").addChecklist("Do Stuff",function(cl)
     * {
     *     cl.addItem("Did you do this yet?");
     * });
     */
-    this.addChecklist = function(name,callback)
+    this.addChecklist = function(name,callback,position)
     {
+        if(!position)
+            position = "bottom";
+
         try
         {
             var checklist = this.checklist(name);
@@ -992,7 +997,7 @@ var Card = function(data)
         
         catch(e)
         {
-            var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name)));
+            var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position)));
             this.checklist_list = null;
         }
 
