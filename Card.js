@@ -328,7 +328,12 @@ var Card = function(data)
 
         return new IterableCollection(this.data.attachments).find(function(elem)
         {
-            return new Attachment(elem);
+            var ret = new Attachment(elem);
+            
+            if(name && !TrelloApi.nameTest(name,ret.text()))
+                ret = false;
+            
+            return ret;
         });
     }
 
@@ -386,6 +391,33 @@ var Card = function(data)
 
         TrelloApi.post(url);
         return this;
+    }
+    
+    /**
+    * Download a file from a URL to Google Drive, then add it
+    * as a link to the card. I can't see a good way to add a file
+    * directly by URL either from the internet or from Google Drive
+    * so this should be updated at some point.
+    * @memberof module:TrelloEntities.Card
+    * @param data {string|Object} either a string that is a fully 
+    * formed URL, or an object that contains at least either
+    * an attribute link or url, and optionally one of these as
+    * well as a name attribute
+    * @example
+    * var notif = new Notification(posted);
+    * card.attachFile(notif.card().attachments().first().link());
+    */
+    this.attachFile = function(data)
+    {
+        if(data.url)
+            var link = data.url;
+        else if(typeof data.link == "string")
+            var link = data.link;
+        else
+            var link = data;
+      
+      var file = Trellinator.downloadFileToGoogleDrive(link);
+      this.attachLink({name: file.getName(),url: file.getUrl()});
     }
 
     /**
@@ -699,7 +731,7 @@ var Card = function(data)
     */
     this.setDue = function(datetime)
     {
-        TrelloApi.put("cards/"+this.data.id+"?due="+encodeURIComponent(datetime));
+        TrelloApi.put("cards/"+this.data.id+"?due="+encodeURIComponent(datetime.toUTCString()));
         this.data.due = datetime;
         return this;
     }
@@ -945,14 +977,19 @@ var Card = function(data)
     * @param name {string} The name of the checklist to add
     * @param callback {Function} a callback which will recieve
     * the new or existing Checklist object to add items to it
+    * @param position {string} (optional) top, bottom, a number, defaults
+    * to "bottom"
     * @example
     * new Notification(posted).movedCard("ToDo").addChecklist("Do Stuff",function(cl)
     * {
     *     cl.addItem("Did you do this yet?");
     * });
     */
-    this.addChecklist = function(name,callback)
+    this.addChecklist = function(name,callback,position)
     {
+        if(!position)
+            position = "bottom";
+
         try
         {
             var checklist = this.checklist(name);
@@ -960,7 +997,7 @@ var Card = function(data)
         
         catch(e)
         {
-            var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name))).setContainingCard(this);
+            var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position))).setContainingCard(this);
             this.checklist_list = null;
         }
 

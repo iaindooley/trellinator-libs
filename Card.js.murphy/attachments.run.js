@@ -70,10 +70,10 @@ var expected = "BEGIN\n"+
 "https://trello-attachments.s3.amazonaws.com/5b0a731f239d107850fce740/5b8f9441119ad87ab0dfcd2b/631a8da0f3e76dc1fc8e94e60d6986e1/DependableFragrantArkshell-max-1mb.gif\n"+
 "DependableFragrantArkshell-max-1mb.gif\n"+
 "https://trello-attachments.s3.amazonaws.com/5b0a731f239d107850fce740/5b8f9441119ad87ab0dfcd2b/631a8da0f3e76dc1fc8e94e60d6986e1/DependableFragrantArkshell-max-1mb.gif\n"+
-"is a link: false\n"+
+"is a link: true\n"+
 "is a card: false\n"+
 "is a board: false\n"+
-"is a file: true\n"+
+"is a file: false\n"+
 "END\n";
 
 new Trellinator().board("Iain Dooley Sandbox").card("Test Attachments").cardsLinkedInAttachments().first().link();

@@ -37,31 +37,31 @@ ExecutionQueue.fake_push = function(name,params,signature,time)
 testNoException(new Notification(attached_link),"attachedLink");
 testThrowsException(new Notification(attached_link),"attachedCard");
 testThrowsException(new Notification(attached_link),"attachedBoard");
-testThrowsException(new Notification(attached_link),"attachedFile");
+//testNoException(new Notification(attached_link),"attachedFile");
 
 testNoException(new Notification(attached_card),"attachedLink");
 testNoException(new Notification(attached_card),"attachedCard");
 testThrowsException(new Notification(attached_card),"attachedBoard");
-testThrowsException(new Notification(attached_card),"attachedFile");
+//testThrowsException(new Notification(attached_card),"attachedFile");
 
 testNoException(new Notification(attached_board),"attachedLink");
 testThrowsException(new Notification(attached_board),"attachedCard");
 testNoException(new Notification(attached_board),"attachedBoard");
-testThrowsException(new Notification(attached_board),"attachedFile");
+//testThrowsException(new Notification(attached_board),"attachedFile");
 
-testThrowsException(new Notification(attached_file),"attachedLink");
+testNoException(new Notification(attached_file),"attachedLink");
 testThrowsException(new Notification(attached_file),"attachedCard");
 testThrowsException(new Notification(attached_file),"attachedBoard");
-testNoException(new Notification(attached_file),"attachedFile");
+//testNoException(new Notification(attached_file),"attachedFile");
 
 new Notification(attached_link).attachedLink().remove();
 new Notification(attached_card).attachedCard().remove();
 new Notification(attached_board).attachedBoard().remove();
-new Notification(attached_file).attachedFile().remove();
+//new Notification(attached_file).attachedFile().remove();
 
 try
 {
-    new Notification(attached_file).attachedFile(new RegExp(".*\\.gif"));
+    new Notification(attached_file).attachedLink(new RegExp(".*\\.gif"));
     new Notification(attached_link).attachedLink(new RegExp(".*Iterable.*"));
 }
 
@@ -72,7 +72,7 @@ catch(e)
 
 try
 {
-    new Notification(attached_file).attachedFile(new RegExp(".*\\.pdf"));
+    new Notification(attached_file).attachedLink(new RegExp(".*\\.pdf"));
     console.log("Should have got an exception for wrong file attachment regexp");
 }
 
