@@ -89,6 +89,18 @@ var Checklist = function(data)
         this.item_list = null;
         return this;
     }
+    
+    /**
+    * Remove this checklist from the containing card
+    * @memberof module:TrelloEntities.Checklist
+    * @example
+    * card.checklist("Something").remove();
+    */
+    this.remove = function()
+    {
+      TrelloApi.del("cards/"+this.card().id()+"/checklists/"+this.id());
+      return this.card();
+    }
 
     /**
     * Mark all items complete
@@ -101,7 +113,7 @@ var Checklist = function(data)
       this.items().each(function(elem)
                         {   
                           if(elem.state() == "incomplete")
-                            TrelloApi.put("cards/"+this.card().data.id+"/checkItem/"+elem.data.id+"?state=complete");
+                            TrelloApi.put("cards/"+this.card().id()+"/checkItem/"+elem.id()+"?state=complete");
                         }.bind(this));
       
       this.item_list = null;
