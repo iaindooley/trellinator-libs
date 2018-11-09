@@ -960,7 +960,7 @@ var Card = function(data)
         
         catch(e)
         {
-            var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name)));
+            var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name))).setContainingCard(this);
             this.checklist_list = null;
         }
 
