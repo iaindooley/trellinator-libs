@@ -944,14 +944,18 @@ var Card = function(data)
     * @param name {string|RegExp} the name of the checklist to
     * copy, if multiple matches will just take the first found
     * @param to_card {Card} the card to copy the checklist to
+    * @param position {string} (optional) either top or bottom, or a positive number, defaults to bottom
     * @example
     * var notif = new Notification(posted);
     * //Copy a checklist to a card if it was moved or added to the ToDo list
     * notif.board().card("Templates").copyChecklist("Some Procedure",notif.addedCard("ToDo"));
     */
-    this.copyChecklist = function(name,to_card)
+    this.copyChecklist = function(name,to_card,position)
     {
-        return new Checklist(TrelloApi.post("cards/"+to_card.data.id+"/checklists?idChecklistSource="+this.checklist(name).data.id)).setContainingCard(to_card);
+        if(!position)
+            position = "bottom";
+
+        return new Checklist(TrelloApi.post("cards/"+to_card.data.id+"/checklists?idChecklistSource="+this.checklist(name).id()+"&pos="+encodeURIComponent(position))).setContainingCard(to_card);
     }
 
     /**
