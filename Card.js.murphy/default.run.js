@@ -17,7 +17,7 @@ Trellinator.override_token = "dc1aaaa44446d40ba7a6c1f87e19c222bd172b165b7d5075ec
 
 fetchTestCard("one").postComment("hi there");
 
-if(fetchTestCard("two").setDue(new Date("2018-02-28 00:00:00")).load().due() != "2018-02-28T05:00:00.000Z")
+if(fetchTestCard("two").setDue(new Date("2018-02-28T05:00:00.000Z")).load().due() != "2018-02-28T05:00:00.000Z")
     console.log("Got back the wrong due date");
 
 Board.findOrCreate("Iain Dooley Sandbox").findOrCreateList("Moved To");
@@ -70,7 +70,7 @@ catch(e)
 function fetchTestCard(name)
 {
     if(!name)
-        name = new Date().getTime();
+        name = new Date("2018-02-28T05:00:00.000Z").getTime();
 
     var sandbox = Board.findOrCreate("Iain Dooley Sandbox");
     var sandbox_list = sandbox.findOrCreateList("Test List");
