@@ -952,10 +952,14 @@ var Card = function(data)
     */
     this.copyChecklist = function(name,to_card,position)
     {
-        if(!position)
-            position = "bottom";
+        var ret = new Checklist(TrelloApi.post("cards/"+to_card.id()+"/checklists?idChecklistSource="+this.checklist(name).id())).setContainingCard(to_card);
 
-        return new Checklist(TrelloApi.post("cards/"+to_card.data.id+"/checklists?idChecklistSource="+this.checklist(name).id()+"&pos="+encodeURIComponent(position))).setContainingCard(to_card);
+        //HACK: The post endpoint for adding a checklist to a card ignores the pos parameter
+        //so we need a separate put to update the position once added
+        if(position)
+            ret.setPosition(position);
+        
+        return ret;
     }
 
     /**
@@ -991,9 +995,6 @@ var Card = function(data)
     */
     this.addChecklist = function(name,callback,position)
     {
-        if(!position)
-            position = "bottom";
-
         try
         {
             var checklist = this.checklist(name);
@@ -1001,9 +1002,15 @@ var Card = function(data)
         
         catch(e)
         {
-            var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position))).setContainingCard(this);
+            //var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position))).setContainingCard(this);
+            var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name))).setContainingCard(this);
             this.checklist_list = null;
         }
+        
+        //HACK: The post endpoint for adding a checklist to a card ignores the pos parameter
+        //so we need a separate put to update the position once added
+        if(position)
+            checklist.setPosition(position);
 
         callback(checklist);
         return this;

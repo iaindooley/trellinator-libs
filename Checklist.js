@@ -53,6 +53,20 @@ var Checklist = function(data)
     }
 
     /**
+    * Set the position of this checklist
+    * @memberof module:TrelloEntities.Checklist
+    * @param position {string or number} either top, bottom or a positive number
+    * @example
+    * card.checklist("My Checklist").setPosition("top");
+    */
+    this.setPosition = function(position)
+    {
+      TrelloApi.put("checklists/"+this.data.id+"?pos="+encodeURIComponent(position));
+      this.data.pos = position;
+      return this;
+    }
+
+    /**
     * Delete all items matching the given state
     * @memberof module:TrelloEntities.Checklist
     * @param state {string} either complete or incomplete
