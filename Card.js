@@ -688,8 +688,18 @@ var Card = function(data)
     */
     this.removeMember = function(member)
     {
-        TrelloApi.del("cards/"+this.data.id+"/idMembers/"+member.data.id);
-        this.members_list = null;
+        try
+        {
+            TrelloApi.del("cards/"+this.data.id+"/idMembers/"+member.data.id);
+            this.members_list = null;
+        }
+
+        catch(e)
+        {
+            if(e.toString().indexOf("member is not on the card").indexOf() == -1)
+                throw e;
+        }
+
         return this;
     }
 
