@@ -696,7 +696,7 @@ var Card = function(data)
 
         catch(e)
         {
-            if(e.toString().indexOf("member is not on the card").indexOf() == -1)
+            if(e.toString().indexOf("member is not on the card") == -1)
                 throw e;
         }
 
