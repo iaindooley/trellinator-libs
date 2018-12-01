@@ -267,12 +267,9 @@ var Card = function(data)
     */
     this.cardsLinkedInAttachments = function()
     {
-        return this.attachments(TrelloApi.cardLinkRegExp()).transform(function(elem)
+        return this.attachments(TrelloApi.cardLinkRegExp()).find(function(elem)
         {
-            if(TrelloApi.cardLinkRegExp().test(elem.url))
-                return new Card({link: elem.url});
-            else
-                return false;
+          return new Card({link: elem.link()});
         });
     }
 
@@ -287,12 +284,9 @@ var Card = function(data)
     */
     this.boardsLinkedInAttachments = function()
     {
-        return this.attachments(TrelloApi.boardLinkRegExp()).transform(function(elem)
+        return this.attachments(TrelloApi.boardLinkRegExp()).find(function(elem)
         {
-            if(TrelloApi.boardLinkRegExp().test(elem.url))
-                return new Board({link: elem.url});
-            else
-                return false;
+          return new Board({link: elem.link()});
         });
     }
 
@@ -328,10 +322,13 @@ var Card = function(data)
 
         return new IterableCollection(this.data.attachments).find(function(elem)
         {
-            var ret = new Attachment(elem);
-            
-            if(name && !TrelloApi.nameTest(name,ret.text()))
-                ret = false;
+            var totest = new Attachment(elem);
+            var ret = false;
+          
+            if(name && TrelloApi.nameTest(name,totest.text()))
+                ret = new Attachment(elem);
+            else if(name && TrelloApi.nameTest(name,totest.link()))
+                ret = new Attachment(elem);
             
             return ret;
         });
