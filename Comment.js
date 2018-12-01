@@ -29,7 +29,10 @@ var Comment = function(data)
     */
     this.id = function()
     {
-        return this.data.id;
+        if(!this.data.data)
+            throw new Error("Malformed comment object");
+      
+        return this.data.data.id;
     }
 
     /**
