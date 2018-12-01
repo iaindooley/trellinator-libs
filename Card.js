@@ -827,6 +827,18 @@ var Card = function(data)
     }
     
     /**
+    * Delete this card NO UNDO AVAILABLE
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).movedCard("Done").del();
+    */
+    this.del = function()
+    {
+        TrelloApi.del("cards/"+this.data.id);
+        return this;
+    }
+
+    /**
     * Archive this card
     * @memberof module:TrelloEntities.Card
     * @example
