@@ -41,10 +41,13 @@ var HttpApi = function(){};
 * @param force_get {string} (optional) force a parameter to be
 *        sent in the GET query string even for post or put queries
 */
-HttpApi.call = function(method,url,force_get)
+HttpApi.call = function(method,url,force_get,headers)
 {
     var payload = null;
     var params  = {"method": method,"muteHttpExceptions":true};
+
+    if(headers)
+        params.headers = headers;
 
     if((method == "post") || (method == "put"))
     {
