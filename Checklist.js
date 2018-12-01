@@ -55,7 +55,7 @@ var Checklist = function(data)
     /**
     * Set the position of this checklist
     * @memberof module:TrelloEntities.Checklist
-    * @param position {string or number} either top, bottom or a positive number
+    * @param position {string|number} either top, bottom or a positive number
     * @example
     * card.checklist("My Checklist").setPosition("top");
     */
