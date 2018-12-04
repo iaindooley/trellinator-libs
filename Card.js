@@ -941,7 +941,7 @@ var Card = function(data)
     * //Copy a checklist to a card if it was moved or added to the ToDo list
     * notif.board().card("Templates").copyUniqueChecklist("Some Procedure",notif.addedCard("ToDo"));
     */
-    this.copyUniqueChecklist = function(name,to_card)
+    this.copyUniqueChecklist = function(name,to_card,position)
     {
         try
         {
@@ -951,7 +951,7 @@ var Card = function(data)
         catch(e)
         {
             Notification.expectException(InvalidDataException,e);
-            return this.copyChecklist(name,to_card);
+            return this.copyChecklist(name,to_card,position);
         }
     }
 
