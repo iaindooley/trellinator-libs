@@ -977,7 +977,8 @@ var Card = function(data)
         //so we need a separate put to update the position once added
         if(position)
             ret.setPosition(position);
-        
+
+        this.checklist_list = null;
         return ret;
     }
 

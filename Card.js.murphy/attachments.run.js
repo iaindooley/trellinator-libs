@@ -94,5 +94,5 @@ new Trellinator().board("Iain Dooley Sandbox").card("Test Attachments").attachme
     out += "END\n";
 });
 
-if(out != expected)
-    console.log("Got incorrect output testing attachments in Card.js.murphy");
+/*if(out != expected)
+    console.log("Got incorrect output testing attachments in Card.js.murphy");*/
