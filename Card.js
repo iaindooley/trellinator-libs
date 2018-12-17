@@ -979,6 +979,7 @@ var Card = function(data)
             ret.setPosition(position);
 
         this.checklist_list = null;
+        to_card.checklist_list = null;
         return ret;
     }
 
