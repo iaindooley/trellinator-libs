@@ -329,6 +329,8 @@ var Card = function(data)
                 ret = new Attachment(elem);
             else if(name && TrelloApi.nameTest(name,totest.link()))
                 ret = new Attachment(elem);
+            else if(!name)
+                ret = totest;
             
             return ret;
         });
