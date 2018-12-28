@@ -78,9 +78,7 @@ HttpApi.call = function(method,url,force_get,headers,payload)
   }
     
   var connector = (typeof UrlFetchApp == "undefined")? new TestConnector():UrlFetchApp;
-  Logger.log(params);
   var resp = connector.fetch(url,params);
-  
   
   if(typeof Utilities != "undefined")
     Utilities.sleep(50);
