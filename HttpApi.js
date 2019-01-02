@@ -45,6 +45,9 @@ HttpApi.call = function(method,url,force_get,headers,payload)
 {
   var params  = {"method": method,"muteHttpExceptions":true};
   
+  if(!force_get)
+      force_get = "";
+  
   if(headers)
   {
     params.headers = headers;
@@ -62,10 +65,15 @@ HttpApi.call = function(method,url,force_get,headers,payload)
       for(var key in payload_parts)
       {
         var sub_parts = payload_parts[key].split("=");
-        if(force_get.indexOf(sub_parts[0]) > -1)
+        if(force_get.indexOf(sub_parts[0]) == -1)
           payload[sub_parts[0]] = decodeURIComponent(sub_parts[1]);
         else
-          url += "?"+sub_parts[0]+"="+sub_parts[1];
+        {
+          if(url.indexOf("?") == -1)
+              url += "?"+sub_parts[0]+"="+sub_parts[1];
+          else
+              url += "&"+sub_parts[0]+"="+sub_parts[1];
+        }
       }
       
       params.payload = payload;
