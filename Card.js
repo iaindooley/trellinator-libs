@@ -171,7 +171,8 @@ var Card = function(data)
         else
           var ret = Trellinator.now();
       
-        return ret;
+        this.moved_to_list_cache = ret;
+        return this.moved_to_list_cache;
     }
 
     /**
@@ -805,6 +806,7 @@ var Card = function(data)
         }
 
         this.current_list = null;
+        this.moved_to_list_cache = null;
         list.card_list = null;
         return this;
     }
@@ -1233,6 +1235,7 @@ var Card = function(data)
         this.labels_list     = null;
         this.members_list    = null;
         this.current_list = null;
+        this.moved_to_list_cache = null;
         var attempt = this.data.id;
         this.data = TrelloApi.get("cards/"+this.data.id+"?fields=all&actions=all&attachments=true&attachment_fields=all&members=true&member_fields=all&memberVoted_fields=all&checklists=all&checklist_fields=all&board=true&board_fields=all&list=true&pluginData=true&stickers=true&sticker_fields=all");
         
