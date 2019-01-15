@@ -82,6 +82,8 @@ var TestConnector = function()
     }
 }
 
+TestConnector.sequencer = {};
+TestConnector.use_sequencer = false;
 TestConnector.test_base_dir = "";
 TestConnector.live_key      = process.argv[2];
 TestConnector.live_token    = process.argv[3];
@@ -91,6 +93,16 @@ TestConnector.nocache       = false;
 TestConnector.fixturePath = function(base_dir,url,options)
 {
     var signature =  md5(url+JSON.stringify(options));
+    
+    if(TestConnector.use_sequencer)
+    {
+        if(!TestConnector.sequencer[signature])
+            TestConnector.sequencer[signature] = 0;
+
+        signature += TestConnector.sequencer[signature];
+        TestConnector.sequencer[signature]++;
+    }
+
     var api_cache_dir = path.resolve(base_dir,"./trello_api_fixtures/").toString();
     !fs.existsSync(api_cache_dir) && fs.mkdirSync(api_cache_dir);
     var fixture_dir = path.resolve(base_dir,"./trello_api_fixtures/"+path.basename(process.argv[1])).toString();

@@ -330,6 +330,8 @@ var Card = function(data)
                 ret = new Attachment(elem);
             else if(name && TrelloApi.nameTest(name,totest.link()))
                 ret = new Attachment(elem);
+            else if(!name)
+                ret = totest;
             
             return ret;
         });
@@ -943,7 +945,7 @@ var Card = function(data)
     * //Copy a checklist to a card if it was moved or added to the ToDo list
     * notif.board().card("Templates").copyUniqueChecklist("Some Procedure",notif.addedCard("ToDo"));
     */
-    this.copyUniqueChecklist = function(name,to_card)
+    this.copyUniqueChecklist = function(name,to_card,position)
     {
         try
         {
@@ -953,7 +955,7 @@ var Card = function(data)
         catch(e)
         {
             Notification.expectException(InvalidDataException,e);
-            return this.copyChecklist(name,to_card);
+            return this.copyChecklist(name,to_card,position);
         }
     }
 
@@ -979,7 +981,9 @@ var Card = function(data)
         //so we need a separate put to update the position once added
         if(position)
             ret.setPosition(position);
-        
+
+        this.checklist_list = null;
+        to_card.checklist_list = null;
         return ret;
     }
 

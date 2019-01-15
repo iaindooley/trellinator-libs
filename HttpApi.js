@@ -41,51 +41,67 @@ var HttpApi = function(){};
 * @param force_get {string} (optional) force a parameter to be
 *        sent in the GET query string even for post or put queries
 */
-HttpApi.call = function(method,url,force_get)
+HttpApi.call = function(method,url,force_get,headers,payload)
 {
-    var payload = null;
-    var params  = {"method": method,"muteHttpExceptions":true};
-
-    if((method == "post") || (method == "put"))
+  var params  = {"method": method,"muteHttpExceptions":true};
+  
+  if(!force_get)
+      force_get = "";
+  
+  if(headers)
+  {
+    params.headers = headers;
+  }
+  
+  if(!payload && ((method == "post") || (method == "put")))
+  {
+    if (url.indexOf("?") != -1)
     {
-        if (url.indexOf("?") != -1)
+      var parts         = url.split("?");
+      var url           = parts[0];
+      var payload_parts = parts[1].split("&");
+      var payload       = {};
+      
+      for(var key in payload_parts)
+      {
+        var sub_parts = payload_parts[key].split("=");
+        if(force_get.indexOf(sub_parts[0]) == -1)
+          payload[sub_parts[0]] = decodeURIComponent(sub_parts[1]);
+        else
         {
-            var parts         = url.split("?");
-            var url           = parts[0];
-            var payload_parts = parts[1].split("&");
-            var payload       = {};
-            
-            for(var key in payload_parts)
-            {
-              var sub_parts = payload_parts[key].split("=");
-              if(sub_parts[0] != force_get)
-                payload[sub_parts[0]] = decodeURIComponent(sub_parts[1]);
-              else
-                url += "?"+sub_parts[0]+"="+sub_parts[1];
-            }
-            
-            params.payload = payload;
+          if(url.indexOf("?") == -1)
+              url += "?"+sub_parts[0]+"="+sub_parts[1];
+          else
+              url += "&"+sub_parts[0]+"="+sub_parts[1];
         }
+      }
+      
+      params.payload = payload;
     }
-
-    var connector = (typeof UrlFetchApp == "undefined")? new TestConnector():UrlFetchApp;
-    var resp = connector.fetch(url,params);
-
-
-    if(typeof Utilities != "undefined")
-        Utilities.sleep(50);
+  }
+  
+  else if(payload)
+  {
+    params.payload = payload;
+  }
     
-    var ret = null;
+  var connector = (typeof UrlFetchApp == "undefined")? new TestConnector():UrlFetchApp;
+  var resp = connector.fetch(url,params);
   
-    try
-    {
-        ret = JSON.parse(resp);
-    }
+  if(typeof Utilities != "undefined")
+    Utilities.sleep(50);
   
-    catch(e)
-    {
-       throw new InvalidRequestException(resp);
-    }
+  var ret = null;
   
-    return ret;
+  try
+  {
+    ret = JSON.parse(resp);
+  }
+  
+  catch(e)
+  {
+    throw new InvalidRequestException(resp);
+  }
+  
+  return ret;
 }
