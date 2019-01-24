@@ -61,6 +61,18 @@ var Team = function(data)
     {
         return this.boards(name).first();
     }
+    
+    /**
+    * Remove this board
+    * @memberof module:TrelloEntities.Team
+    * @example
+    * new Trellinator().team("My Team").del();
+    */
+    this.del = function()
+    {
+      TrelloApi.del("organizations/"+this.id());
+      return this;
+    }
 
     /**
     * Return an IterableCollection of boards that are 
@@ -77,7 +89,7 @@ var Team = function(data)
         {
             this.board_list= new IterableCollection(TrelloApi.get("organizations/"+this.data.id+"/boards?filter=open&fields=all")).transform(function(elem)
             {
-                return new Board(elem);
+                return new Board(elem).setContainingTeam(this);
             });
         }
 
