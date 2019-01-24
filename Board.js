@@ -132,8 +132,12 @@ var Board = function(data)
     */
     this.moveToTeam = function(team)
     {
-      this.containing_team.board_list = null;
-      this.containing_team = team;
+      if(this.containing_team)
+      {
+          this.containing_team.board_list = null;
+          this.containing_team = team;
+      }
+
       TrelloApi.put("boards/"+this.id()+"?idOrganization="+team.id());
       return this;
     }
