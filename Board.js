@@ -88,6 +88,7 @@ var Board = function(data)
     this.members_list  = null;
     this.labels_list   = null;
     this.card_list     = null;
+  this.containing_team = null;
 
     /**
     * Return the board ID
@@ -112,6 +113,29 @@ var Board = function(data)
             this.load();
         
         return this.data.name;
+    }
+    
+    /**
+    * Set the containing team
+    */
+    this.setContainingTeam = function(team)
+    {
+      this.containing_team = team;
+      return this;
+    }
+    
+    /**
+    * Move this board to a different team
+    * @memberof module:TrelloEntities.Board
+    * @example
+    * new Notification(posted).board().moveToTeam(new Trellinator().team("New Team"));
+    */
+    this.moveToTeam = function(team)
+    {
+      this.containing_team.board_list = null;
+      this.containing_team = team;
+      TrelloApi.put("boards/"+this.id()+"?idOrganization="+team.id());
+      return this;
     }
     
     /**
