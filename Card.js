@@ -252,8 +252,7 @@ var Card = function(data)
         {   
             checklist.items().each(function(item)
             {   
-                if(item.state == "incomplete")
-                    ret = false;
+              ret = item.isComplete();
             }.bind(this));
         }.bind(this));        
         
