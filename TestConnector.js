@@ -25,25 +25,56 @@ var TestConnector = function()
         catch(e)
         {
             var live_url = url.replace("key=dummy&token=dummy","key="+TestConnector.live_key+"&token="+TestConnector.live_token);
+            var header_string = "";
+            var std_data = true;
+            
+            if(options.headers)
+            {
+                header_string = "--header \""+new IterableCollection(options.headers).implodeValues("\" --header \"",function(elem,key)
+                {
+                    return key+": "+elem;
+                })+"\" ";
+            }
 
             if(options.payload)
             {
-                var data_string = new IterableCollection(options.payload).implode("&",function(elem,key)
+                if(options.headers)
                 {
-                    if(key == "key")
-                        return TestConnector.live_key;
-                    else if(key == "token")
-                        return TestConnector.live_token;
-                    else
-                        return encodeURIComponent(elem);
-                });
+                    if(options.headers["content-type"] == "application/json")
+                    {
+                        std_data = false;
+                        
+                        var data_string = JSON.stringify(new IterableCollection(options.payload).find(function(elem,key)
+                        {   
+                            if(key == "key")
+                                return TestConnector.live_key;
+                            else if(key == "token")
+                                return TestConnector.live_token;
+                            else
+                                return encodeURIComponent(elem);
+                        }).obj);
+                    }
+                }
                 
-                var cmd      = "curl --data \""+data_string+"\" --request "+options.method.toUpperCase()+" --url '"+live_url+"'";
+                if(std_data)
+                {
+                    var data_string = new IterableCollection(options.payload).implode("&",function(elem,key)
+                    {
+                        if(key == "key")
+                            return TestConnector.live_key;
+                        else if(key == "token")
+                            return TestConnector.live_token;
+                        else
+                            return encodeURIComponent(elem);
+                    });
+                }
+                
+                var cmd      = "curl "+header_string+"--data \""+data_string+"\" --request "+options.method.toUpperCase()+" --url '"+live_url+"'";
             }
             
             else
-                var cmd      = "curl --request "+options.method.toUpperCase()+" --url '"+live_url+"'";
-
+                var cmd      = "curl "+header_string+"--request "+options.method.toUpperCase()+" --url '"+live_url+"'";
+console.log(cmd);
             var stdout = cp.execSync(cmd,{ stdio: ['pipe', 'pipe', 'ignore']});
             
             if(stdout)
