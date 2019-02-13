@@ -74,7 +74,7 @@ var TestConnector = function()
             
             else
                 var cmd      = "curl "+header_string+"--request "+options.method.toUpperCase()+" --url '"+live_url+"'";
-console.log(cmd);
+
             var stdout = cp.execSync(cmd,{ stdio: ['pipe', 'pipe', 'ignore']});
             
             if(stdout)
