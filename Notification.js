@@ -379,6 +379,53 @@ var Notification = function(notification)
     }
 
     /**
+    * Return the previous value after a change
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .changedCardName().setName(new Notification(posted).oldValue());
+    * 
+    */
+    this.oldValue = function()
+    {
+        if(this.notification.action.data.old)
+        {
+            for(var key in this.notification.action.data.old)
+                return this.notification.action.data.old[key];
+        }
+        
+        else
+        {
+            throw new InvalidActionException("No old value present");
+        }
+    }
+
+    /**
+    * Return the name of the attribute that changed
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * var notif = new Notification(posted);
+    * notif
+    * .changedCardName().setName(notif.oldValue());
+    * notif.replyToMember("You changed: "+notif.whatChanged());
+    */
+    this.whatChanged = function()
+    {
+        if(this.notification.action.data.old)
+        {
+            for(var key in this.notification.action.data.old)
+                return key;
+        }
+        
+        else
+        {
+            throw new InvalidActionException("No old value present");
+        }
+    }
+
+    /**
     * Return a List object that had
     * it's name changed or throws
     * an InvalidActionException if no
