@@ -1234,7 +1234,8 @@ var Card = function(data)
     * If a field with the given name doesn't exist it will 
     * be created as a text type field.
     * @memberof module:TrelloEntities.Card
-    * @param field_name {striung} the name of the field to get the value for on this card
+    * @param field_name {string} the name of the field to get the value for on this card
+    * @param field_value {string|Date|int|float|double|boolean} the value to set
     * @example
     * new Notification(posted).card().setCustomFieldValue("My Field","Hi there");
     */
