@@ -1250,7 +1250,7 @@ var Card = function(data)
           };
 
         this.insertTrelloCustomFieldValue(payload,value,field);
-        HttpApi.call("put",url,"",{"content-type": "application/json"},payload);
+        HttpApi.call("put",url,"",{"content-type": "application/json"},JSON.stringify(payload));
         return this;
     }
 
@@ -1302,7 +1302,7 @@ var Card = function(data)
                 token: TrelloApi.checkControlValues().token
               };
     
-            var field = HttpApi.call("post",url,"",{"content-type": "application/json"},payload);
+            var field = HttpApi.call("post",url,"",{"content-type": "application/json"},JSON.stringify(payload));
             
             if(!field.id)
                 throw "Unable to create custom field: "+field_name+" response: "+field;
