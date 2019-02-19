@@ -43,6 +43,16 @@ var TestConnector = function()
                     if(options.headers["content-type"] == "application/json")
                     {
                         std_data = false;
+                        
+                        try
+                        {
+                            options.payload = JSON.parse(options.payload);
+                        }
+                        
+                        catch(e)
+                        {
+                        }
+
                         var data_string = JSON.stringify(new IterableCollection(options.payload).find(function(elem,key)
                         {   
                             if(key == "key")
