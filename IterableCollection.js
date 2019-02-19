@@ -53,7 +53,7 @@ var IterableCollection = function(obj)
     */
     this.find = function(callback)
     {
-        var new_obj = [];
+        var new_obj = {};
 
         for(var key in this.obj)
         {
