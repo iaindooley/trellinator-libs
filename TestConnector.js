@@ -44,6 +44,15 @@ var TestConnector = function()
                     {
                         std_data = false;
                         
+                        try
+                        {
+                            options.payload = JSON.parse(options.payload);
+                        }
+                        
+                        catch(e)
+                        {
+                        }
+
                         var data_string = JSON.stringify(new IterableCollection(options.payload).find(function(elem,key)
                         {   
                             if(key == "key")
@@ -51,7 +60,7 @@ var TestConnector = function()
                             else if(key == "token")
                                 return TestConnector.live_token;
                             else
-                                return encodeURIComponent(elem);
+                                return elem;
                         }).obj);
                     }
                 }
@@ -69,7 +78,7 @@ var TestConnector = function()
                     });
                 }
                 
-                var cmd      = "curl "+header_string+"--data \""+data_string+"\" --request "+options.method.toUpperCase()+" --url '"+live_url+"'";
+                var cmd      = "curl "+header_string+"--data '"+data_string+"' --request "+options.method.toUpperCase()+" --url '"+live_url+"'";
             }
             
             else

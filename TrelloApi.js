@@ -93,16 +93,7 @@ TrelloApi.put = function(baseURL)
 TrelloApi.constructTrelloURL = function(baseURL)
 {
     var freshURL = "";
-    var creds = {key: "dummy",token: "dummy"};
-
-    try
-    {
-        creds = TrelloApi.checkControlValues();
-    }
-    
-    catch(e)
-    {
-    }
+    creds = TrelloApi.checkControlValues();
 
     if (baseURL.indexOf("?") == -1)
         freshURL = "https://api.trello.com/1/"+ baseURL +"?key="+ creds.key + "&token="+ creds.token;
@@ -118,20 +109,28 @@ TrelloApi.checkControlValues = function()
 {
     if(!TrelloApi.trello_api_key_information)
     {
-        var col = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG_NAME_).getRange("B2:B3").getValues();
- 
-        var appKey = (col[0][0] + "").trim();
- 
-        if(appKey == "")
-            TrelloApi.trello_api_key_information = {key: "", token: "", err: "Trello Key not found in " + CONFIG_NAME_ + " tab." };
-   
-        var token = (col[1][0] + "").trim();
-
-        if(token == "")
-            TrelloApi.trello_api_key_information = {key: "", token: "", err: "Trello Token not found in " + CONFIG_NAME_ + " tab." };
-
-        //both f ound
-        TrelloApi.trello_api_key_information = {key: appKey, token: token, err:""};
+        if(Trellinator.isGoogleAppsScript())
+        {
+            var col = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG_NAME_).getRange("B2:B3").getValues();
+     
+            var appKey = (col[0][0] + "").trim();
+     
+            if(appKey == "")
+                TrelloApi.trello_api_key_information = {key: "", token: "", err: "Trello Key not found in " + CONFIG_NAME_ + " tab." };
+       
+            var token = (col[1][0] + "").trim();
+    
+            if(token == "")
+                TrelloApi.trello_api_key_information = {key: "", token: "", err: "Trello Token not found in " + CONFIG_NAME_ + " tab." };
+    
+            //both f ound
+            TrelloApi.trello_api_key_information = {key: appKey, token: token, err:""};
+        }
+        
+        else
+        {
+            TrelloApi.trello_api_key_information = {key: "dummy", token: "dummy", err:""};
+        }
     }
   
     return TrelloApi.trello_api_key_information;

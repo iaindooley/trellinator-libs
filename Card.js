@@ -1129,6 +1129,240 @@ var Card = function(data)
         this.labels_list = null;
         return this;
     }
+
+    /**
+    * Return the value of a custom field by name.
+    * This works for all field types, and the value is
+    * converted to the appropriate data type based on
+    * the type of field (eg. number/date/etc)
+    *
+    * If the Custom Fields power up is not enabled
+    * this method will attempt to enable it. If it can't
+    * be enabled because the board has reached the power up
+    * limit, an unexpected exception is thrown.
+    *
+    * If a field with the given name doesn't exist it will 
+    * be created as a text type field
+    * @memberof module:TrelloEntities.Card
+    * @param field_name {striung} the name of the field to get the value for on this card
+    * @example
+    * new Notification(posted).card().customFieldValue("My Field");
+    */
+    this.customFieldValue = function(field_name)
+    {
+        var field = this.findOrCreateCustomFieldFromName(field_name);
+        var ret = false;
+
+        this.customFields().each(function(loop)
+        {
+            if(loop.idCustomField == field.id)
+            {
+                ret = this.extractCustomFieldValueFromDataBasedOnType(loop);
+            }
+        }.bind(this));
+        
+        return ret;
+    }
+
+    //INTERNAL USE ONLY
+    this.extractCustomFieldValueFromDataBasedOnType = function(data)
+    {
+        var ret = "";
+
+        if(data.value)
+        {
+            for(var key in data.value)
+            {
+                switch(key)
+                {
+                    case "text":
+                        ret = data.value[key];
+                    break;
+                      
+                    case "number":
+                        ret = parseFloat(data.value[key]);
+                    break;
+                      
+                    case "checked":
+                        ret = (data.value[key] === 'true') ? true:false;
+                    break;
+                      
+                    case "date":
+                        ret = new Date(data.value[key]);
+                    break;
+                      
+                    default:
+                        ret = "";
+                    break;
+                }
+            }
+        }
+        
+        else if(data.idValue)
+        {
+            new IterableCollection(TrelloApi.get("customField/"+data.idCustomField+"/options")).each(function(option)
+            {
+                if(data.idValue = option._id)
+                    ret = option.value.text;
+            });
+
+        }
+        
+        return ret;
+    }
+
+    /**
+    * Get an IterableCollection of all custom fields
+    * as raw objects for this card (not really that useful)
+    * @memberof module:TrelloEntities.Card
+    */
+    this.customFields = function()
+    {
+        return new IterableCollection(TrelloApi.get("cards/"+this.id()+"/customFieldItems"));
+    }
+
+    /**
+    * Set the value of a custom field. Automatically converts
+    * the value to the correct type for the API, including
+    * looking up dropdown options etc. 
+    *
+    * If the Custom Fields power up is not enabled
+    * this method will attempt to enable it. If it can't
+    * be enabled because the board has reached the power up
+    * limit, an unexpected exception is thrown.
+    *
+    * If a field with the given name doesn't exist it will 
+    * be created as a text type field.
+    * @memberof module:TrelloEntities.Card
+    * @param field_name {string} the name of the field to get the value for on this card
+    * @param field_value {string|Date|int|float|double|boolean} the value to set
+    * @example
+    * new Notification(posted).card().setCustomFieldValue("My Field","Hi there");
+    */
+    this.setCustomFieldValue = function(field_name,value)
+    {
+        var field = this.findOrCreateCustomFieldFromName(field_name);
+        var url = "https://api.trello.com/1/card/"+this.id()+"/customField/"+field.id+"/item";
+        
+        var payload = {
+            key: TrelloApi.checkControlValues().key,
+            token: TrelloApi.checkControlValues().token
+          };
+
+        this.insertTrelloCustomFieldValue(payload,value,field);
+        HttpApi.call("put",url,"",{"content-type": "application/json"},JSON.stringify(payload));
+        return this;
+    }
+
+    //INTERNAL USE ONLY
+    this.findOrCreateCustomFieldFromName = function(field_name)
+    {
+        var enabled = false;
+
+        new IterableCollection(TrelloApi.get("boards/"+this.board().id()+"/plugins?filter=enabled")).each(function(loop)
+        {
+            if(loop.name == "Custom Fields")
+                enabled = true;
+        }.bind(this));
+        
+        if(!enabled)
+        {
+            new IterableCollection(TrelloApi.get("boards/"+this.board().id()+"/plugins?filter=available")).each(function(loop)
+            {
+                if(loop.name == "Custom Fields")
+                {
+                    var resp = TrelloApi.post("boards/"+this.board().id()+"/boardPlugins?idPlugin="+loop.id);
+                    
+                    if(resp.error)
+                        throw "Unable to enable Custom Fields power up to find or create custom field from name: "+field_name+" because: "+resp.error;
+                }
+            }.bind(this));
+        }
+
+        var fields = TrelloApi.get("boards/"+this.board().id()+"/customFields");
+        var field = null;
+
+        new IterableCollection(fields).each(function(loop)
+                                            {
+                                              if(loop.name == field_name)
+                                                field = loop;
+                                            });
+
+        if(field === null)
+        {
+            var url = "https://api.trello.com/1/customFields";
+      
+            var payload = {
+                idModel: this.board().id(),
+                modelType: "board",
+                name: field_name,
+                pos: "bottom",
+                type: "text",
+                key: TrelloApi.checkControlValues().key,
+                token: TrelloApi.checkControlValues().token
+              };
+    
+            var field = HttpApi.call("post",url,"",{"content-type": "application/json"},JSON.stringify(payload));
+            
+            if(!field.id)
+                throw "Unable to create custom field: "+field_name+" response: "+field;
+        }
+        
+        return field;
+    }
+
+    //INTERNAL USE ONLY
+    this.insertTrelloCustomFieldValue = function(payload,value,field)
+    {
+        //Clear the field if the value is empty
+        if ( value === "" || value === null || value === undefined ) {
+          payload.value = "";
+        }
+
+        switch (field.type)
+        {
+            case "text":
+              payload.value = { text: value.toString() };
+            break;
+              
+            case "number":
+              var n = parseFloat(value);
+              if ( isNaN(n) ) {
+                payload.value = "";
+              } else {
+                payload.value = {number: n.toString() };
+              }
+            break;
+              
+            case "checkbox":
+              payload.value = {checked: (!!value).toString() };
+            break;
+              
+            case "date":
+              var d = new Date(value);
+              if ( isNaN( d.getTime() ) ) {
+                payload.value = "";
+              } else {
+                payload.value = { date: d.toISOString() };
+              }
+            break;
+              
+            case "list":
+                payload.idValue = "";
+
+                new IterableCollection(field.options).each(function(opt)
+                {
+                    if(opt.value.text == value)
+                        payload.idValue = opt.id;
+                });
+            break;
+              
+            default:
+                //This shouldn't happen. We can't assume the type, so we clear the field instead.
+                payload.value = "";
+            break;
+        }
+    }
     
     /**
     * Add a custom or default sticker.
