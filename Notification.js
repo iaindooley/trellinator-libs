@@ -641,6 +641,38 @@ var Notification = function(notification)
         ret.setContainingChecklist(this.checklist().setContainingCard(this.card()));
         return ret;
     }
+    
+    /**
+    * Return a CheckItem object if it was added to a checklist
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionally only look for a checklist item matching a string or regex
+    * or RegExp object to match against the text of the completed item
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .addedChecklistItem(/.*Fluffy.*Bunny/)
+    * .card()
+    * .postComment("Cute ^_^");
+    */
+    this.addedChecklistItem = function(name)
+    {
+        if(this.notification.action.type && (this.notification.action.type == "createCheckItem"))
+        {
+            var ret = new CheckItem(this.notification.action.data.checkItem);
+
+            if(name && !TrelloApi.nameTest(name,ret.name()))
+                throw new InvalidActionException("Checklist item named: "+ret.name()+" added which doesn't match: "+name);
+
+            ret.setContainingChecklist(this.checklist().setContainingCard(this.card()));
+        }
+        
+        else
+        {
+            throw new InvalidActionException("No checklist item was created");
+        }
+        
+        return ret;
+    }
 
     /**
     * Return an Attachment object which will
@@ -808,11 +840,16 @@ var Notification = function(notification)
     */
     this.card = function()
     {
-        if(!this.notification.action.display.entities.card)
+        if(!this.notification.action.display.entities.card && !this.notification.action.data.card)
             throw new InvalidActionException("No card was part of this notification");
 
         if(!this.card_object)
-            this.card_object = new Card(this.notification.action.display.entities.card);
+        {
+            if(this.notification.action.display.entities.card)
+                this.card_object = new Card(this.notification.action.display.entities.card);
+            else if(this.notification.action.data.card)
+                this.card_object = new Card(this.notification.action.data.card);
+        }
         
         return this.card_object;
     }
