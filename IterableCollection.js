@@ -107,10 +107,12 @@ var IterableCollection = function(obj)
 
         for(var key in this.obj)
         {
+            var called = callback(this.obj[key],key);
+            
             if(!ret)
-                ret = callback(this.obj[key],key);
+                ret = called;
             else
-                ret += separator+callback(this.obj[key],key);
+                ret += called ? separator+callback(this.obj[key],key):called;
         }
         
         return ret;
