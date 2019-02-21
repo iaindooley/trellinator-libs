@@ -107,6 +107,7 @@ var Notification = function(notification)
     * an object of type Member, otherwise
     * throw an InvalidActionException
     * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optional name (string or regex) to match against username
     * @throws InvalidActionException
     * @example
     * var member = new Notification(posted).addedMemberToBoard();
@@ -119,7 +120,31 @@ var Notification = function(notification)
         var ret = new Member(this.notification.action.member);
 
         if(name && !TrelloApi.nameTest(name,ret.name()))
-            throw new InvalidActionException("The completed checklist was not named "+name);
+            throw new InvalidActionException("The added member was not named "+name);
+        
+        return ret;
+    }
+
+    /**
+    * If this notification was the result of
+    * a member being removed from a board, return
+    * an object of type Member, otherwise
+    * throw an InvalidActionException
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optional name (string or regex) to match against username
+    * @throws InvalidActionException
+    * @example
+    * var member = new Notification(posted).removedMemberFromBoard();
+    */
+    this.removedMemberFromBoard = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_removed_from_board")
+            throw new InvalidActionException("No member removed from a board");
+        
+        var ret = new Member(this.notification.action.member);
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new InvalidActionException("The removed member was not named "+name);
         
         return ret;
     }
