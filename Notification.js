@@ -102,6 +102,29 @@ var Notification = function(notification)
     }
 
     /**
+    * If this notification was the result of
+    * a member being added to a board, return
+    * an object of type Member, otherwise
+    * throw an InvalidActionException
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * var member = new Notification(posted).addedMemberToBoard();
+    */
+    this.addedMemberToBoard = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_added_member_to_board")
+            throw new InvalidActionException("No member added to a board");
+        
+        var ret = new Member(this.notification.action.member);
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new InvalidActionException("The completed checklist was not named "+name);
+        
+        return ret;
+    }
+
+    /**
     * If a checklist was completed as part of this notification
     * return a Checklist object, otherwise throw an InvalidActionException
     * @memberof module:TrellinatorCore.Notification
