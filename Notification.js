@@ -96,9 +96,9 @@ var Notification = function(notification)
     * var comment = "@"+notif.addedMemberToCard().name()+" welcome!";
     * notif.card().postComment(comment);
     */
-    this.addedMemberToCard = function()
+    this.addedMemberToCard = function(name)
     {
-        return this.memberAddedToCard();
+        return this.memberAddedToCard(name);
     }
 
     /**
@@ -1076,7 +1076,7 @@ var Notification = function(notification)
     }
 
     //Deprecated: use addedMember instead
-    this.memberAddedToCard = function()
+    this.memberAddedToCard = function(name)
     {
       if(
           (this.notification.action.display.translationKey != "action_member_joined_card") &&
@@ -1084,7 +1084,12 @@ var Notification = function(notification)
         )
             throw new InvalidActionException("No member added to card");
       
-      return new Member(this.notification.action.member);
+      var ret = new Member(this.notification.action.member);
+
+      if(name && !TrelloApi.nameTest(name,ret.name()))
+        throw new InvalidActionException("Member was added, but was not named: "+name);
+      
+      return ret;
     }
 
     //Deprecated: use addedComment instead
