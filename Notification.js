@@ -510,6 +510,32 @@ var Notification = function(notification)
 
     /**
     * Return a Card object if the
+    * description of the card was
+    * changed or throw an InvalidActionException
+    * if no card description was changed
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionally pass in a name of card to match
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .changedCardDescription()
+    * .postComment("how dare you!");
+    */
+    this.changedCardDescription = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_changed_description_of_card")
+            throw new InvalidActionException("Card description was not changed");
+
+        var ret = this.card();
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new InvalidActionException("Card item named: "+ret.name()+" description updated which doesn't match: "+name);
+        
+        return ret;
+    }
+
+    /**
+    * Return a Card object if the
     * due date was marked complete
     * or throw an InvalidActionException
     * if no due date was completed
