@@ -55,6 +55,20 @@ var List = function(data)
     }
 
     /**
+    * Return the current position of this list
+    * @memberof module:TrelloEntities.List
+    * @example
+    * new Notification(notification).addedCard().currentList().position();
+    */
+    this.position = function()
+    {
+        if(!this.data.pos)
+            this.load();
+
+        return this.data.pos;
+    }
+
+    /**
     * Sort the list, defaults to sort alphabetically
     * in ascending order, but you can pass in a callback
     * function too.
