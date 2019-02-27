@@ -130,6 +130,28 @@ var Board = function(data)
     * @example
     * new Notification(posted).board().moveToTeam(new Trellinator().team("New Team"));
     */
+    this.team = function()
+    {
+      if(!this.containing_team)
+      {
+          if(!this.data.idOrganization)
+              this.load();
+
+          if(this.data.idOrganization)
+              this.containing_team = new Team({id: this.data.idOrganization});
+          else
+              throw new InvalidDataException("This Board does not belong to a team");
+      }
+
+      return this.containing_team;
+    }
+
+    /**
+    * Move this board to a different team
+    * @memberof module:TrelloEntities.Board
+    * @example
+    * new Notification(posted).board().moveToTeam(new Trellinator().team("New Team"));
+    */
     this.moveToTeam = function(team)
     {
       if(this.containing_team)
@@ -477,7 +499,7 @@ var Board = function(data)
         this.members_list  = null;
         this.labels_list   = null;
         this.card_list     = null;
-        this.data = TrelloApi.get("boards/"+this.data.id+"?actions=none&boardStars=none&cards=none&checklists=none&fields=name%2C%20desc%2C%20descData%2C%20closed%2C%20idOrganization%2C%20url%2C%20shortUrl&lists=none&members=none&memberships=none&membersInvited=none");
+        this.data = TrelloApi.get("boards/"+this.data.id+"?actions=none&boardStars=none&cards=none&checklists=none&fields=name%2Cdesc%2CdescData%2Cclosed%2CidOrganization%2Curl%2CshortUrl&lists=none&members=none&memberships=none&membersInvited=none");
         return this;
     }
 
