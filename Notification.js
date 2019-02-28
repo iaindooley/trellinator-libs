@@ -1252,8 +1252,11 @@ var Notification = function(notification)
 */
 Notification.expectException = function(type,e)
 {
-    if(e.constructor != type)
-        throw e;
+  if(!Array.isArray(type))
+    type = [type];
+  
+  if(type.indexOf(e.constructor) == -1)
+    throw e;
 }
 
 /**
