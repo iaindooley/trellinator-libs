@@ -83,5 +83,6 @@ var CustomField = function(data)
     this.setItemForCurrentCard = function(item_data)
     {
         this.current_item = item_data;
+        return this;
     }
 }
