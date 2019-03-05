@@ -1202,7 +1202,7 @@ var Card = function(data)
         {
             new IterableCollection(TrelloApi.get("customField/"+data.idCustomField+"/options")).each(function(option)
             {
-                if(data.idValue = option._id)
+                if(data.idValue == option._id)
                     ret = option.value.text;
             });
 
