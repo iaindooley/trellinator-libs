@@ -33,7 +33,7 @@ var TestConnector = function()
                 header_string = "--header \""+new IterableCollection(options.headers).implodeValues("\" --header \"",function(elem,key)
                 {
                     return key+": "+elem;
-                }).replace('"','\\"')+"\" ";
+                }).split('"').join('\\"')+"\" ";
             }
 
             if(options.payload)
@@ -78,7 +78,7 @@ var TestConnector = function()
                     });
                 }
                 
-                var cmd      = 'curl '+header_string+'--data "'+data_string.replace('"','\\"')+'" --request '+options.method.toUpperCase()+' --url "'+live_url+'"';
+                var cmd      = 'curl '+header_string+'--data "'+data_string.split('"').join('\\"')+'" --request '+options.method.toUpperCase()+' --url "'+live_url+'"';
             }
             
             else
