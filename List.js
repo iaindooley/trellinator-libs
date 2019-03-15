@@ -51,6 +51,7 @@ var List = function(data)
         TrelloApi.put("lists/"+this.data.id+"/idBoard?value="+board.id());
         this.data.idBoard = null;
         this.board_object = null;
+        this.card_list = null;
         return this;
     }
 
