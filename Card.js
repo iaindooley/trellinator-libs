@@ -38,6 +38,7 @@ var Card = function(data)
     this.labels_list     = null;
     this.members_list    = null;
     this.current_list = null;
+  this.containing_board = null;
 
     /**
     * Returns the card ID
@@ -109,7 +110,10 @@ var Card = function(data)
     {
         var ret = null;
 
-        if(this.current_list)
+        if(this.containing_board)
+            ret = this.containing_board;
+      
+        else if(this.current_list)
         {
             ret = this.current_list.board();
         }
@@ -121,12 +125,19 @@ var Card = function(data)
             
             var data = (this.data.board) ? this.data.board:{id: this.data.idBoard};
             ret = new Board(data);
+            this.containing_board = ret;
         }
         
         if(!ret)
             throw new InvalidDataException("Board not found for card: "+this.id());
         
         return ret;
+    }
+    
+    this.setContainingBoard = function(board)
+    {
+      this.containing_board = board;
+      return this;
     }
 
     /**
@@ -442,10 +453,10 @@ var Card = function(data)
     */
     this.name = function()
     {
-        if(!this.data.name && !this.data.text)
+        if((typeof this.data.name === 'undefined') && (typeof this.data.text === 'undefined'))
             this.load();
 
-        return this.data.name ? this.data.name:this.data.text;
+        return this.data.text ? this.data.text:this.data.name;
     }
     
     /**
@@ -809,6 +820,7 @@ var Card = function(data)
         this.current_list = null;
         this.moved_to_list_cache = null;
         list.card_list = null;
+        this.containing_board = null;
         return this;
     }
 
@@ -1202,7 +1214,7 @@ var Card = function(data)
         {
             new IterableCollection(TrelloApi.get("customField/"+data.idCustomField+"/options")).each(function(option)
             {
-                if(data.idValue = option._id)
+                if(data.idValue == option._id)
                     ret = option.value.text;
             });
 
@@ -1257,58 +1269,7 @@ var Card = function(data)
     //INTERNAL USE ONLY
     this.findOrCreateCustomFieldFromName = function(field_name)
     {
-        var enabled = false;
-
-        new IterableCollection(TrelloApi.get("boards/"+this.board().id()+"/plugins?filter=enabled")).each(function(loop)
-        {
-            if(loop.name == "Custom Fields")
-                enabled = true;
-        }.bind(this));
-        
-        if(!enabled)
-        {
-            new IterableCollection(TrelloApi.get("boards/"+this.board().id()+"/plugins?filter=available")).each(function(loop)
-            {
-                if(loop.name == "Custom Fields")
-                {
-                    var resp = TrelloApi.post("boards/"+this.board().id()+"/boardPlugins?idPlugin="+loop.id);
-                    
-                    if(resp.error)
-                        throw "Unable to enable Custom Fields power up to find or create custom field from name: "+field_name+" because: "+resp.error;
-                }
-            }.bind(this));
-        }
-
-        var fields = TrelloApi.get("boards/"+this.board().id()+"/customFields");
-        var field = null;
-
-        new IterableCollection(fields).each(function(loop)
-                                            {
-                                              if(loop.name == field_name)
-                                                field = loop;
-                                            });
-
-        if(field === null)
-        {
-            var url = "https://api.trello.com/1/customFields";
-      
-            var payload = {
-                idModel: this.board().id(),
-                modelType: "board",
-                name: field_name,
-                pos: "bottom",
-                type: "text",
-                key: TrelloApi.checkControlValues().key,
-                token: TrelloApi.checkControlValues().token
-              };
-    
-            var field = HttpApi.call("post",url,"",{"content-type": "application/json"},JSON.stringify(payload));
-            
-            if(!field.id)
-                throw "Unable to create custom field: "+field_name+" response: "+field;
-        }
-        
-        return field;
+        return this.board().findOrCreateCustomFieldFromName(field_name);
     }
 
     //INTERNAL USE ONLY
@@ -1473,9 +1434,11 @@ var Card = function(data)
         this.members_list    = null;
         this.current_list = null;
         this.moved_to_list_cache = null;
+        this.containing_board = null;
         var attempt = this.data.id;
         this.data = TrelloApi.get("cards/"+this.data.id+"?fields=all&actions=all&attachments=true&attachment_fields=all&members=true&member_fields=all&memberVoted_fields=all&checklists=all&checklist_fields=all&board=true&board_fields=all&list=true&pluginData=true&stickers=true&sticker_fields=all");
-        
+      
+
         if(!this.data)
             throw new InvalidDataException("Unable to load card with id: "+attempt);
 

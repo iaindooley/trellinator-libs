@@ -193,6 +193,32 @@ var Notification = function(notification)
     }
 
     /**
+    * Return a Custom Field object
+    * that was changed, optionally pass
+    * in a string or regex to match against
+    * the name of the field
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionaly pass in a string
+    * or RegExp to match against the name of the CARD
+    * on which the field was changed
+    * @throws InvalidActionException
+    * @example
+    * var card = new Notification(posted).changedCustomField("Priority").card();
+    */
+    this.changedCustomField = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_update_custom_field_item")
+            throw new InvalidActionException("No custom field was changed");
+
+        var ret = new CustomField(this.notification.action.data.customField).setContainingCard(this.card()).setItemForCurrentCard(this.notification.action.data.customFieldItem);
+        
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new InvalidActionException("The updated custom field was not named "+name);
+        
+        return ret;
+    }
+
+    /**
     * Return a Card object if a card was moved 
     * from one list to another (either on the same
     * board or to a different board) as 
@@ -1314,3 +1340,4 @@ Notification.fromDueDateAction = function(params)
 
     return ret;
 }
+

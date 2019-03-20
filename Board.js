@@ -89,6 +89,8 @@ var Board = function(data)
     this.labels_list   = null;
     this.card_list     = null;
   this.containing_team = null;
+  this.custom_fields_enabled = false;
+        this.custom_fields     = null;
 
     /**
     * Return the board ID
@@ -342,10 +344,10 @@ var Board = function(data)
         {
             this.card_list = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/cards?fields=id,name")).transform(function(card)
             {
-                return new Card(card);
-            });
+                return new Card(card).setContainingBoard(this);
+            }.bind(this));
         }
-        
+
         return this.card_list.findByName(name);
     }
     
@@ -509,8 +511,79 @@ var Board = function(data)
         this.members_list  = null;
         this.labels_list   = null;
         this.card_list     = null;
+        this.custom_fields     = null;
+        this.custom_fields_enabled     = null;
         this.data = TrelloApi.get("boards/"+this.data.id+"?actions=none&boardStars=none&cards=none&checklists=none&fields=name%2Cdesc%2CdescData%2Cclosed%2CidOrganization%2Curl%2CshortUrl&lists=none&members=none&memberships=none&membersInvited=none");
         return this;
+    }
+
+    //INTERNAL
+    this.findOrCreateCustomFieldFromName = function(field_name)
+    {
+        this.enableCustomFields();
+
+        if(!this.custom_fields)
+            this.custom_fields = new IterableCollection(TrelloApi.get("boards/"+this.id()+"/customFields"));
+
+        var field = null;
+        this.custom_fields.each(function(loop)
+                                { 
+                                    if(loop.name == field_name)
+                                        field = loop;
+                                });
+
+        if(field === null)
+        {
+            var url = "https://api.trello.com/1/customFields";
+
+            var payload = {
+                idModel: this.id(),
+                modelType: "board",
+                name: field_name,
+                pos: "bottom",
+                type: "text",
+                key: TrelloApi.checkControlValues().key,
+                token: TrelloApi.checkControlValues().token
+              };
+
+            var field = HttpApi.call("post",url,"",{"content-type": "application/json"},JSON.stringify(payload));
+
+            if(!field.id)
+                throw "Unable to create custom field: "+field_name+" response: "+JSON.stringify(field);
+            
+            this.custom_fields = null;
+        }
+
+        return field;
+    }
+
+    //INTERNAL
+    this.enableCustomFields = function()
+    {
+        if(!this.custom_fields_enabled)
+        {
+            new IterableCollection(TrelloApi.get("boards/"+this.id()+"/plugins?filter=enabled")).each(function(loop)
+            {   
+                if(loop.name == "Custom Fields")
+                    enabled = true;
+            }.bind(this));
+    
+            if(!enabled)
+            {   
+                new IterableCollection(TrelloApi.get("boards/"+this.id()+"/plugins?filter=available")).each(function(loop)
+                {   
+                    if(loop.name == "Custom Fields")
+                    {
+                        var resp = TrelloApi.post("boards/"+this.id()+"/boardPlugins?idPlugin="+loop.id);
+    
+                        if(resp.error)
+                            throw "Unable to enable Custom Fields power up to find or create custom field from name: "+field_name+" because: "+resp.error;
+                    }
+                }.bind(this));
+            }
+            
+            this.custom_fields_enabled = true;
+        }
     }
 
     //DEPRECATED: use setName

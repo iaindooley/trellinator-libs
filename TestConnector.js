@@ -33,7 +33,7 @@ var TestConnector = function()
                 header_string = "--header \""+new IterableCollection(options.headers).implodeValues("\" --header \"",function(elem,key)
                 {
                     return key+": "+elem;
-                }).replace('"','\\"')+"\" ";
+                }).split('"').join('\\"')+"\" ";
             }
 
             if(options.payload)
@@ -78,7 +78,7 @@ var TestConnector = function()
                     });
                 }
                 
-                var cmd      = 'curl '+header_string+'--data "'+data_string.replace('"','\\"')+'" --request '+options.method.toUpperCase()+' --url "'+live_url+'"';
+                var cmd      = 'curl '+header_string+'--data "'+data_string.split('"').join('\\"')+'" --request '+options.method.toUpperCase()+' --url "'+live_url+'"';
             }
             
             else
@@ -122,7 +122,7 @@ var TestConnector = function()
     }
 }
 
-TestConnector.sequencer = {};
+TestConnector.sequencer = 0;
 TestConnector.use_sequencer = false;
 TestConnector.test_base_dir = "";
 TestConnector.live_key      = process.argv[2];
@@ -136,11 +136,8 @@ TestConnector.fixturePath = function(base_dir,url,options)
     
     if(TestConnector.use_sequencer)
     {
-        if(!TestConnector.sequencer[signature])
-            TestConnector.sequencer[signature] = 0;
-
-        signature += TestConnector.sequencer[signature];
-        TestConnector.sequencer[signature]++;
+        signature = signature+TestConnector.sequencer.toString();
+        TestConnector.sequencer++;
     }
 
     var api_cache_dir = path.resolve(base_dir,"./trello_api_fixtures/").toString();
