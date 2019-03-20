@@ -397,20 +397,30 @@ var Board = function(data)
     
     /**
     * Create a new board by copying this one
+    * into a team, preserving members
     * @memberof module:TrelloEntities.Board
     * @param name {string} the name for the new board
-    * @param team {Team} a Team object to add this board to
-    * @param permission {string} org, private, public (defaults to "org")
+    * @param team {Team} optional - a Team object to add this board to
+    * @param permission {string} optional - org, private, public (defaults to "org" if team provided)
     * @example
     * var trellinator = new Trellinator();
     * trellinator.board("My Template").copy("My Project",trellinator.team("Some Team"));
     */
     this.copy = function(name,team,permission)
     {
-        if(!permission)
-            permission = "org";
+        var teamstr = "";
+        var permstr = "";
 
-        var new_board = new Board(TrelloApi.post("/boards/?name="+encodeURIComponent(name)+"&idOrganization="+team.data.id+"&idBoardSource="+this.data.id+"&keepFromSource=cards&prefs_permissionLevel="+permission+"&prefs_voting=disabled&prefs_comments=members&prefs_invitations=members&prefs_selfJoin=true&prefs_cardCovers=true&prefs_background=blue&prefs_cardAging=regular"));
+        if(permission && team)
+            permstr = "&prefs_permissionLevel="+permission;
+        else if(team)
+            permstr = "&prefs_permissionLevel=org";
+
+
+        if(team)
+            teamstr = "&idOrganization="+team.data.id;
+
+        var new_board = new Board(TrelloApi.post("/boards/?name="+encodeURIComponent(name)+teamstr+"&idBoardSource="+this.data.id+"&keepFromSource=cards"+permstr+"&prefs_voting=disabled&prefs_comments=members&prefs_invitations=members&prefs_selfJoin=true&prefs_cardCovers=true&prefs_background=blue&prefs_cardAging=regular"));
         
         this.members().each(function(elem)
         {
