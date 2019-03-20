@@ -160,9 +160,33 @@ var Board = function(data)
       {
           this.containing_team.board_list = null;
           this.containing_team = team;
+          this.data.idOrganization = team.id();
       }
 
       TrelloApi.put("boards/"+this.id()+"?idOrganization="+team.id());
+      return this;
+    }
+
+    /**
+    * Make this a personal board (remove from any team)
+    * will not effect membership of the board
+    * @memberof module:TrelloEntities.Board
+    * @example
+    * new Notification(posted).board().makePersonal();
+    */
+    this.makePersonal = function()
+    {
+      var to_delete = new Trellinator().team("DELETE THIS "+Trellinator.now().getTime());
+      this.moveToTeam(to_delete);
+      
+      if(this.containing_team)
+      {
+          this.containing_team.board_list = null;
+          this.containing_team = null;
+      }
+
+      this.data.idOrganization = null;
+      to_delete.del();
       return this;
     }
     
