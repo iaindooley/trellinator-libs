@@ -15,6 +15,7 @@ eval(murphy.load(__dirname,"../TestConnector.js"));
 eval(murphy.load(__dirname,"../IterableCollection.js"));
 ////////////////////////////////////////////////////////////////////////////
 TestConnector.test_base_dir = __dirname;
+Trellinator.fake_now = new Date("2018-02-28T05:00:00.000Z");
 Trellinator.override_token = "dc1aaaa44446d40ba7a6c1f87e19c222bd172b165b7d5075ec428749e7437181";
 TestConnector.use_sequencer = true;
 var t = new Trellinator();
