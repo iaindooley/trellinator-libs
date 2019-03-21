@@ -19,6 +19,15 @@ Trellinator.override_token = "dc1aaaa44446d40ba7a6c1f87e19c222bd172b165b7d5075ec
 TestConnector.use_sequencer = true;
 var t = new Trellinator();
 var b = t.board("New Team Board");
-console.log(b.team().name());
 t.board("New Team Board").makePersonal();
-console.log(b.team().name());
+
+try
+{
+    console.log(b.team().name());
+}
+
+catch(e)
+{
+    if(e.toString().indexOf("This Board does not belong to a team") == -1)
+        throw e;
+}
