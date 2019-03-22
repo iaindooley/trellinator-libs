@@ -541,6 +541,22 @@ var Board = function(data)
         return this;
     }
 
+    /**
+    * Return a list of custom fields
+    * @memberof module:TrelloEntities.Board
+    * @example
+    * new Notification(posted).board().customFields().first().name();
+    */
+    this.customFields = function()
+    {
+        this.enableCustomFields();
+        return new IterableCollection(TrelloApi.get("boards/"+this.id()+"/customFields")).find(function(field)
+        {
+            return new CustomField(field);
+        });
+        
+    }
+
     //INTERNAL
     this.findOrCreateCustomFieldFromName = function(field_name)
     {
