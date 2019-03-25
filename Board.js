@@ -176,17 +176,12 @@ var Board = function(data)
     */
     this.makePersonal = function()
     {
-      var to_delete = new Trellinator().team("DELETE THIS "+Trellinator.now().getTime());
-      this.moveToTeam(to_delete);
-      
       if(this.containing_team)
-      {
           this.containing_team.board_list = null;
-          this.containing_team = null;
-      }
 
-      this.data.idOrganization = null;
-      to_delete.del();
+      this.containing_team = null;
+      this.data.idOrganization = "";
+      TrelloApi.put("boards/"+this.id()+"?idOrganization=");
       return this;
     }
     
