@@ -60,6 +60,50 @@ var Comment = function(data)
 
         return this.data.data.text;
     }
+    
+    /**
+    * Return the member who made a comment
+    * @memberof module:TrelloEntities.Comment
+    * @example
+    * card.comments().first().member();
+    */
+    this.member = function()
+    {
+      return new Member(this.data.memberCreator);
+    }
+    
+    /**
+    * Return an IterableCollection of mentioned members
+    * @memberof module:TrelloEntities.Comment
+    * @example
+    * card.comments().first().mentionedMembers();
+    */
+    this.mentionedMembers = function()
+    {
+        var ret     = new Array();
+
+        this.card().board().members().each(function(member)
+        {
+            if(new RegExp(".*@"+member.name()+".*").test(this.text()))
+                ret.push(member);
+        });
+        
+        if(!ret.length)
+            throw new InvalidActionException("No members were mentioned in this comment");
+        
+        return new IterableCollection(ret);
+    }
+    
+    /**
+    * Return a Date when this comment was made
+    * @memberof module:TrelloEntities.Comment
+    * @example
+    * card.comments().first().when().toString();
+    */
+    this.when = function()
+    {
+      return new Date(this.data.date);
+    }
 
     /**
     * A name() function used in name comparisons
