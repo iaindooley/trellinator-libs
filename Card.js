@@ -1048,7 +1048,9 @@ var Card = function(data)
         if(position)
             checklist.setPosition(position);
 
-        callback(checklist);
+        if(callback)
+            callback(checklist);
+
         return this;
     }
 
