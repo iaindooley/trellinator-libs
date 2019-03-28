@@ -1508,6 +1508,7 @@ Card.findOrCreate = function(list,data)
     
     catch(e)
     {
+        Notification.expectException(InvalidDataException,e);
         var ret = Card.create(list,data);
     }
     

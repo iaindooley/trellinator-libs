@@ -389,6 +389,7 @@ var Board = function(data)
       
       catch(e)
       {
+          Notification.expectException(InvalidDataException,e);
           var list = this.createList(name,pos);
       }
       
