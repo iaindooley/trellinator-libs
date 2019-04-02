@@ -100,7 +100,7 @@ HttpApi.call = function(method,url,force_get,headers,payload)
   
   catch(e)
   {
-    throw new InvalidRequestException(resp);
+    throw new InvalidRequestException(resp+" from: "+url+" params: "+JSON.stringify(params));
   }
   
   return ret;
