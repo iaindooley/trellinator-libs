@@ -598,6 +598,8 @@ var Board = function(data)
     {
         if(!this.custom_fields_enabled)
         {
+          var enabled = false;
+          
             new IterableCollection(TrelloApi.get("boards/"+this.id()+"/plugins?filter=enabled")).each(function(loop)
             {   
                 if(loop.name == "Custom Fields")
