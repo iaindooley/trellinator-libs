@@ -103,6 +103,34 @@ var Notification = function(notification)
 
     /**
     * If this notification was the result of
+    * a member being removed from a card, return
+    * an object of type Member, otherwise
+    * throw an InvalidActionException
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * var notif = new Notification(posted);
+    * var comment = "@"+notif.removedMemberFromCard().name()+" welcome!";
+    * notif.card().postComment(comment);
+    */
+    this.removedMemberFromCard = function(name)
+    {
+      if(
+          (this.notification.action.display.translationKey != "action_member_left_card") &&
+          (this.notification.action.display.translationKey != "action_removed_member_from_card")
+        )
+            throw new InvalidActionException("No member removed from card");
+      
+      var ret = new Member(this.notification.action.member);
+
+      if(name && !TrelloApi.nameTest(name,ret.name()))
+        throw new InvalidActionException("Member was removed, but was not named: "+name);
+      
+      return ret;
+    }
+
+    /**
+    * If this notification was the result of
     * a member being added to a board, return
     * an object of type Member, otherwise
     * throw an InvalidActionException
