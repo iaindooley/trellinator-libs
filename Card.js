@@ -342,9 +342,12 @@ var Card = function(data)
                 ret = new Attachment(elem);
             else if(!name)
                 ret = totest;
-            
+
+            if(ret)
+                ret.setContainingCard(this);
+
             return ret;
-        });
+        }.bind(this));
     }
 
     /**
