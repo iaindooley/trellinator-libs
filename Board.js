@@ -89,6 +89,8 @@ var Board = function(data)
     this.labels_list   = null;
     this.card_list     = null;
   this.containing_team = null;
+  this.custom_fields_enabled = false;
+        this.custom_fields     = null;
 
     /**
     * Return the board ID
@@ -158,9 +160,28 @@ var Board = function(data)
       {
           this.containing_team.board_list = null;
           this.containing_team = team;
+          this.data.idOrganization = team.id();
       }
 
       TrelloApi.put("boards/"+this.id()+"?idOrganization="+team.id());
+      return this;
+    }
+
+    /**
+    * Make this a personal board (remove from any team)
+    * will not effect membership of the board
+    * @memberof module:TrelloEntities.Board
+    * @example
+    * new Notification(posted).board().makePersonal();
+    */
+    this.makePersonal = function()
+    {
+      if(this.containing_team)
+          this.containing_team.board_list = null;
+
+      this.containing_team = null;
+      this.data.idOrganization = "";
+      TrelloApi.put("boards/"+this.id()+"?idOrganization=");
       return this;
     }
     
@@ -342,10 +363,10 @@ var Board = function(data)
         {
             this.card_list = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/cards?fields=id,name")).transform(function(card)
             {
-                return new Card(card);
-            });
+                return new Card(card).setContainingBoard(this);
+            }.bind(this));
         }
-        
+
         return this.card_list.findByName(name);
     }
     
@@ -368,6 +389,7 @@ var Board = function(data)
       
       catch(e)
       {
+          Notification.expectException(InvalidDataException,e);
           var list = this.createList(name,pos);
       }
       
@@ -397,20 +419,30 @@ var Board = function(data)
     
     /**
     * Create a new board by copying this one
+    * into a team, preserving members
     * @memberof module:TrelloEntities.Board
     * @param name {string} the name for the new board
-    * @param team {Team} a Team object to add this board to
-    * @param permission {string} org, private, public (defaults to "org")
+    * @param team {Team} optional - a Team object to add this board to
+    * @param permission {string} optional - org, private, public (defaults to "org" if team provided)
     * @example
     * var trellinator = new Trellinator();
     * trellinator.board("My Template").copy("My Project",trellinator.team("Some Team"));
     */
     this.copy = function(name,team,permission)
     {
-        if(!permission)
-            permission = "org";
+        var teamstr = "";
+        var permstr = "";
 
-        var new_board = new Board(TrelloApi.post("/boards/?name="+encodeURIComponent(name)+"&idOrganization="+team.data.id+"&idBoardSource="+this.data.id+"&keepFromSource=cards&prefs_permissionLevel="+permission+"&prefs_voting=disabled&prefs_comments=members&prefs_invitations=members&prefs_selfJoin=true&prefs_cardCovers=true&prefs_background=blue&prefs_cardAging=regular"));
+        if(permission && team)
+            permstr = "&prefs_permissionLevel="+permission;
+        else if(team)
+            permstr = "&prefs_permissionLevel=org";
+
+
+        if(team)
+            teamstr = "&idOrganization="+team.data.id;
+
+        var new_board = new Board(TrelloApi.post("/boards/?name="+encodeURIComponent(name)+teamstr+"&idBoardSource="+this.data.id+"&keepFromSource=cards"+permstr+"&prefs_voting=disabled&prefs_comments=members&prefs_invitations=members&prefs_selfJoin=true&prefs_cardCovers=true&prefs_background=blue&prefs_cardAging=regular"));
         
         this.members().each(function(elem)
         {
@@ -499,8 +531,97 @@ var Board = function(data)
         this.members_list  = null;
         this.labels_list   = null;
         this.card_list     = null;
+        this.custom_fields     = null;
+        this.custom_fields_enabled     = null;
         this.data = TrelloApi.get("boards/"+this.data.id+"?actions=none&boardStars=none&cards=none&checklists=none&fields=name%2Cdesc%2CdescData%2Cclosed%2CidOrganization%2Curl%2CshortUrl&lists=none&members=none&memberships=none&membersInvited=none");
         return this;
+    }
+
+    /**
+    * Return a list of custom fields
+    * @memberof module:TrelloEntities.Board
+    * @example
+    * new Notification(posted).board().customFields().first().name();
+    */
+    this.customFields = function()
+    {
+        this.enableCustomFields();
+        return new IterableCollection(TrelloApi.get("boards/"+this.id()+"/customFields")).find(function(field)
+        {
+            return new CustomField(field);
+        });
+        
+    }
+
+    //INTERNAL
+    this.findOrCreateCustomFieldFromName = function(field_name)
+    {
+        this.enableCustomFields();
+
+        if(!this.custom_fields)
+            this.custom_fields = new IterableCollection(TrelloApi.get("boards/"+this.id()+"/customFields"));
+
+        var field = null;
+        this.custom_fields.each(function(loop)
+                                { 
+                                    if(loop.name == field_name)
+                                        field = loop;
+                                });
+
+        if(field === null)
+        {
+            var url = "https://api.trello.com/1/customFields";
+
+            var payload = {
+                idModel: this.id(),
+                modelType: "board",
+                name: field_name,
+                pos: "bottom",
+                type: "text",
+                key: TrelloApi.checkControlValues().key,
+                token: TrelloApi.checkControlValues().token
+              };
+
+            var field = HttpApi.call("post",url,"",{"content-type": "application/json"},JSON.stringify(payload));
+
+            if(!field.id)
+                throw "Unable to create custom field: "+field_name+" response: "+JSON.stringify(field);
+            
+            this.custom_fields = null;
+        }
+
+        return field;
+    }
+
+    //INTERNAL
+    this.enableCustomFields = function()
+    {
+        if(!this.custom_fields_enabled)
+        {
+          var enabled = false;
+          
+            new IterableCollection(TrelloApi.get("boards/"+this.id()+"/plugins?filter=enabled")).each(function(loop)
+            {   
+                if(loop.name == "Custom Fields")
+                    enabled = true;
+            }.bind(this));
+    
+            if(!enabled)
+            {   
+                new IterableCollection(TrelloApi.get("boards/"+this.id()+"/plugins?filter=available")).each(function(loop)
+                {   
+                    if(loop.name == "Custom Fields")
+                    {
+                        var resp = TrelloApi.post("boards/"+this.id()+"/boardPlugins?idPlugin="+loop.id);
+    
+                        if(resp.error)
+                            throw "Unable to enable Custom Fields power up to find or create custom field from name: "+field_name+" because: "+resp.error;
+                    }
+                }.bind(this));
+            }
+            
+            this.custom_fields_enabled = true;
+        }
     }
 
     //DEPRECATED: use setName

@@ -51,6 +51,7 @@ var List = function(data)
         TrelloApi.put("lists/"+this.data.id+"/idBoard?value="+board.id());
         this.data.idBoard = null;
         this.board_object = null;
+        this.card_list = null;
         return this;
     }
 
@@ -259,8 +260,9 @@ var List = function(data)
     */
     this.archive = function()
     {
-        TrelloApi.put("lists/"+this.data.id+"?closed=true");
-        return this;
+      TrelloApi.put("lists/"+this.data.id+"?closed=true");
+      this.board().list_of_lists = null;
+      return this;
     }
 
     /**
@@ -271,8 +273,9 @@ var List = function(data)
     */
     this.unArchive = function()
     {
-        TrelloApi.put("lists/"+this.data.id+"?closed=false");
-        return this;
+      TrelloApi.put("lists/"+this.data.id+"?closed=false");
+      this.board().list_of_lists = null;
+      return this;
     }
 
     /**
