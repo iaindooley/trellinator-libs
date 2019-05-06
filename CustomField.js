@@ -12,9 +12,10 @@
 */
 var CustomField = function(data)
 {
-    this.data = data;
-    this.containing_card = null;
-    this.current_item = null;
+  this.data = data;
+  this.containing_card = null;
+  this.current_item = null;
+  this.old_value = null;
 
 
     /**
@@ -40,6 +41,45 @@ var CustomField = function(data)
     {
         return this.card().customFieldValue(this.name());
     }
+    
+    /**
+    * Set the old value
+    * @memberof module:TrelloEntities.CustomField
+    */
+    this.setOldValue = function(old)
+    {
+      this.old = old;
+      return this;
+    }
+    
+    /**
+    * Return the old value
+    * @memberof module:TrelloEntities.CustomField
+    */
+    this.oldValue = function()
+    {      
+      if(this.old)
+      {
+        this.card().customFields().each(function(loop)
+                                        {
+                                          if(loop.idCustomField == this.id())
+                                          {                      
+                                            if(this.old.idValue)
+                                              loop.idValue = this.old.idValue;
+                                            else
+                                              loop.value = this.old.value;
+                                            
+                                            ret = this.card().extractCustomFieldValueFromDataBasedOnType(loop);
+                                          }
+                                        }.bind(this));
+      }
+      
+      else
+        var ret = this.value();
+      
+      return ret;
+    }
+    
 
     /**
     * Return the Card on which this comment
