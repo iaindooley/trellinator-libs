@@ -210,7 +210,10 @@ var Notification = function(notification)
         if(this.notification.action.display.translationKey != "action_update_custom_field_item")
             throw new InvalidActionException("No custom field was changed");
 
-        var ret = new CustomField(this.notification.action.data.customField).setContainingCard(this.card()).setItemForCurrentCard(this.notification.action.data.customFieldItem);
+        var ret = new CustomField(this.notification.action.data.customField)
+        .setContainingCard(this.card())
+        .setItemForCurrentCard(this.notification.action.data.customFieldItem)
+        .setOldValue(this.notification.action.data.old);
         
         if(name && !TrelloApi.nameTest(name,ret.name()))
             throw new InvalidActionException("The updated custom field was not named "+name);
