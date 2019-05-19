@@ -33,7 +33,7 @@ var TestConnector = function()
                 header_string = '--header "'+new IterableCollection(options.headers).implodeValues('" --header "',function(elem,key)
                 {
                     return key+": "+elem;
-                }).split('"').join('"')+'" ';
+                })+'" ';
             }
 
             if(options.payload)
