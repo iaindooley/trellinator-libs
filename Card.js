@@ -1067,8 +1067,17 @@ var Card = function(data)
     */
     this.removeLabel = function(label)
     {
-        TrelloApi.del("cards/"+this.data.id+"/idLabels/"+label.id());
-        this.labels_list = null;
+        try
+        {
+            TrelloApi.del("cards/"+this.data.id+"/idLabels/"+label.id());
+            this.labels_list = null;
+        }
+
+        catch(e)
+        {
+            Notification.expectException(InvalidRequestException,e);
+        }
+
         return this;
     }
 
