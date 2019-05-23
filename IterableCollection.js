@@ -164,6 +164,95 @@ var IterableCollection = function(obj)
         
         return ret;
     }
+
+    /**
+    * Return the item in this collection that appears
+    * before a given item, identified by an expression,
+    * optionally passing in a callback function used
+    * to compare the element with the expression.
+    * 
+    * By default the expression can be a string or a 
+    * RegExp and the comparison will be done based
+    * on calling the name() method of the element.
+    * 
+    * A common use case is to find the previous list
+    * in a Trello board that appears after a list
+    * with a given name.
+    * 
+    * @memberof module:TrellinatorCore.IterableCollection
+    * @param expression {string|RegExp} a string or RegExp
+    * indicating the element before which you'd like to find
+    * the previous item.
+    * @param inspector {Function} (optional) a callback 
+    * used to compare the items to the expression. This
+    * should accept 2 parameters:
+    *  - test {string|RegExp} The expression that you passed in
+    *    to the original function
+    *  - elem {Object} the item from the collection to be
+    *    compared to the test expression
+    * the function should return true if the element matches
+    * the expression.
+    * @example
+    * var prev_list = notif.board().lists().itemBefore(new RegExp("Inbox.*"));
+    * @example
+    * var prev_card = notif.board().list("Test")
+    * .cards().itemBefore(my_card.id(),function(test,elem)
+    * {
+    *     return test == elem.id();
+    * });
+    * @throws InvalidDataException
+    */
+    this.itemBefore = function(expression,inspector)
+    {
+      var ret         = null;
+      var prev = null;
+      var next = null;
+      var return_prev = false;
+      
+      if(!inspector)
+      {
+        inspector = function(test,elem)
+        {
+          Logger.log("testing: "+TrelloApi.nameTestData(test)+" against: "+elem.name());
+          return TrelloApi.nameTest(TrelloApi.nameTestData(test),elem.name());
+        };
+      }
+      
+      if(expression)
+      {
+        for(var key in this.obj)
+        {
+          if(return_prev)
+          {
+            ret = prev;
+            prev = next;
+            return_prev = false;
+          }
+          
+          if(inspector(expression,this.obj[key]))
+          {
+            return_prev = true;
+            next = this.obj[key];
+          }
+          
+          else
+          {
+            prev = this.obj[key];
+          }
+        }
+      }
+      
+      if(return_prev)
+      {
+        ret = prev;
+        return_prev = false;
+      }
+      
+      if(!ret)
+        throw new InvalidDataException("There was no item before: "+expression);
+      
+      return ret;
+    }
     
     /**
     * Return the item in this collection that appears
@@ -269,6 +358,16 @@ var IterableCollection = function(obj)
             throw new InvalidDataException("No data in IterableCollection: "+this.obj);
         
         return ret;
+    }
+    
+    /**
+    * Return the last element from this collection
+    * @memberof module:TrellinatorCore.IterableCollection
+    * @throws InvalidDataException
+    */
+    this.last = function()
+    {
+        return new IterableCollection(this.asArray().reverse()).first();
     }
 
     /**
