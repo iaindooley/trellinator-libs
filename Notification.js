@@ -766,7 +766,7 @@ var Notification = function(notification)
 
         var ret = new CheckItem(this.notification.action.display.entities.checkitem);
         
-        if(name && (ret.name() != name))
+        if(name && !TrelloApi.nameTest(name,ret.name()))
             throw new InvalidActionException("A checklist item was completed but it was not named: "+name);
 
         ret.setContainingChecklist(this.checklist().setContainingCard(this.card()));
@@ -982,7 +982,7 @@ var Notification = function(notification)
                 this.card_object = new Card(this.notification.action.data.card);
         }
         
-        return this.card_object;
+        return this.card_object.setNotification(this);
     }
 
     /**

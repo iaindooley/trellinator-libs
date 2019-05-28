@@ -34,6 +34,7 @@
 var Card = function(data)
 {    
     this.data            = data;
+    this.notification_object = null;
     this.checklist_list  = null;
     this.labels_list     = null;
     this.members_list    = null;
@@ -49,6 +50,24 @@ var Card = function(data)
     this.id = function()
     {
         return this.data.id;
+    }
+    
+    this.setNotification = function(notif)
+    {
+        this.notification_object = notif;
+        return this;
+    }
+    
+    /**
+    * Return the notification (if any) that
+    * originated this card
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).card().notification().replytoMember("Hai");
+    */
+    this.notification = function()
+    {
+        return this.notification_object;
     }
 
     /**
