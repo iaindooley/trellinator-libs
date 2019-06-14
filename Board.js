@@ -281,7 +281,7 @@ var Board = function(data)
                                    return new Label(elem);
                                });
         }
-        
+      Logger.log("Built labels list for : "+name);
         return this.labels_list.findByName(name);
     }
 
