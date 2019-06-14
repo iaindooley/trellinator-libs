@@ -213,7 +213,6 @@ var IterableCollection = function(obj)
       {
         inspector = function(test,elem)
         {
-          Logger.log("testing: "+TrelloApi.nameTestData(test)+" against: "+elem.name());
           return TrelloApi.nameTest(TrelloApi.nameTestData(test),elem.name());
         };
       }
