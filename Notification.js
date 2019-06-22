@@ -363,6 +363,11 @@ var Notification = function(notification)
     */
     this.boardBefore = function()
     {
+        if(this.notification.action.display.translationKey != "action_move_card_to_board")
+        {
+          throw new InvalidActionException("Card not moved from a board");
+        }
+      
         try
         {
             var ret = this.listBefore().board();
