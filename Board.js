@@ -615,7 +615,7 @@ var Board = function(data)
                         var resp = TrelloApi.post("boards/"+this.id()+"/boardPlugins?idPlugin="+loop.id);
     
                         if(resp.error)
-                            throw "Unable to enable Custom Fields power up to find or create custom field from name: "+field_name+" because: "+resp.error;
+                            throw "Unable to enable Custom Fields power up to find or create custom field from name because: "+resp.error;
                     }
                 }.bind(this));
             }
