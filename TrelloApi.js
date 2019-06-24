@@ -152,7 +152,7 @@ TrelloApi.nameTest = function(test,actual)
             ret = actual;
     }
         
-    else if(test.constructor === RegExp)
+    else if(test && (test.constructor === RegExp))
     {
         if(test.test(actual))
             ret = actual;
@@ -176,7 +176,7 @@ TrelloApi.nameTestData = function(data,item_name)
     if(!item_name)
         item_name = "name";
 
-    if((typeof data == "string") || ((typeof data !== "undefined") && (data.constructor === RegExp)))
+    if((typeof data == "string") || (data && (typeof data !== "undefined") && (data.constructor === RegExp)))
         ret = data;
     else if(data && data[item_name])
         ret = data[item_name];
