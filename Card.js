@@ -409,20 +409,24 @@ var Card = function(data)
     */
     this.attachLink = function(data)
     {
-        if(data.url)
-            var link = data.url;
-        else if(typeof data.link == "string")
-            var link = data.link;
-        else
-            var link = data;
-
-        var url = "cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link);
-
-        if(data.name)
-            url += "&name="+encodeURIComponent(data.name);
-
-        TrelloApi.post(url);
-        return this;
+      if(data.url)
+        var link = data.url;
+      else if(typeof data.link == "string")
+        var link = data.link;
+      else
+        var link = data;
+      
+      var url = "cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link);
+      
+      if(data.name)
+        url += "&name="+encodeURIComponent(data.name);
+      
+      TrelloApi.post(url);
+      
+      if(this.data.attachments)
+        this.data.attachments = null;
+      
+      return this;
     }
     
     /**
