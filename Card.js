@@ -1127,6 +1127,7 @@ var Card = function(data)
         }
         
         this.labels_list = null;
+        this.data.labels = null;
         return this;
     }
 
