@@ -34,6 +34,7 @@
 var Card = function(data)
 {    
     this.data            = data;
+    this.notification_object = null;
     this.checklist_list  = null;
     this.labels_list     = null;
     this.members_list    = null;
@@ -49,6 +50,24 @@ var Card = function(data)
     this.id = function()
     {
         return this.data.id;
+    }
+    
+    this.setNotification = function(notif)
+    {
+        this.notification_object = notif;
+        return this;
+    }
+    
+    /**
+    * Return the notification (if any) that
+    * originated this card
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).card().notification().replytoMember("Hai");
+    */
+    this.notification = function()
+    {
+        return this.notification_object;
     }
 
     /**
@@ -342,9 +361,12 @@ var Card = function(data)
                 ret = new Attachment(elem);
             else if(!name)
                 ret = totest;
-            
+
+            if(ret)
+                ret.setContainingCard(this);
+
             return ret;
-        });
+        }.bind(this));
     }
 
     /**
@@ -387,20 +409,24 @@ var Card = function(data)
     */
     this.attachLink = function(data)
     {
-        if(data.url)
-            var link = data.url;
-        else if(typeof data.link == "string")
-            var link = data.link;
-        else
-            var link = data;
-
-        var url = "cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link);
-
-        if(data.name)
-            url += "&name="+encodeURIComponent(data.name);
-
-        TrelloApi.post(url);
-        return this;
+      if(data.url)
+        var link = data.url;
+      else if(typeof data.link == "string")
+        var link = data.link;
+      else
+        var link = data;
+      
+      var url = "cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link);
+      
+      if(data.name)
+        url += "&name="+encodeURIComponent(data.name);
+      
+      TrelloApi.post(url);
+      
+      if(this.data.attachments)
+        this.data.attachments = null;
+      
+      return this;
     }
     
     /**
@@ -1064,8 +1090,17 @@ var Card = function(data)
     */
     this.removeLabel = function(label)
     {
-        TrelloApi.del("cards/"+this.data.id+"/idLabels/"+label.id());
-        this.labels_list = null;
+        try
+        {
+            TrelloApi.del("cards/"+this.data.id+"/idLabels/"+label.id());
+            this.labels_list = null;
+        }
+
+        catch(e)
+        {
+            Notification.expectException(InvalidRequestException,e);
+        }
+
         return this;
     }
 

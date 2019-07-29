@@ -281,7 +281,7 @@ var Board = function(data)
                                    return new Label(elem);
                                });
         }
-        
+      
         return this.labels_list.findByName(name);
     }
 
@@ -598,6 +598,8 @@ var Board = function(data)
     {
         if(!this.custom_fields_enabled)
         {
+          var enabled = false;
+          
             new IterableCollection(TrelloApi.get("boards/"+this.id()+"/plugins?filter=enabled")).each(function(loop)
             {   
                 if(loop.name == "Custom Fields")
@@ -613,7 +615,7 @@ var Board = function(data)
                         var resp = TrelloApi.post("boards/"+this.id()+"/boardPlugins?idPlugin="+loop.id);
     
                         if(resp.error)
-                            throw "Unable to enable Custom Fields power up to find or create custom field from name: "+field_name+" because: "+resp.error;
+                            throw "Unable to enable Custom Fields power up to find or create custom field from name because: "+resp.error;
                     }
                 }.bind(this));
             }

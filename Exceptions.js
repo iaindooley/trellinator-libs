@@ -80,6 +80,7 @@
 var InvalidDataException = function(msg)
 {
   this.msg = msg+"\n\nSTACK: "+Trellinator.getStack();
+  this.original_message = msg;
     
   /**
   * Return a string representation of this message
@@ -89,6 +90,11 @@ var InvalidDataException = function(msg)
   this.toString = function()
   {
     return this.msg;
+  }
+
+  this.message = function()
+  {
+      return this.original_message;
   }
 }
 
@@ -105,6 +111,7 @@ var InvalidDataException = function(msg)
 var InvalidActionException = function(msg)
 {
   this.msg = msg+"\n\nSTACK: "+Trellinator.getStack();
+  this.original_message = msg;
   
   /**
   * Return a string representation of this message
@@ -114,6 +121,11 @@ var InvalidActionException = function(msg)
   this.toString = function()
   {
     return this.msg;
+  }
+
+  this.message = function()
+  {
+      return this.original_message;
   }
 }
 
@@ -128,6 +140,7 @@ var InvalidActionException = function(msg)
 var InvalidRequestException = function(msg)
 {
   this.msg = msg+"\n\nSTACK: "+Trellinator.getStack();
+  this.original_message = msg;
   
   /**
   * Return a string representation of this message
@@ -137,5 +150,10 @@ var InvalidRequestException = function(msg)
   this.toString = function()
   {
     return this.msg;
+  }
+  
+  this.message = function()
+  {
+      return this.original_message;
   }
 }

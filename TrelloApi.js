@@ -21,7 +21,7 @@ TrelloApi.searchCardsInTeams= function(teams,query)
   else
     throw new Error("You need to either pass in a Team object or an IterableCollection of teams to the searchCardsInTeams method");
   
-  var url = "search?query="+encodeURIComponent(query)+"&idOrganizations="+team_ids+"&modelTypes=cards&board_fields=name%2CidOrganization&boards_limit=10&card_fields=all&cards_limit=10&cards_page=0&card_attachments=false&organization_fields=name%2CdisplayName&organizations_limit=10&member_fields=avatarHash%2CfullName%2Cinitials%2Cusername%2Cconfirmed&members_limit=10";
+  var url = "search?query="+encodeURIComponent(query)+"&idOrganizations="+team_ids+"&modelTypes=cards&partial=true&board_fields=name%2CidOrganization&boards_limit=10&card_fields=all&cards_limit=10&cards_page=0&card_attachments=false&organization_fields=name%2CdisplayName&organizations_limit=10&member_fields=avatarHash%2CfullName%2Cinitials%2Cusername%2Cconfirmed&members_limit=10";
 
   return new IterableCollection(TrelloApi.get(url).cards).transform(function(elem)
              {
@@ -52,7 +52,7 @@ TrelloApi.searchCardsInBoards = function(boards,query)
   else
     throw new Error("You need to either pass in an IterableCollection of Board objects, a single Board object, or the string mine to the searchCardsInBoards method");
   
-  var url = "search?query="+encodeURIComponent(query)+"&idBoards="+board_ids+"&modelTypes=cards&board_fields=name%2CidOrganization&boards_limit=10&card_fields=all&cards_limit=1000&cards_page=0&card_attachments=false&organization_fields=name%2CdisplayName&organizations_limit=10&member_fields=avatarHash%2CfullName%2Cinitials%2Cusername%2Cconfirmed&members_limit=10";
+  var url = "search?query="+encodeURIComponent(query)+"&idBoards="+board_ids+"&modelTypes=cards&partial=true&board_fields=name%2CidOrganization&boards_limit=1000&card_fields=all&cards_limit=10&cards_page=0&card_attachments=false&organization_fields=name%2CdisplayName&organizations_limit=10&member_fields=avatarHash%2CfullName%2Cinitials%2Cusername%2Cconfirmed&members_limit=10";
   return new IterableCollection(TrelloApi.get(url).cards)
   .transform(function(elem)
              {
@@ -152,7 +152,7 @@ TrelloApi.nameTest = function(test,actual)
             ret = actual;
     }
         
-    else if(test.constructor === RegExp)
+    else if(test && (test.constructor === RegExp))
     {
         if(test.test(actual))
             ret = actual;
@@ -176,7 +176,7 @@ TrelloApi.nameTestData = function(data,item_name)
     if(!item_name)
         item_name = "name";
 
-    if((typeof data == "string") || ((typeof data !== "undefined") && (data.constructor === RegExp)))
+    if((typeof data == "string") || (data && (typeof data !== "undefined") && (data.constructor === RegExp)))
         ret = data;
     else if(data && data[item_name])
         ret = data[item_name];

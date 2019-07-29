@@ -31,8 +31,8 @@ var Comment = function(data)
     {
         if(!this.data.data)
             throw new Error("Malformed comment object");
-      
-        return this.data.data.id;
+
+        return this.data.data.id ? this.data.data.id:this.data.id;
     }
 
     /**

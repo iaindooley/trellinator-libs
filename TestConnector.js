@@ -30,10 +30,10 @@ var TestConnector = function()
             
             if(options.headers)
             {
-                header_string = "--header \""+new IterableCollection(options.headers).implodeValues("\" --header \"",function(elem,key)
+                header_string = '--header "'+new IterableCollection(options.headers).implodeValues('" --header "',function(elem,key)
                 {
                     return key+": "+elem;
-                }).split('"').join('\\"')+"\" ";
+                })+'" ';
             }
 
             if(options.payload)

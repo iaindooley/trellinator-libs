@@ -103,6 +103,34 @@ var Notification = function(notification)
 
     /**
     * If this notification was the result of
+    * a member being removed from a card, return
+    * an object of type Member, otherwise
+    * throw an InvalidActionException
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * var notif = new Notification(posted);
+    * var comment = "@"+notif.removedMemberFromCard().name()+" welcome!";
+    * notif.card().postComment(comment);
+    */
+    this.removedMemberFromCard = function(name)
+    {
+      if(
+          (this.notification.action.display.translationKey != "action_member_left_card") &&
+          (this.notification.action.display.translationKey != "action_removed_member_from_card")
+        )
+            throw new InvalidActionException("No member removed from card");
+      
+      var ret = new Member(this.notification.action.member);
+
+      if(name && !TrelloApi.nameTest(name,ret.name()))
+        throw new InvalidActionException("Member was removed, but was not named: "+name);
+      
+      return ret;
+    }
+
+    /**
+    * If this notification was the result of
     * a member being added to a board, return
     * an object of type Member, otherwise
     * throw an InvalidActionException
@@ -210,7 +238,10 @@ var Notification = function(notification)
         if(this.notification.action.display.translationKey != "action_update_custom_field_item")
             throw new InvalidActionException("No custom field was changed");
 
-        var ret = new CustomField(this.notification.action.data.customField).setContainingCard(this.card()).setItemForCurrentCard(this.notification.action.data.customFieldItem);
+        var ret = new CustomField(this.notification.action.data.customField)
+        .setContainingCard(this.card())
+        .setItemForCurrentCard(this.notification.action.data.customFieldItem)
+        .setOldValue(this.notification.action.data.old);
         
         if(name && !TrelloApi.nameTest(name,ret.name()))
             throw new InvalidActionException("The updated custom field was not named "+name);
@@ -332,6 +363,11 @@ var Notification = function(notification)
     */
     this.boardBefore = function()
     {
+        if(this.notification.action.display.translationKey != "action_move_card_to_board")
+        {
+          throw new InvalidActionException("Card not moved from a board");
+        }
+      
         try
         {
             var ret = this.listBefore().board();
@@ -735,7 +771,7 @@ var Notification = function(notification)
 
         var ret = new CheckItem(this.notification.action.display.entities.checkitem);
         
-        if(name && (ret.name() != name))
+        if(name && !TrelloApi.nameTest(name,ret.name()))
             throw new InvalidActionException("A checklist item was completed but it was not named: "+name);
 
         ret.setContainingChecklist(this.checklist().setContainingCard(this.card()));
@@ -951,7 +987,7 @@ var Notification = function(notification)
                 this.card_object = new Card(this.notification.action.data.card);
         }
         
-        return this.card_object;
+        return this.card_object.setNotification(this);
     }
 
     /**

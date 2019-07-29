@@ -48,11 +48,37 @@ var List = function(data)
     */
     this.move = function(board)
     {
-        TrelloApi.put("lists/"+this.data.id+"/idBoard?value="+board.id());
-        this.data.idBoard = null;
-        this.board_object = null;
-        this.card_list = null;
-        return this;
+      TrelloApi.put("lists/"+this.data.id+"/idBoard?value="+board.id());
+      
+      if(this.board_object)
+      {
+        this.board_object.list_of_lists = null;
+      }
+      
+      this.data.idBoard = null;
+      this.board_object = null;
+      this.card_list = null;
+      return this;
+    }
+    
+    /**
+    * Set the position of a list
+    * @memberof module:TrelloEntities.List
+    * @param pos {string|float} top, bottom, or a positive float
+    * @example
+    * var to_board = new Trellinator().board("Some Board");
+    * new Notification(posted).addedCard().currentList().setPosition("bottom");
+    */
+    this.setPosition = function(pos)
+    {
+      TrelloApi.put("lists/"+this.data.id+"/pos?value="+pos);
+      
+      if(this.board_object)
+      {
+        this.board_object.list_of_lists = null;
+      }
+      
+      return this;
     }
 
     /**
@@ -260,8 +286,9 @@ var List = function(data)
     */
     this.archive = function()
     {
-        TrelloApi.put("lists/"+this.data.id+"?closed=true");
-        return this;
+      TrelloApi.put("lists/"+this.data.id+"?closed=true");
+      this.board().list_of_lists = null;
+      return this;
     }
 
     /**
@@ -272,8 +299,9 @@ var List = function(data)
     */
     this.unArchive = function()
     {
-        TrelloApi.put("lists/"+this.data.id+"?closed=false");
-        return this;
+      TrelloApi.put("lists/"+this.data.id+"?closed=false");
+      this.board().list_of_lists = null;
+      return this;
     }
 
     /**
