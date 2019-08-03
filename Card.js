@@ -299,7 +299,18 @@ var Card = function(data)
     {
         return this.attachments(TrelloApi.cardLinkRegExp()).find(function(elem)
         {
-          return new Card({link: elem.link()});
+          try
+          {
+            return new Card({link: elem.link()});
+          }
+          
+          catch(e)
+          {
+            if(e.toString().indexOf("card not found") === 0)
+              return false;
+            else
+              throw e;
+          }
         });
     }
 
