@@ -5,6 +5,7 @@ eval(murphy.load(__dirname,"../TrelloApi.js"));
 eval(murphy.load(__dirname,"../HttpApi.js"));
 eval(murphy.load(__dirname,"../TestConnector.js"));
 eval(murphy.load(__dirname,"../IterableCollection.js"));
+eval(murphy.load(__dirname,"../../trellinator/Trellinator.js"));
 //////////////////////////////////////////////////////
 TestConnector.test_base_dir   = __dirname;
 

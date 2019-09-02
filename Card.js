@@ -34,10 +34,12 @@
 var Card = function(data)
 {    
     this.data            = data;
+    this.notification_object = null;
     this.checklist_list  = null;
     this.labels_list     = null;
     this.members_list    = null;
     this.current_list = null;
+  this.containing_board = null;
 
     /**
     * Returns the card ID
@@ -48,6 +50,24 @@ var Card = function(data)
     this.id = function()
     {
         return this.data.id;
+    }
+    
+    this.setNotification = function(notif)
+    {
+        this.notification_object = notif;
+        return this;
+    }
+    
+    /**
+    * Return the notification (if any) that
+    * originated this card
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).card().notification().replytoMember("Hai");
+    */
+    this.notification = function()
+    {
+        return this.notification_object;
     }
 
     /**
@@ -109,7 +129,10 @@ var Card = function(data)
     {
         var ret = null;
 
-        if(this.current_list)
+        if(this.containing_board)
+            ret = this.containing_board;
+      
+        else if(this.current_list)
         {
             ret = this.current_list.board();
         }
@@ -121,12 +144,19 @@ var Card = function(data)
             
             var data = (this.data.board) ? this.data.board:{id: this.data.idBoard};
             ret = new Board(data);
+            this.containing_board = ret;
         }
         
         if(!ret)
             throw new InvalidDataException("Board not found for card: "+this.id());
         
         return ret;
+    }
+    
+    this.setContainingBoard = function(board)
+    {
+      this.containing_board = board;
+      return this;
     }
 
     /**
@@ -171,7 +201,8 @@ var Card = function(data)
         else
           var ret = Trellinator.now();
       
-        return ret;
+        this.moved_to_list_cache = ret;
+        return this.moved_to_list_cache;
     }
 
     /**
@@ -251,8 +282,7 @@ var Card = function(data)
         {   
             checklist.items().each(function(item)
             {   
-                if(item.state == "incomplete")
-                    ret = false;
+              ret = item.isComplete();
             }.bind(this));
         }.bind(this));        
         
@@ -269,7 +299,18 @@ var Card = function(data)
     {
         return this.attachments(TrelloApi.cardLinkRegExp()).find(function(elem)
         {
-          return new Card({link: elem.link()});
+          try
+          {
+            return new Card({link: elem.link()});
+          }
+          
+          catch(e)
+          {
+            if(e.toString().indexOf("card not found") === 0)
+              return false;
+            else
+              throw e;
+          }
         });
     }
 
@@ -329,9 +370,14 @@ var Card = function(data)
                 ret = new Attachment(elem);
             else if(name && TrelloApi.nameTest(name,totest.link()))
                 ret = new Attachment(elem);
-            
+            else if(!name)
+                ret = totest;
+
+            if(ret)
+                ret.setContainingCard(this);
+
             return ret;
-        });
+        }.bind(this));
     }
 
     /**
@@ -374,20 +420,24 @@ var Card = function(data)
     */
     this.attachLink = function(data)
     {
-        if(data.url)
-            var link = data.url;
-        else if(typeof data.link == "string")
-            var link = data.link;
-        else
-            var link = data;
-
-        var url = "cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link);
-
-        if(data.name)
-            url += "&name="+encodeURIComponent(data.name);
-
-        TrelloApi.post(url);
-        return this;
+      if(data.url)
+        var link = data.url;
+      else if(typeof data.link == "string")
+        var link = data.link;
+      else
+        var link = data;
+      
+      var url = "cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link);
+      
+      if(data.name)
+        url += "&name="+encodeURIComponent(data.name);
+      
+      TrelloApi.post(url);
+      
+      if(this.data.attachments)
+        this.data.attachments = null;
+      
+      return this;
     }
     
     /**
@@ -440,10 +490,10 @@ var Card = function(data)
     */
     this.name = function()
     {
-        if(!this.data.name && !this.data.text)
+        if((typeof this.data.name === 'undefined') && (typeof this.data.text === 'undefined'))
             this.load();
 
-        return this.data.name ? this.data.name:this.data.text;
+        return this.data.text ? this.data.text:this.data.name;
     }
     
     /**
@@ -805,7 +855,9 @@ var Card = function(data)
         }
 
         this.current_list = null;
+        this.moved_to_list_cache = null;
         list.card_list = null;
+        this.containing_board = null;
         return this;
     }
 
@@ -941,7 +993,7 @@ var Card = function(data)
     * //Copy a checklist to a card if it was moved or added to the ToDo list
     * notif.board().card("Templates").copyUniqueChecklist("Some Procedure",notif.addedCard("ToDo"));
     */
-    this.copyUniqueChecklist = function(name,to_card)
+    this.copyUniqueChecklist = function(name,to_card,position)
     {
         try
         {
@@ -951,7 +1003,7 @@ var Card = function(data)
         catch(e)
         {
             Notification.expectException(InvalidDataException,e);
-            return this.copyChecklist(name,to_card);
+            return this.copyChecklist(name,to_card,position);
         }
     }
 
@@ -977,7 +1029,9 @@ var Card = function(data)
         //so we need a separate put to update the position once added
         if(position)
             ret.setPosition(position);
-        
+
+        this.checklist_list = null;
+        to_card.checklist_list = null;
         return ret;
     }
 
@@ -1031,7 +1085,9 @@ var Card = function(data)
         if(position)
             checklist.setPosition(position);
 
-        callback(checklist);
+        if(callback)
+            callback(checklist);
+
         return this;
     }
 
@@ -1045,8 +1101,17 @@ var Card = function(data)
     */
     this.removeLabel = function(label)
     {
-        TrelloApi.del("cards/"+this.data.id+"/idLabels/"+label.id());
-        this.labels_list = null;
+        try
+        {
+            TrelloApi.del("cards/"+this.data.id+"/idLabels/"+label.id());
+            this.labels_list = null;
+        }
+
+        catch(e)
+        {
+            Notification.expectException(InvalidRequestException,e);
+        }
+
         return this;
     }
 
@@ -1073,6 +1138,7 @@ var Card = function(data)
         }
         
         this.labels_list = null;
+        this.data.labels = null;
         return this;
     }
 
@@ -1123,6 +1189,189 @@ var Card = function(data)
 
         this.labels_list = null;
         return this;
+    }
+
+    /**
+    * Return the value of a custom field by name.
+    * This works for all field types, and the value is
+    * converted to the appropriate data type based on
+    * the type of field (eg. number/date/etc)
+    *
+    * If the Custom Fields power up is not enabled
+    * this method will attempt to enable it. If it can't
+    * be enabled because the board has reached the power up
+    * limit, an unexpected exception is thrown.
+    *
+    * If a field with the given name doesn't exist it will 
+    * be created as a text type field
+    * @memberof module:TrelloEntities.Card
+    * @param field_name {striung} the name of the field to get the value for on this card
+    * @example
+    * new Notification(posted).card().customFieldValue("My Field");
+    */
+    this.customFieldValue = function(field_name)
+    {
+        var field = this.findOrCreateCustomFieldFromName(field_name);
+        var ret = false;
+
+        this.customFields().each(function(loop)
+        {
+            if(loop.idCustomField == field.id)
+            {
+                ret = this.extractCustomFieldValueFromDataBasedOnType(loop);
+            }
+        }.bind(this));
+        
+        return ret;
+    }
+
+    //INTERNAL USE ONLY
+    this.extractCustomFieldValueFromDataBasedOnType = function(data)
+    {
+        var ret = "";
+
+        if(data.value)
+        {
+            for(var key in data.value)
+            {
+                switch(key)
+                {
+                    case "text":
+                        ret = data.value[key];
+                    break;
+                      
+                    case "number":
+                        ret = parseFloat(data.value[key]);
+                    break;
+                      
+                    case "checked":
+                        ret = (data.value[key] === 'true') ? true:false;
+                    break;
+                      
+                    case "date":
+                        ret = new Date(data.value[key]);
+                    break;
+                      
+                    default:
+                        ret = "";
+                    break;
+                }
+            }
+        }
+        
+        else if(data.idValue)
+        {
+            new IterableCollection(TrelloApi.get("customField/"+data.idCustomField+"/options")).each(function(option)
+            {
+                if(data.idValue == option._id)
+                    ret = option.value.text;
+            });
+
+        }
+        
+        return ret;
+    }
+
+    /**
+    * Get an IterableCollection of all custom fields
+    * as raw objects for this card (not really that useful)
+    * @memberof module:TrelloEntities.Card
+    */
+    this.customFields = function()
+    {
+        return new IterableCollection(TrelloApi.get("cards/"+this.id()+"/customFieldItems"));
+    }
+
+    /**
+    * Set the value of a custom field. Automatically converts
+    * the value to the correct type for the API, including
+    * looking up dropdown options etc. 
+    *
+    * If the Custom Fields power up is not enabled
+    * this method will attempt to enable it. If it can't
+    * be enabled because the board has reached the power up
+    * limit, an unexpected exception is thrown.
+    *
+    * If a field with the given name doesn't exist it will 
+    * be created as a text type field.
+    * @memberof module:TrelloEntities.Card
+    * @param field_name {string} the name of the field to get the value for on this card
+    * @param field_value {string|Date|int|float|double|boolean} the value to set
+    * @example
+    * new Notification(posted).card().setCustomFieldValue("My Field","Hi there");
+    */
+    this.setCustomFieldValue = function(field_name,value)
+    {
+        var field = this.findOrCreateCustomFieldFromName(field_name);
+        var url = "https://api.trello.com/1/card/"+this.id()+"/customField/"+field.id+"/item";
+        
+        var payload = {
+            key: TrelloApi.checkControlValues().key,
+            token: TrelloApi.checkControlValues().token
+          };
+
+        this.insertTrelloCustomFieldValue(payload,value,field);
+        HttpApi.call("put",url,"",{"content-type": "application/json"},JSON.stringify(payload));
+        return this;
+    }
+
+    //INTERNAL USE ONLY
+    this.findOrCreateCustomFieldFromName = function(field_name)
+    {
+        return this.board().findOrCreateCustomFieldFromName(field_name);
+    }
+
+    //INTERNAL USE ONLY
+    this.insertTrelloCustomFieldValue = function(payload,value,field)
+    {
+        //Clear the field if the value is empty
+        if ( value === "" || value === null || value === undefined ) {
+          payload.value = "";
+        }
+
+        switch (field.type)
+        {
+            case "text":
+              payload.value = { text: value.toString() };
+            break;
+              
+            case "number":
+              var n = parseFloat(value);
+              if ( isNaN(n) ) {
+                payload.value = "";
+              } else {
+                payload.value = {number: n.toString() };
+              }
+            break;
+              
+            case "checkbox":
+              payload.value = {checked: (!!value).toString() };
+            break;
+              
+            case "date":
+              var d = new Date(value);
+              if ( isNaN( d.getTime() ) ) {
+                payload.value = "";
+              } else {
+                payload.value = { date: d.toISOString() };
+              }
+            break;
+              
+            case "list":
+                payload.idValue = "";
+
+                new IterableCollection(field.options).each(function(opt)
+                {
+                    if(opt.value.text == value)
+                        payload.idValue = opt.id;
+                });
+            break;
+              
+            default:
+                //This shouldn't happen. We can't assume the type, so we clear the field instead.
+                payload.value = "";
+            break;
+        }
     }
     
     /**
@@ -1233,9 +1482,12 @@ var Card = function(data)
         this.labels_list     = null;
         this.members_list    = null;
         this.current_list = null;
+        this.moved_to_list_cache = null;
+        this.containing_board = null;
         var attempt = this.data.id;
         this.data = TrelloApi.get("cards/"+this.data.id+"?fields=all&actions=all&attachments=true&attachment_fields=all&members=true&member_fields=all&memberVoted_fields=all&checklists=all&checklist_fields=all&board=true&board_fields=all&list=true&pluginData=true&stickers=true&sticker_fields=all");
-        
+      
+
         if(!this.data)
             throw new InvalidDataException("Unable to load card with id: "+attempt);
 
@@ -1303,6 +1555,7 @@ Card.findOrCreate = function(list,data)
     
     catch(e)
     {
+        Notification.expectException(InvalidDataException,e);
         var ret = Card.create(list,data);
     }
     

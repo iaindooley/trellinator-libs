@@ -96,9 +96,85 @@ var Notification = function(notification)
     * var comment = "@"+notif.addedMemberToCard().name()+" welcome!";
     * notif.card().postComment(comment);
     */
-    this.addedMemberToCard = function()
+    this.addedMemberToCard = function(name)
     {
-        return this.memberAddedToCard();
+        return this.memberAddedToCard(name);
+    }
+
+    /**
+    * If this notification was the result of
+    * a member being removed from a card, return
+    * an object of type Member, otherwise
+    * throw an InvalidActionException
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * var notif = new Notification(posted);
+    * var comment = "@"+notif.removedMemberFromCard().name()+" welcome!";
+    * notif.card().postComment(comment);
+    */
+    this.removedMemberFromCard = function(name)
+    {
+      if(
+          (this.notification.action.display.translationKey != "action_member_left_card") &&
+          (this.notification.action.display.translationKey != "action_removed_member_from_card")
+        )
+            throw new InvalidActionException("No member removed from card");
+      
+      var ret = new Member(this.notification.action.member);
+
+      if(name && !TrelloApi.nameTest(name,ret.name()))
+        throw new InvalidActionException("Member was removed, but was not named: "+name);
+      
+      return ret;
+    }
+
+    /**
+    * If this notification was the result of
+    * a member being added to a board, return
+    * an object of type Member, otherwise
+    * throw an InvalidActionException
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optional name (string or regex) to match against username
+    * @throws InvalidActionException
+    * @example
+    * var member = new Notification(posted).addedMemberToBoard();
+    */
+    this.addedMemberToBoard = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_added_member_to_board")
+            throw new InvalidActionException("No member added to a board");
+        
+        var ret = new Member(this.notification.action.member);
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new InvalidActionException("The added member was not named "+name);
+        
+        return ret;
+    }
+
+    /**
+    * If this notification was the result of
+    * a member being removed from a board, return
+    * an object of type Member, otherwise
+    * throw an InvalidActionException
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optional name (string or regex) to match against username
+    * @throws InvalidActionException
+    * @example
+    * var member = new Notification(posted).removedMemberFromBoard();
+    */
+    this.removedMemberFromBoard = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_removed_from_board")
+            throw new InvalidActionException("No member removed from a board");
+        
+        var ret = new Member(this.notification.action.member);
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new InvalidActionException("The removed member was not named "+name);
+        
+        return ret;
     }
 
     /**
@@ -141,6 +217,35 @@ var Notification = function(notification)
         }
         
         ret.setContainingCard(this.card());
+        return ret;
+    }
+
+    /**
+    * Return a Custom Field object
+    * that was changed, optionally pass
+    * in a string or regex to match against
+    * the name of the field
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionaly pass in a string
+    * or RegExp to match against the name of the CARD
+    * on which the field was changed
+    * @throws InvalidActionException
+    * @example
+    * var card = new Notification(posted).changedCustomField("Priority").card();
+    */
+    this.changedCustomField = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_update_custom_field_item")
+            throw new InvalidActionException("No custom field was changed");
+
+        var ret = new CustomField(this.notification.action.data.customField)
+        .setContainingCard(this.card())
+        .setItemForCurrentCard(this.notification.action.data.customFieldItem)
+        .setOldValue(this.notification.action.data.old);
+        
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new InvalidActionException("The updated custom field was not named "+name);
+        
         return ret;
     }
 
@@ -258,6 +363,11 @@ var Notification = function(notification)
     */
     this.boardBefore = function()
     {
+        if(this.notification.action.display.translationKey != "action_move_card_to_board")
+        {
+          throw new InvalidActionException("Card not moved from a board");
+        }
+      
         try
         {
             var ret = this.listBefore().board();
@@ -379,6 +489,53 @@ var Notification = function(notification)
     }
 
     /**
+    * Return the previous value after a change
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .changedCardName().setName(new Notification(posted).oldValue());
+    * 
+    */
+    this.oldValue = function()
+    {
+        if(this.notification.action.data.old)
+        {
+            for(var key in this.notification.action.data.old)
+                return this.notification.action.data.old[key];
+        }
+        
+        else
+        {
+            throw new InvalidActionException("No old value present");
+        }
+    }
+
+    /**
+    * Return the name of the attribute that changed
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * var notif = new Notification(posted);
+    * notif
+    * .changedCardName().setName(notif.oldValue());
+    * notif.replyToMember("You changed: "+notif.whatChanged());
+    */
+    this.whatChanged = function()
+    {
+        if(this.notification.action.data.old)
+        {
+            for(var key in this.notification.action.data.old)
+                return key;
+        }
+        
+        else
+        {
+            throw new InvalidActionException("No old value present");
+        }
+    }
+
+    /**
     * Return a List object that had
     * it's name changed or throws
     * an InvalidActionException if no
@@ -411,6 +568,32 @@ var Notification = function(notification)
     this.changedCardName = function()
     {
         return this.cardWithNameChanged();
+    }
+
+    /**
+    * Return a Card object if the
+    * description of the card was
+    * changed or throw an InvalidActionException
+    * if no card description was changed
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionally pass in a name of card to match
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .changedCardDescription()
+    * .postComment("how dare you!");
+    */
+    this.changedCardDescription = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_changed_description_of_card")
+            throw new InvalidActionException("Card description was not changed");
+
+        var ret = this.card();
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new InvalidActionException("Card item named: "+ret.name()+" description updated which doesn't match: "+name);
+        
+        return ret;
     }
 
     /**
@@ -588,10 +771,42 @@ var Notification = function(notification)
 
         var ret = new CheckItem(this.notification.action.display.entities.checkitem);
         
-        if(name && (ret.name() != name))
+        if(name && !TrelloApi.nameTest(name,ret.name()))
             throw new InvalidActionException("A checklist item was completed but it was not named: "+name);
 
         ret.setContainingChecklist(this.checklist().setContainingCard(this.card()));
+        return ret;
+    }
+    
+    /**
+    * Return a CheckItem object if it was added to a checklist
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionally only look for a checklist item matching a string or regex
+    * or RegExp object to match against the text of the completed item
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .addedChecklistItem(/.*Fluffy.*Bunny/)
+    * .card()
+    * .postComment("Cute ^_^");
+    */
+    this.addedChecklistItem = function(name)
+    {
+        if(this.notification.action.type && (this.notification.action.type == "createCheckItem"))
+        {
+            var ret = new CheckItem(this.notification.action.data.checkItem);
+
+            if(name && !TrelloApi.nameTest(name,ret.name()))
+                throw new InvalidActionException("Checklist item named: "+ret.name()+" added which doesn't match: "+name);
+
+            ret.setContainingChecklist(this.checklist().setContainingCard(this.card()));
+        }
+        
+        else
+        {
+            throw new InvalidActionException("No checklist item was created");
+        }
+        
         return ret;
     }
 
@@ -761,13 +976,18 @@ var Notification = function(notification)
     */
     this.card = function()
     {
-        if(!this.notification.action.display.entities.card)
+        if(!this.notification.action.display.entities.card && !this.notification.action.data.card)
             throw new InvalidActionException("No card was part of this notification");
 
         if(!this.card_object)
-            this.card_object = new Card(this.notification.action.display.entities.card);
+        {
+            if(this.notification.action.display.entities.card)
+                this.card_object = new Card(this.notification.action.display.entities.card);
+            else if(this.notification.action.data.card)
+                this.card_object = new Card(this.notification.action.data.card);
+        }
         
-        return this.card_object;
+        return this.card_object.setNotification(this);
     }
 
     /**
@@ -944,7 +1164,7 @@ var Notification = function(notification)
     }
 
     //Deprecated: use addedMember instead
-    this.memberAddedToCard = function()
+    this.memberAddedToCard = function(name)
     {
       if(
           (this.notification.action.display.translationKey != "action_member_joined_card") &&
@@ -952,7 +1172,12 @@ var Notification = function(notification)
         )
             throw new InvalidActionException("No member added to card");
       
-      return new Member(this.notification.action.member);
+      var ret = new Member(this.notification.action.member);
+
+      if(name && !TrelloApi.nameTest(name,ret.name()))
+        throw new InvalidActionException("Member was added, but was not named: "+name);
+      
+      return ret;
     }
 
     //Deprecated: use addedComment instead
@@ -1089,8 +1314,11 @@ var Notification = function(notification)
 */
 Notification.expectException = function(type,e)
 {
-    if(e.constructor != type)
-        throw e;
+  if(!Array.isArray(type))
+    type = [type];
+  
+  if(type.indexOf(e.constructor) == -1)
+    throw e;
 }
 
 /**
@@ -1148,3 +1376,4 @@ Notification.fromDueDateAction = function(params)
 
     return ret;
 }
+

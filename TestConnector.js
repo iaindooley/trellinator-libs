@@ -25,24 +25,64 @@ var TestConnector = function()
         catch(e)
         {
             var live_url = url.replace("key=dummy&token=dummy","key="+TestConnector.live_key+"&token="+TestConnector.live_token);
+            var header_string = "";
+            var std_data = true;
+            
+            if(options.headers)
+            {
+                header_string = '--header "'+new IterableCollection(options.headers).implodeValues('" --header "',function(elem,key)
+                {
+                    return key+": "+elem;
+                })+'" ';
+            }
 
             if(options.payload)
             {
-                var data_string = new IterableCollection(options.payload).implode("&",function(elem,key)
+                if(options.headers)
                 {
-                    if(key == "key")
-                        return TestConnector.live_key;
-                    else if(key == "token")
-                        return TestConnector.live_token;
-                    else
-                        return encodeURIComponent(elem);
-                });
+                    if(options.headers["content-type"] == "application/json")
+                    {
+                        std_data = false;
+                        
+                        try
+                        {
+                            options.payload = JSON.parse(options.payload);
+                        }
+                        
+                        catch(e)
+                        {
+                        }
+
+                        var data_string = JSON.stringify(new IterableCollection(options.payload).find(function(elem,key)
+                        {   
+                            if(key == "key")
+                                return TestConnector.live_key;
+                            else if(key == "token")
+                                return TestConnector.live_token;
+                            else
+                                return elem;
+                        }).obj);
+                    }
+                }
                 
-                var cmd      = "curl --data \""+data_string+"\" --request "+options.method.toUpperCase()+" --url '"+live_url+"'";
+                if(std_data)
+                {
+                    var data_string = new IterableCollection(options.payload).implode("&",function(elem,key)
+                    {
+                        if(key == "key")
+                            return TestConnector.live_key;
+                        else if(key == "token")
+                            return TestConnector.live_token;
+                        else
+                            return encodeURIComponent(elem);
+                    });
+                }
+                
+                var cmd = 'curl '+header_string+'--data "'+data_string.split('"').join('\\"')+'" --request '+options.method.toUpperCase()+" --url \""+live_url+'\"';
             }
             
             else
-                var cmd      = "curl --request "+options.method.toUpperCase()+" --url '"+live_url+"'";
+                var cmd = "curl "+header_string+"--request "+options.method.toUpperCase()+" --url \""+live_url+'\"';
 
             var stdout = cp.execSync(cmd,{ stdio: ['pipe', 'pipe', 'ignore']});
             
@@ -82,6 +122,8 @@ var TestConnector = function()
     }
 }
 
+TestConnector.sequencer = 0;
+TestConnector.use_sequencer = false;
 TestConnector.test_base_dir = "";
 TestConnector.live_key      = process.argv[2];
 TestConnector.live_token    = process.argv[3];
@@ -91,6 +133,13 @@ TestConnector.nocache       = false;
 TestConnector.fixturePath = function(base_dir,url,options)
 {
     var signature =  md5(url+JSON.stringify(options));
+    
+    if(TestConnector.use_sequencer)
+    {
+        signature = signature+TestConnector.sequencer.toString();
+        TestConnector.sequencer++;
+    }
+
     var api_cache_dir = path.resolve(base_dir,"./trello_api_fixtures/").toString();
     !fs.existsSync(api_cache_dir) && fs.mkdirSync(api_cache_dir);
     var fixture_dir = path.resolve(base_dir,"./trello_api_fixtures/"+path.basename(process.argv[1])).toString();

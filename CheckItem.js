@@ -88,6 +88,7 @@ var CheckItem = function(data)
     this.markComplete = function()
     {
         this.mark("complete");
+        return this;
     }
 
     /**
@@ -100,6 +101,7 @@ var CheckItem = function(data)
     this.markIncomplete = function()
     {
         this.mark("incomplete");
+        return this;
     }
 
     /**

@@ -4,6 +4,7 @@
 !apps/trellinator-libs/CheckItem.js
 !apps/trellinator-libs/Checklist.js
 !apps/trellinator-libs/Comment.js
+!apps/trellinator-libs/CustomField.js
 !apps/trellinator-libs/Exceptions.js
 !apps/trellinator-libs/HttpApi.js
 !apps/trellinator-libs/IterableCollection.js
