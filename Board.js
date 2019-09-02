@@ -503,6 +503,28 @@ var Board = function(data)
     }
 
     /**
+    * Archive this board
+    * @memberof module:TrelloEntities.Board
+    * @example
+    * new Notification(posted).board().del();
+    */
+    this.archive = function()
+    {
+        return TrelloApi.put("boards/"+this.data.id+"?closed=true");
+    }
+
+    /**
+    * Unarchive this board
+    * @memberof module:TrelloEntities.Board
+    * @example
+    * new Notification(posted).board().del();
+    */
+    this.unArchive = function()
+    {
+        return TrelloApi.put("boards/"+this.data.id+"?closed=false");
+    }
+
+    /**
     * Delete this board
     * @memberof module:TrelloEntities.Board
     * @example
