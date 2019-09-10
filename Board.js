@@ -428,7 +428,7 @@ var Board = function(data)
     * var trellinator = new Trellinator();
     * trellinator.board("My Template").copy("My Project",trellinator.team("Some Team"));
     */
-    this.copy = function(name,team,permission)
+    this.copy = function(name,team,permission,no_members)
     {
         var teamstr = "";
         var permstr = "";
@@ -444,10 +444,13 @@ var Board = function(data)
 
         var new_board = new Board(TrelloApi.post("/boards/?name="+encodeURIComponent(name)+teamstr+"&idBoardSource="+this.data.id+"&keepFromSource=cards"+permstr+"&prefs_voting=disabled&prefs_comments=members&prefs_invitations=members&prefs_selfJoin=true&prefs_cardCovers=true&prefs_background=blue&prefs_cardAging=regular"));
         
-        this.members().each(function(elem)
+        if(!no_members)
         {
-            new_board.addMember(elem);
-        }.bind(this));
+            this.members().each(function(elem)
+            {
+                new_board.addMember(elem);
+            }.bind(this));
+        }
         
         return new_board;
     }
