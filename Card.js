@@ -1525,10 +1525,12 @@ var Card = function(data)
 */
 Card.create = function(list,data)
 {
-    if(typeof data === "string")
-        data = {name: data};
-
-    return new Card(TrelloApi.post("cards?idList="+list.id()+"&"+new IterableCollection(data).implode("&",encodeURIComponent)));
+  if(typeof data === "string")
+    data = {name: data};
+  
+  var ret = new Card(TrelloApi.post("cards?idList="+list.id()+"&"+new IterableCollection(data).implode("&",encodeURIComponent)));
+  list.card_list = null;
+  return ret;
 }
 
 /**
