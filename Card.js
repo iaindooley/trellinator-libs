@@ -952,6 +952,22 @@ var Card = function(data)
     }
     
     /**
+    * Check if this card is archived
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).archivedCard().isArchived();
+    */
+    this.isArchived = function()
+    {
+      if(typeof this.data.closed === 'undefined')
+      {
+        this.load();
+      }
+      
+      return this.data.closed;
+    }
+    
+    /**
     * Return a checklist from this card of the given
     * name if it exists or throw InvalidDataException
     * @memberof module:TrelloEntities.Card
