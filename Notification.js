@@ -142,15 +142,17 @@ var Notification = function(notification)
     */
     this.addedMemberToBoard = function(name)
     {
-        if(this.notification.action.display.translationKey != "action_added_member_to_board")
-            throw new InvalidActionException("No member added to a board");
-        
-        var ret = new Member(this.notification.action.member);
-
-        if(name && !TrelloApi.nameTest(name,ret.name()))
-            throw new InvalidActionException("The added member was not named "+name);
-        
-        return ret;
+      if(["action_added_member_to_board","action_added_member_to_board_as_admin"].indexOf(this.notification.action.display.translationKey) == -1)
+      {
+        throw new InvalidActionException("No member added to a board");
+      }
+      
+      var ret = new Member(this.notification.action.member);
+      
+      if(name && !TrelloApi.nameTest(name,ret.name()))
+      throw new InvalidActionException("The added member was not named "+name);
+      
+      return ret;
     }
 
     /**
