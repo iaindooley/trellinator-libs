@@ -178,6 +178,33 @@ var Notification = function(notification)
     }
 
     /**
+    * If a checklist item was converted to a card
+    * return a Card object, otherwise throw an InvalidActionException
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionally pass in a string or RegExp object
+    * to match against the name of the converted checklist item
+    * @throws InvalidActionException
+    * @example 
+    * new Notification(posted)
+    * .convertedChecklistItemToCard(new RegExp(".*Carmen San Diego.*"))
+    * .checklist().card().postComment("Great work gumshoe!");
+    */
+    this.convertedChecklistItemToCard = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_convert_to_card_from_checkitem")
+            throw new InvalidActionException("No checklist item was converted to a card");
+
+        var ret = new Card(this.notification.action.data.card);
+        ret.source = new Checklist(this.notification.action.data.checklist)
+                     .setContainingCard(new Card(this.notification.action.data.cardSource));
+        
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new InvalidActionException("A checklist item was converted to a card but it was not named: "+name);
+
+        return ret;
+    }
+
+    /**
     * If a checklist was completed as part of this notification
     * return a Checklist object, otherwise throw an InvalidActionException
     * @memberof module:TrellinatorCore.Notification
