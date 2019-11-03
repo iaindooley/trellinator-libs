@@ -129,6 +129,48 @@ var CheckItem = function(data)
         
       return (this.data.text)?this.data.text:this.data.name;
     }
+    
+    /**
+    * Return a Card object that is linked in the name of this
+    * checklist item. If more than one card is linked, just
+    * returns the first one. Ignores any other text or formatting
+    * @memberof module:TrelloEntities.CheckItem
+    * @example
+    * card.checklist("Something").items().first().linkedCard().name();
+    */
+    this.linkedCard = function()
+    {
+      if(parts = TrelloApi.cardLinkRegExp().exec(this.name()))
+      {
+          return new Card({id: parts[1]});
+      }
+      
+      else
+      {
+          throw new InvalidDataException("No card linked in checklist item name");
+      }
+    }
+
+    /**
+    * Return a Board object that is linked in the name of this
+    * checklist item. If more than one board is linked, just
+    * returns the first one. Ignores any other text or formatting
+    * @memberof module:TrelloEntities.CheckItem
+    * @example
+    * card.checklist("Something").items().first().linkedBoard().name();
+    */
+    this.linkedBoard = function()
+    {
+      if(parts = TrelloApi.boardLinkRegExp().exec(this.name()))
+      {
+          return new Board({id: parts[1]});
+      }
+      
+      else
+      {
+          throw new InvalidDataException("No board linked in checklist item name");
+      }
+    }
 
     //INTERNAL USE ONLY
     this.load = function()
