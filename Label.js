@@ -74,6 +74,20 @@ var Label = function(data)
 
         return this.data.name;
     }
+
+    /**
+    * Remove this label
+    * @memberof module:TrelloEntities.Label
+    * @example
+    * card.labels().first().name();
+    */
+    this.del = function()
+    {
+        if(typeof this.data.name == undefined)
+            this.load();
+
+        TrelloApi.del("labels/"+this.data.id);
+    }
     
     //INTERNAL USE ONLY
     this.load = function()
