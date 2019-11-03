@@ -46,9 +46,14 @@ var List = function(data)
     * var to_board = new Trellinator().board("Some Board");
     * new Notification(posted).addedCard().currentList().move(to_board);
     */
-    this.move = function(board)
+    this.move = function(board,pos)
     {
       TrelloApi.put("lists/"+this.data.id+"/idBoard?value="+board.id());
+      
+      if(pos)
+      {
+        TrelloApi.put("lists/"+this.data.id+"/pos?value="+encodeURIComponent(pos));
+      }
       
       if(this.board_object)
       {

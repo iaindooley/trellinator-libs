@@ -281,7 +281,7 @@ var Board = function(data)
                                    return new Label(elem);
                                });
         }
-        
+      
         return this.labels_list.findByName(name);
     }
 
@@ -428,7 +428,7 @@ var Board = function(data)
     * var trellinator = new Trellinator();
     * trellinator.board("My Template").copy("My Project",trellinator.team("Some Team"));
     */
-    this.copy = function(name,team,permission)
+    this.copy = function(name,team,permission,no_members)
     {
         var teamstr = "";
         var permstr = "";
@@ -444,10 +444,13 @@ var Board = function(data)
 
         var new_board = new Board(TrelloApi.post("/boards/?name="+encodeURIComponent(name)+teamstr+"&idBoardSource="+this.data.id+"&keepFromSource=cards"+permstr+"&prefs_voting=disabled&prefs_comments=members&prefs_invitations=members&prefs_selfJoin=true&prefs_cardCovers=true&prefs_background=blue&prefs_cardAging=regular"));
         
-        this.members().each(function(elem)
+        if(!no_members)
         {
-            new_board.addMember(elem);
-        }.bind(this));
+            this.members().each(function(elem)
+            {
+                new_board.addMember(elem);
+            }.bind(this));
+        }
         
         return new_board;
     }
@@ -500,6 +503,28 @@ var Board = function(data)
         TrelloApi.del("boards/"+this.data.id+"/members/"+member.username());
         this.members_list  = null;
         return this;
+    }
+
+    /**
+    * Archive this board
+    * @memberof module:TrelloEntities.Board
+    * @example
+    * new Notification(posted).board().del();
+    */
+    this.archive = function()
+    {
+        return TrelloApi.put("boards/"+this.data.id+"?closed=true");
+    }
+
+    /**
+    * Unarchive this board
+    * @memberof module:TrelloEntities.Board
+    * @example
+    * new Notification(posted).board().del();
+    */
+    this.unArchive = function()
+    {
+        return TrelloApi.put("boards/"+this.data.id+"?closed=false");
     }
 
     /**
@@ -615,7 +640,7 @@ var Board = function(data)
                         var resp = TrelloApi.post("boards/"+this.id()+"/boardPlugins?idPlugin="+loop.id);
     
                         if(resp.error)
-                            throw "Unable to enable Custom Fields power up to find or create custom field from name: "+field_name+" because: "+resp.error;
+                            throw "Unable to enable Custom Fields power up to find or create custom field from name because: "+resp.error;
                     }
                 }.bind(this));
             }

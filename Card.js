@@ -59,6 +59,41 @@ var Card = function(data)
     }
     
     /**
+    * Return a Date object representing the
+    * creation date of this card
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).card().whenCreated().toLocaleString();
+    */    
+    this.whenCreated = function()
+    {
+      return new Date(1000*parseInt(this.id().substring(0,8),16));
+    }
+    
+    /**
+    * Number of days excluding saturday and sunday
+    * since this card was created
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).card().weekDaysSinceCreated().toLocaleString();    
+    */
+    this.weekDaysSinceCreated = function()
+    {
+      var created = this.whenCreated().addDays(1);
+      var ret = 0;
+      
+      while(created < Trellinator.now())
+      {
+        if(created.isWeekDay())
+          ret++;
+        
+        created.addDays(1);
+      }
+      
+      return ret;
+    }
+    
+    /**
     * Return the notification (if any) that
     * originated this card
     * @memberof module:TrelloEntities.Card
@@ -299,7 +334,18 @@ var Card = function(data)
     {
         return this.attachments(TrelloApi.cardLinkRegExp()).find(function(elem)
         {
-          return new Card({link: elem.link()});
+          try
+          {
+            return new Card({link: elem.link()});
+          }
+          
+          catch(e)
+          {
+            if(e.toString().indexOf("card not found") === 0)
+              return false;
+            else
+              throw e;
+          }
         });
     }
 
@@ -409,20 +455,24 @@ var Card = function(data)
     */
     this.attachLink = function(data)
     {
-        if(data.url)
-            var link = data.url;
-        else if(typeof data.link == "string")
-            var link = data.link;
-        else
-            var link = data;
-
-        var url = "cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link);
-
-        if(data.name)
-            url += "&name="+encodeURIComponent(data.name);
-
-        TrelloApi.post(url);
-        return this;
+      if(data.url)
+        var link = data.url;
+      else if(typeof data.link == "string")
+        var link = data.link;
+      else
+        var link = data;
+      
+      var url = "cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link);
+      
+      if(data.name)
+        url += "&name="+encodeURIComponent(data.name);
+      
+      TrelloApi.post(url);
+      
+      if(this.data.attachments)
+        this.data.attachments = null;
+      
+      return this;
     }
     
     /**
@@ -902,6 +952,22 @@ var Card = function(data)
     }
     
     /**
+    * Check if this card is archived
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).archivedCard().isArchived();
+    */
+    this.isArchived = function()
+    {
+      if(typeof this.data.closed === 'undefined')
+      {
+        this.load();
+      }
+      
+      return this.data.closed;
+    }
+    
+    /**
     * Return a checklist from this card of the given
     * name if it exists or throw InvalidDataException
     * @memberof module:TrelloEntities.Card
@@ -1123,6 +1189,7 @@ var Card = function(data)
         }
         
         this.labels_list = null;
+        this.data.labels = null;
         return this;
     }
 
@@ -1509,10 +1576,12 @@ var Card = function(data)
 */
 Card.create = function(list,data)
 {
-    if(typeof data === "string")
-        data = {name: data};
-
-    return new Card(TrelloApi.post("cards?idList="+list.id()+"&"+new IterableCollection(data).implode("&",encodeURIComponent)));
+  if(typeof data === "string")
+    data = {name: data};
+  
+  var ret = new Card(TrelloApi.post("cards?idList="+list.id()+"&"+new IterableCollection(data).implode("&",encodeURIComponent)));
+  list.card_list = null;
+  return ret;
 }
 
 /**

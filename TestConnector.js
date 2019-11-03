@@ -78,11 +78,11 @@ var TestConnector = function()
                     });
                 }
                 
-                var cmd      = 'curl '+header_string+'--data "'+data_string.split('"').join('\\"')+'" --request '+options.method.toUpperCase()+' --url "'+live_url+'"';
+                var cmd = 'curl '+header_string+'--data "'+data_string.split('"').join('\\"')+'" --request '+options.method.toUpperCase()+" --url \""+live_url+'\"';
             }
             
             else
-                var cmd      = "curl "+header_string+"--request "+options.method.toUpperCase()+" --url '"+live_url+"'";
+                var cmd = "curl "+header_string+"--request "+options.method.toUpperCase()+" --url \""+live_url+'\"';
 
             var stdout = cp.execSync(cmd,{ stdio: ['pipe', 'pipe', 'ignore']});
             
