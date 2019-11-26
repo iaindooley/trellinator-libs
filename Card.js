@@ -1375,54 +1375,58 @@ var Card = function(data)
     //INTERNAL USE ONLY
     this.insertTrelloCustomFieldValue = function(payload,value,field)
     {
-        //Clear the field if the value is empty
-        if ( value === "" || value === null || value === undefined ) {
-          payload.value = "";
-        }
-
+      //Clear the field if the value is empty
+      if ( value === "" || value === null || value === undefined ) {
+        payload.value = "";
+      }
+      
+      else
+      {
+        
         switch (field.type)
         {
-            case "text":
-              payload.value = { text: value.toString() };
+          case "text":
+            payload.value = { text: value.toString() };
             break;
-              
-            case "number":
-              var n = parseFloat(value);
-              if ( isNaN(n) ) {
-                payload.value = "";
-              } else {
-                payload.value = {number: n.toString() };
-              }
+            
+          case "number":
+            var n = parseFloat(value);
+            if ( isNaN(n) ) {
+              payload.value = "";
+            } else {
+              payload.value = {number: n.toString() };
+            }
             break;
-              
-            case "checkbox":
-              payload.value = {checked: (!!value).toString() };
+            
+          case "checkbox":
+            payload.value = {checked: (!!value).toString() };
             break;
-              
-            case "date":
-              var d = new Date(value);
-              if ( isNaN( d.getTime() ) ) {
-                payload.value = "";
-              } else {
-                payload.value = { date: d.toISOString() };
-              }
+            
+          case "date":
+            var d = new Date(value);
+            if ( isNaN( d.getTime() ) ) {
+              payload.value = "";
+            } else {
+              payload.value = { date: d.toISOString() };
+            }
             break;
-              
-            case "list":
-                payload.idValue = "";
-
-                new IterableCollection(field.options).each(function(opt)
-                {
-                    if(opt.value.text == value)
-                        payload.idValue = opt.id;
-                });
+            
+          case "list":
+            payload.idValue = "";
+            
+            new IterableCollection(field.options).each(function(opt)
+                                                       {
+                                                         if(opt.value.text == value)
+                                                           payload.idValue = opt.id;
+                                                       });
             break;
-              
-            default:
-                //This shouldn't happen. We can't assume the type, so we clear the field instead.
-                payload.value = "";
+            
+          default:
+            //This shouldn't happen. We can't assume the type, so we clear the field instead.
+            payload.value = "";
             break;
         }
+      }
     }
     
     /**
