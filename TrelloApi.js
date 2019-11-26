@@ -9,10 +9,10 @@ TrelloApi.searchCardsInTeams= function(teams,query)
 {
   if(teams.constructor === IterableCollection)
   {
-    var team_ids = encodeURIComponent(teams.transform(function(team)
-                                                      {
-                                                        return team.data.id;
-                                                      }).implodeValues(","));
+    var team_ids = encodeURIComponent(teams.find(function(team)
+                                                 {
+                                                     return team.data.id;
+                                                 }).implodeValues(","));
   }
   
   else if(teams.constructor === Team)
@@ -37,10 +37,10 @@ TrelloApi.searchCardsInBoards = function(boards,query)
 {
   if(boards.constructor === IterableCollection)
   {
-    var board_ids = encodeURIComponent(boards.transform(function(board)
-                                                        {
-                                                          return board.data.id;
-                                                        }).implodeValues(","));
+    var board_ids = encodeURIComponent(boards.find(function(board)
+                                                   {
+                                                       return board.data.id;
+                                                   }).implodeValues(","));
   }
   
   else if(boards.constructor === Board)

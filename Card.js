@@ -341,10 +341,17 @@ var Card = function(data)
           
           catch(e)
           {
-            if(e.toString().indexOf("card not found") === 0)
+            if(
+              (e.toString().indexOf("card not found") === 0) ||
+              (e.toString().indexOf("unauthorized card permission requested") === 0)
+            )
+            {
               return false;
+            }
             else
+            {
               throw e;
+            }
           }
         });
     }
@@ -428,6 +435,21 @@ var Card = function(data)
             this.load();
         
         return "https://trello.com/c/"+this.data.shortLink;
+    }
+    
+    /**
+    * Return a link to this card formatted so
+    * that it can be used in a checklist item name
+    * such that the link will work on both mobile and
+    * web/desktop apps
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * var notif = new Notification(posted);
+    * notif.card().mobileFriendlyLink();
+    */
+    this.mobileFriendlyLink = function()
+    {
+      return "["+this.name().replaceAll("@","AT").replaceAll(/[<>"]/,"")+"]("+this.link()+")";
     }
     
     /**
