@@ -69,7 +69,7 @@ var Label = function(data)
     */
     this.name = function()
     {
-        if(typeof this.data.name == undefined)
+        if(!('name' in this.data))
             this.load();
 
         return this.data.name;
