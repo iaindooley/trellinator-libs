@@ -180,6 +180,39 @@ var Notification = function(notification)
     }
 
     /**
+    * A board was created, returns an object of type Board
+    * This is true if the board was created or copied from another board
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optional name (string or regex) to match against username
+    * @throws InvalidActionException
+    * @example
+    * var board = new Notification(posted).createdBoard();
+    */
+    this.createdBoard = function()
+    {
+      if(["action_create_board","action_copy_board"].indexOf(this.notification.action.display.translationKey) == -1)
+        throw new InvalidActionException("No member added to a board");
+      
+      return new Board(this.notification.action.data.board);
+    }
+
+    /**
+    * A board was copied, returns an object of type Board
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optional name (string or regex) to match against username
+    * @throws InvalidActionException
+    * @example
+    * var board = new Notification(posted).copiedBoard();
+    */
+    this.copiedBoard = function()
+    {
+      if(["action_copy_board"].indexOf(this.notification.action.display.translationKey) == -1)
+        throw new InvalidActionException("No member added to a board");
+      
+      return new Board(this.notification.action.data.board);
+    }
+
+    /**
     * If a checklist item was converted to a card
     * return a Card object, otherwise throw an InvalidActionException
     * @memberof module:TrellinatorCore.Notification
