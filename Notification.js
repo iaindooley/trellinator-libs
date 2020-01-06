@@ -1008,6 +1008,21 @@ var Notification = function(notification)
     }
 
     /**
+    * Throw an invalid action exception if the 
+    * notification came in on a member webhook
+    * rather than a board webhook
+    * @memberof module:TrellinatorCore.Notification
+    * @example
+    * new Notification(posted)
+    * .ignoreMemberWebhooks()
+    */
+    this.ignoreMemberWebhooks = function()
+    {
+        if(this.notification.model.id != this.notification.action.data.board.id)
+            throw new InvalidActionException("We are only worried about notifications at the board level");
+    }
+
+    /**
     * Return the Board object on which this action
     * was performed. Since all notifications are at
     * the board level, this will always return 
@@ -1021,7 +1036,12 @@ var Notification = function(notification)
     this.board = function()
     {
         if(!this.board_object)
-            this.board_object = new Board(this.notification.model);
+        {
+            if(this.notification.model.id == this.notification.action.data.board.id)
+                this.board_object = new Board(this.notification.model);
+            else
+                this.board_object = new Board(this.notification.action.data.board);
+        }
         
         return this.board_object;
     }
