@@ -1285,7 +1285,7 @@ var Notification = function(notification)
     //Deprecated: use mentionedMember instead
     this.memberMentionedInComment = function(name)
     {
-        return this.membersMentionedInComment().findByName(new RegExp("(^|\s)@"+name+"($|\s)","i")).first();
+        return this.membersMentionedInComment().findByName(name).first();
     }
 
     //Deprecated: use mentionedMembers instead
@@ -1296,7 +1296,7 @@ var Notification = function(notification)
 
         this.board().members().each(function(member)
         {
-            if(new RegExp("(^|\s)@"+member.name()+"($|\s)","i").test(comment.text()))
+            if(new RegExp("(^|\\b|\\s)@"+member.name()+"(\\b|\\s|$)","i").test(comment.text()))
                 ret.push(member);
         });
         
