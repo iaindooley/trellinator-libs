@@ -878,13 +878,15 @@ var Card = function(data)
     * //Copy the card to a list ToDo in the board Some Board in position 2
     * new Notification(posted).card().copyToList(list,2);
     */
-    this.copyToList = function(list,position)
+    this.copyToList = function(list,position,keep)
     {
         if(!position)
-            position = "bottom";
+            position = "top";
+        if(!keep)
+            keep = "all";
 
         list.card_list = null;
-        return new Card(TrelloApi.post("cards?pos="+position+"&idList="+list.data.id+"&idCardSource="+this.data.id+"&keepFromSource=all"));
+        return new Card(TrelloApi.post("cards?pos="+position+"&idList="+list.data.id+"&idCardSource="+this.data.id+"&keepFromSource="+encodeURIComponent(keep)));
     }
 
     /**
@@ -897,12 +899,12 @@ var Card = function(data)
     * @example
     * new Notification(posted).card().copyTo("ToDo","top");
     */
-    this.copyTo = function(name,position)
+    this.copyTo = function(name,position,keep)
     {
         if(!position)
-            position = (name.position)?name.position:"bottom";
+            position = (name.position)?name.position:"top";
 
-        return this.copyToList(this.board().list(TrelloApi.nameTestData(name,"list")),position);
+        return this.copyToList(this.board().list(TrelloApi.nameTestData(name,"list")),position,keep);
     }
 
     /**

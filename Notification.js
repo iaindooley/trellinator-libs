@@ -180,6 +180,39 @@ var Notification = function(notification)
     }
 
     /**
+    * A board was created, returns an object of type Board
+    * This is true if the board was created or copied from another board
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optional name (string or regex) to match against username
+    * @throws InvalidActionException
+    * @example
+    * var board = new Notification(posted).createdBoard();
+    */
+    this.createdBoard = function()
+    {
+      if(["action_create_board","action_copy_board"].indexOf(this.notification.action.display.translationKey) == -1)
+        throw new InvalidActionException("No member added to a board");
+      
+      return new Board(this.notification.action.data.board);
+    }
+
+    /**
+    * A board was copied, returns an object of type Board
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optional name (string or regex) to match against username
+    * @throws InvalidActionException
+    * @example
+    * var board = new Notification(posted).copiedBoard();
+    */
+    this.copiedBoard = function()
+    {
+      if(["action_copy_board"].indexOf(this.notification.action.display.translationKey) == -1)
+        throw new InvalidActionException("No member added to a board");
+      
+      return new Board(this.notification.action.data.board);
+    }
+
+    /**
     * If a checklist item was converted to a card
     * return a Card object, otherwise throw an InvalidActionException
     * @memberof module:TrellinatorCore.Notification
@@ -975,6 +1008,21 @@ var Notification = function(notification)
     }
 
     /**
+    * Throw an invalid action exception if the 
+    * notification came in on a member webhook
+    * rather than a board webhook
+    * @memberof module:TrellinatorCore.Notification
+    * @example
+    * new Notification(posted)
+    * .ignoreMemberWebhooks()
+    */
+    this.ignoreMemberWebhooks = function()
+    {
+        if(this.notification.model.id != this.notification.action.data.board.id)
+            throw new InvalidActionException("We are only worried about notifications at the board level");
+    }
+
+    /**
     * Return the Board object on which this action
     * was performed. Since all notifications are at
     * the board level, this will always return 
@@ -988,7 +1036,12 @@ var Notification = function(notification)
     this.board = function()
     {
         if(!this.board_object)
-            this.board_object = new Board(this.notification.model);
+        {
+            if(this.notification.model.id == this.notification.action.data.board.id)
+                this.board_object = new Board(this.notification.model);
+            else
+                this.board_object = new Board(this.notification.action.data.board);
+        }
         
         return this.board_object;
     }
@@ -1243,7 +1296,7 @@ var Notification = function(notification)
 
         this.board().members().each(function(member)
         {
-            if(new RegExp(".*@"+member.name()+".*").test(comment.text()))
+            if(new RegExp("(^|\\b|\\s)@"+member.name()+"(\\b|\\s|$)","i").test(comment.text()))
                 ret.push(member);
         });
         

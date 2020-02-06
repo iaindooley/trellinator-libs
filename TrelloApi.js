@@ -5,7 +5,7 @@ TrelloApi.trello_api_key_information = null;
 * query: same as advanced search query in Trello
 * teams: an array of team objects
 */
-TrelloApi.searchCardsInTeams= function(teams,query)
+TrelloApi.searchCardsInTeams= function(teams,query,card_limit)
 {
   if(teams.constructor === IterableCollection)
   {
@@ -21,7 +21,10 @@ TrelloApi.searchCardsInTeams= function(teams,query)
   else
     throw new Error("You need to either pass in a Team object or an IterableCollection of teams to the searchCardsInTeams method");
   
-  var url = "search?query="+encodeURIComponent(query)+"&idOrganizations="+team_ids+"&modelTypes=cards&partial=true&board_fields=name%2CidOrganization&boards_limit=10&card_fields=all&cards_limit=10&cards_page=0&card_attachments=false&organization_fields=name%2CdisplayName&organizations_limit=10&member_fields=avatarHash%2CfullName%2Cinitials%2Cusername%2Cconfirmed&members_limit=10";
+  if(!card_limit)
+      card_limit = 1000;
+
+  var url = "search?query="+encodeURIComponent(query)+"&idOrganizations="+team_ids+"&modelTypes=cards&partial=true&board_fields=name%2CidOrganization&boards_limit=10&card_fields=all&cards_limit="+card_limit+"&cards_page=0&card_attachments=false&organization_fields=name%2CdisplayName&organizations_limit=10&member_fields=avatarHash%2CfullName%2Cinitials%2Cusername%2Cconfirmed&members_limit=10";
 
   return new IterableCollection(TrelloApi.get(url).cards).transform(function(elem)
              {
@@ -33,7 +36,7 @@ TrelloApi.searchCardsInTeams= function(teams,query)
 * query: same as advanced search query in Trello
 * boards: an array of board objects or "mine"
 */
-TrelloApi.searchCardsInBoards = function(boards,query)
+TrelloApi.searchCardsInBoards = function(boards,query,card_limit)
 {
   if(boards.constructor === IterableCollection)
   {
@@ -52,7 +55,10 @@ TrelloApi.searchCardsInBoards = function(boards,query)
   else
     throw new Error("You need to either pass in an IterableCollection of Board objects, a single Board object, or the string mine to the searchCardsInBoards method");
   
-  var url = "search?query="+encodeURIComponent(query)+"&idBoards="+board_ids+"&modelTypes=cards&partial=true&board_fields=name%2CidOrganization&boards_limit=1000&card_fields=all&cards_limit=10&cards_page=0&card_attachments=false&organization_fields=name%2CdisplayName&organizations_limit=10&member_fields=avatarHash%2CfullName%2Cinitials%2Cusername%2Cconfirmed&members_limit=10";
+  if(!card_limit)
+      card_limit = 1000;
+
+  var url = "search?query="+encodeURIComponent(query)+"&idBoards="+board_ids+"&modelTypes=cards&partial=true&board_fields=name%2CidOrganization&boards_limit=1000&card_fields=all&cards_limit="+card_limit+"&cards_page=0&card_attachments=false&organization_fields=name%2CdisplayName&organizations_limit=10&member_fields=avatarHash%2CfullName%2Cinitials%2Cusername%2Cconfirmed&members_limit=10";
   return new IterableCollection(TrelloApi.get(url).cards)
   .transform(function(elem)
              {

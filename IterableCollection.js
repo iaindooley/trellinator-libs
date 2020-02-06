@@ -360,6 +360,16 @@ var IterableCollection = function(obj)
     }
     
     /**
+    * Reverse the order of this collection
+    * @memberof module:TrellinatorCore.IterableCollection
+    * @throws InvalidDataException
+    */
+    this.reverse = function()
+    {
+        return new IterableCollection(this.asArray().reverse());
+    }
+
+    /**
     * Return the last element from this collection
     * @memberof module:TrellinatorCore.IterableCollection
     * @throws InvalidDataException
