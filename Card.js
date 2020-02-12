@@ -741,6 +741,9 @@ var Card = function(data)
     */
     this.postComment = function(comment_text)
     {
+        if(comment_text.length > 16384)
+            comment_text = comment_text.substring(0,16381)+"...";
+
         TrelloApi.post("cards/"+this.data.id+"/actions/comments?text="+encodeURIComponent(comment_text));
         return this;
     }
