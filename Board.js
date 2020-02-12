@@ -207,6 +207,17 @@ var Board = function(data)
     {
         return this.shortUrl();
     }
+
+    /**
+    * Return the short ID to this board
+    * @memberof module:TrelloEntities.Board
+    * @example
+    * card.attachLink(new Notification(posted).board().shortId());
+    */
+    this.shortId = function()
+    {
+        return this.link().replace("https://trello.com/b/","")
+    }
   
     /**
     * Fetch a member of the board by 

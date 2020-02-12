@@ -779,6 +779,23 @@ var Card = function(data)
         this.members_list = null;
         return this;
     }
+
+    /**
+    * Remove all labels from this card
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).movedCard("Done").removeAllLabels();
+    */
+    this.removeAllLabels = function()
+    {
+        this.labels().each(function(elem)
+        {
+            this.removeLabel(elem);
+        }.bind(this));
+      
+        this.labels_list = null;
+        return this;
+    }
     
     /**
     * Remove a member from this card
