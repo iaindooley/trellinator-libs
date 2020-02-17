@@ -722,6 +722,9 @@ var Card = function(data)
     */
     this.setDescription = function(desc)
     {
+        if(desc.length > 16384)
+            desc = desc.substring(0,16381)+"...";
+
         TrelloApi.put("cards/"+this.data.id+"?desc="+encodeURIComponent(desc));
         this.data.desc = desc;
         return this;
@@ -1626,6 +1629,11 @@ Card.create = function(list,data)
 {
   if(typeof data === "string")
     data = {name: data};
+  else if(data.desc)
+  {
+      if(data.desc.length > 16384)
+          data.desc = data.desc.substring(0,16381)+"...";
+  }
   
   var ret = new Card(TrelloApi.post("cards?idList="+list.id()+"&"+new IterableCollection(data).implode("&",encodeURIComponent)));
   list.card_list = null;
