@@ -1629,7 +1629,7 @@ Card.create = function(list,data)
 {
   if(typeof data === "string")
     data = {name: data};
-  else if(data.desc)
+  else if(data && data.desc)
   {
       if(data.desc.length > 16384)
           data.desc = data.desc.substring(0,16381)+"...";
