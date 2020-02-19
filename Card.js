@@ -1625,10 +1625,18 @@ var Card = function(data)
 * @example
 * Card.create(new Trellinator().board("Some Board").list("ToDo"),{name: "Hi there!",pos:"top"});
 */
-Card.create = function(list,data)
+Card.create = function(list,data,pos)
 {
   if(typeof data === "string")
+  {
     data = {name: data};
+    
+    if(!pos)
+        pos = "top";
+    
+    data.pos = pos;
+  }
+
   else if(data && data.desc)
   {
       if(data.desc.length > 16384)
