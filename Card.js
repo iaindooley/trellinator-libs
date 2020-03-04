@@ -722,6 +722,9 @@ var Card = function(data)
     */
     this.setDescription = function(desc)
     {
+        if(desc.length > 16384)
+            desc = desc.substring(0,16381)+"...";
+
         TrelloApi.put("cards/"+this.data.id+"?desc="+encodeURIComponent(desc));
         this.data.desc = desc;
         return this;
@@ -741,6 +744,9 @@ var Card = function(data)
     */
     this.postComment = function(comment_text)
     {
+        if(comment_text.length > 16384)
+            comment_text = comment_text.substring(0,16381)+"...";
+
         TrelloApi.post("cards/"+this.data.id+"/actions/comments?text="+encodeURIComponent(comment_text));
         return this;
     }
@@ -774,6 +780,23 @@ var Card = function(data)
         }.bind(this));
       
         this.members_list = null;
+        return this;
+    }
+
+    /**
+    * Remove all labels from this card
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * new Notification(posted).movedCard("Done").removeAllLabels();
+    */
+    this.removeAllLabels = function()
+    {
+        this.labels().each(function(elem)
+        {
+            this.removeLabel(elem);
+        }.bind(this));
+      
+        this.labels_list = null;
         return this;
     }
     
@@ -1602,10 +1625,23 @@ var Card = function(data)
 * @example
 * Card.create(new Trellinator().board("Some Board").list("ToDo"),{name: "Hi there!",pos:"top"});
 */
-Card.create = function(list,data)
+Card.create = function(list,data,pos)
 {
   if(typeof data === "string")
+  {
     data = {name: data};
+    
+    if(!pos)
+        pos = "top";
+    
+    data.pos = pos;
+  }
+
+  else if(data && data.desc)
+  {
+      if(data.desc.length > 16384)
+          data.desc = data.desc.substring(0,16381)+"...";
+  }
   
   var ret = new Card(TrelloApi.post("cards?idList="+list.id()+"&"+new IterableCollection(data).implode("&",encodeURIComponent)));
   list.card_list = null;

@@ -657,6 +657,28 @@ var Notification = function(notification)
         
         return ret;
     }
+    
+    /**
+    * Return previous desc if it was changed
+    * as part of this notification
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionally pass in a name of card to match
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .oldCardDescription();
+    */
+    this.oldCardDescription = function(name)
+    {
+      var ret = null;
+
+      if(this.notification && this.notification.action && this.notification.action.data && this.notification.action.data.old && this.notification.action.data.old.desc)
+        ret = this.notification.action.data.old.desc;
+      else
+        throw new InvalidDataException("No old description, probably it wasn't just changed");
+        
+      return ret;
+    }
 
     /**
     * Return a Card object if the
