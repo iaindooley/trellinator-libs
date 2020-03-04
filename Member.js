@@ -30,6 +30,7 @@ var Member = function(data)
     this.data = data;
     this.list_of_teams = null;
     this.board_list  = null;
+    this.containing_card  = null;
   
     /**
     * Return the id of this Member
@@ -40,6 +41,31 @@ var Member = function(data)
     this.id = function()
     {
         return this.data.id;
+    }
+
+    //INTERNAL
+    this.setContainingCard = function(card)
+    {
+        this.containing_card = card;
+        return this;
+    }
+    
+    /**
+    * If a containing card has been set, return it
+    * otherwise throw InvalidDataException
+    * @memberof module:TrelloEntities.Member
+    * @example
+    * new Notification(notification)
+    * .addedMemberToCard()
+    * .card()
+    * .postComment("Member added to me");
+    */
+    this.card = function()
+    {
+        if(!this.containing_card)
+            throw new InvalidDataException("No containing card set");
+        
+        return this.containing_card;
     }
     
     /**

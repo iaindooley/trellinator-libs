@@ -1259,7 +1259,7 @@ var Notification = function(notification)
       if(name && !TrelloApi.nameTest(name,ret.name()))
         throw new InvalidActionException("Member was added, but was not named: "+name);
       
-      return ret;
+      return ret.setContainingCard(this.card());
     }
 
     //Deprecated: use addedComment instead
