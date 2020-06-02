@@ -1003,8 +1003,11 @@ var Notification = function(notification)
         
         if(!ret.isLink())
             throw new InvalidActionException("An attachment was added but it wasn't a link");
-        if(name && !TrelloApi.nameTest(name,ret.link()))
-            throw new InvalidActionException("Attachment with url: "+ret.link()+" did not match "+name);
+        if(
+              (name && !TrelloApi.nameTest(name,ret.link())) &&
+              (name && !TrelloApi.nameTest(name,ret.text()))
+          )
+            throw new InvalidActionException("Attachment with url: "+ret.link()+" and name: "+ret.text()+" did not match "+name);
 
         return ret.setContainingCard(this.card());
     }
