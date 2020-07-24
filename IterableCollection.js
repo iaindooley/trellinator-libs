@@ -491,7 +491,7 @@ var IterableCollection = function(obj)
       ret = new Array();
       
       for(var key in this.obj)
-        ret[key] = this.obj[key];
+        ret.push(this.obj[key]);
       
       return ret;
     }
