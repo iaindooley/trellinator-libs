@@ -812,11 +812,40 @@ var Notification = function(notification)
     * @example
     * new Notification(posted)
     * .addedLabel(new RegExp("Charles.*"))
+    * .card()
     * .postComment("In Charge!");
     */
     this.addedLabel = function(name)
     {
         return this.labelAddedToCard(name);
+    }
+
+    /**
+    * Return a Label object if a label
+    * was removed from a card as part of this notification,
+    * or throw an InvalidActionException
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionally pass in a 
+    * string or RegExp to match against the name of
+    * the label that was removed
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .removedLabel(new RegExp("Charles.*"))
+    * .card()
+    * .postComment("In Charge!");
+    */
+    this.removedLabel = function(name)
+    {
+        if(this.notification.action.display.translationKey != "action_remove_label_from_card")
+            throw new InvalidActionException("No label was removed from a card");
+        
+        var ret = new Label(this.notification.action.data.label);
+        
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new InvalidActionException("Label was removed, but was not named: "+name);
+        
+        return ret.setContainingCard(this.card());
     }
 
     /**
