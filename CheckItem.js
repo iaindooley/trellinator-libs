@@ -81,9 +81,9 @@ var CheckItem = function(data)
     /**
     * Set the position for this item
     * @memberof module:TrelloEntities.CheckItem
-    * @param pos {string,int} either top, bottom or a positive number
+    * @param pos {string|int} either top, bottom or a positive number
     * @example
-    * card.checklist("Something").items().first().setName("Blah");
+    * card.checklist("Something").items().first().setPosition("top");
     */
     this.setPosition = function(pos)
     {
