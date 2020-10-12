@@ -487,7 +487,11 @@ var Card = function(data)
       var url = "cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link);
       
       if(data.name)
-        url += "&name="+encodeURIComponent(data.name);
+      {
+        var maxlength = 256;
+        var ltrimmed_name = data.name.substr(data.name.length-maxlength);
+        url += "&name="+encodeURIComponent(ltrimmed_name);
+      }
       
       TrelloApi.post(url);
       
