@@ -79,6 +79,20 @@ var CheckItem = function(data)
     }
 
     /**
+    * Set the position for this item
+    * @memberof module:TrelloEntities.CheckItem
+    * @param pos {string|int} either top, bottom or a positive number
+    * @example
+    * card.checklist("Something").items().first().setPosition("top");
+    */
+    this.setPosition = function(pos)
+    {
+        TrelloApi.put("cards/"+this.containing_checklist.card().data.id+"/checkItem/"+this.data.id+"?pos="+encodeURIComponent(pos));
+        this.data.pos = pos;
+        return this;
+    }
+
+    /**
     * Change the state of this item to
     * complete
     * @memberof module:TrelloEntities.CheckItem

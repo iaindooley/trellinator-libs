@@ -96,6 +96,9 @@ HttpApi.call = function(method,url,force_get,headers,payload)
   try
   {
     ret = JSON.parse(resp);
+    
+    if(ret.error) 
+        throw new InvalidRequestException(ret.message);
   }
   
   catch(e)

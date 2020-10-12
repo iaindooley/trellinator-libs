@@ -327,15 +327,76 @@ var IterableCollection = function(obj)
     /**
     * Return a random element from this collection
     * @memberof module:TrellinatorCore.IterableCollection
+    * @param include {Function} (optional) a callback that returns true if an object should be considered, false if not
     * @throws InvalidDataException
     */
-    this.random = function()
+    this.random = function(include)
     {
         if(!this.length())
             throw new InvalidDataException("No items in IterableCollection when selecting a random element");
 
-        var keys = Object.keys(this.obj)
-        return this.obj[keys[ keys.length * Math.random() << 0]];
+        if(include)
+        {
+            var ret = false;
+            
+            while(!ret)
+            {
+                var keys = Object.keys(this.obj)
+                var randkey = keys[ keys.length * Math.random() << 0];
+                var rand = this.obj[randkey];
+                
+                if(include(rand))
+                   ret = rand;
+            }
+            
+        }
+        
+        else
+        {
+            var keys = Object.keys(this.obj)
+            var randkey = keys[ keys.length * Math.random() << 0];
+            var ret = this.obj[randkey];
+        }
+
+        return ret;
+    }
+
+    /**
+    * Remove and return a random element from this collection
+    * @memberof module:TrellinatorCore.IterableCollection
+    * @param include {Function} (optional) a callback that returns true if an object should be considered, false if not
+    * @throws InvalidDataException
+    */
+    this.removeRandom = function(include)
+    {
+        if(!this.length())
+            throw new InvalidDataException("No items in IterableCollection when selecting a random element");
+
+        if(include)
+        {
+            var ret = false;
+            
+            while(!ret)
+            {
+                var keys = Object.keys(this.obj)
+                var randkey = keys[ keys.length * Math.random() << 0];
+                var rand = this.obj[randkey];
+                
+                if(include(rand))
+                   ret = rand;
+            }
+            
+        }
+        
+        else
+        {
+            var keys = Object.keys(this.obj)
+            var randkey = keys[ keys.length * Math.random() << 0];
+            var ret = this.obj[randkey];
+        }
+
+        delete this.obj[randkey];
+        return ret;
     }
 
     /**
@@ -491,7 +552,7 @@ var IterableCollection = function(obj)
       ret = new Array();
       
       for(var key in this.obj)
-        ret[key] = this.obj[key];
+        ret.push(this.obj[key]);
       
       return ret;
     }

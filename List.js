@@ -39,6 +39,19 @@ var List = function(data)
     }
   
     /**
+    * Archive all cards in a list
+    * @memberof module:TrelloEntities.List
+    * @example
+    * new Notification(posted).addedCard().currentList().archiveAllCards();
+    */
+    this.archiveAllCards = function()
+    {
+      TrelloApi.post("lists/"+this.data.id+"/archiveAllCards");
+      this.card_list = null;
+      return this;
+    }
+
+    /**
     * Move a list to a different board
     * @memberof module:TrelloEntities.List
     * @param board {Board} the board to move this list to

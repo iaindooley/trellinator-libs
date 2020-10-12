@@ -54,10 +54,26 @@ var Attachment = function(data)
     */
     this.link = function()
     {
-        if(!this.data.url)
-            this.load();
-
-        return this.data.url;
+      if(!this.data.url)
+        this.load();
+      
+      if((this.data.url.indexOf("https://trello") === 0) && (this.card_object) && (this.data.fileName))
+      {
+        var ret = "https://api.trello.com/1/cards/"+this.card_object.id()+"/attachments/"+this.data.id+"/download/"+this.data.fileName;
+        var creds = TrelloApi.checkControlValues();
+        ret = ret+"?key="+creds.key+"&token="+creds.token;
+      }
+      
+      else if(this.data.url.indexOf("https://api.trello.com") === 0)
+      {
+        var creds = TrelloApi.checkControlValues();
+        var ret = this.data.url+"?key="+creds.key+"&token="+creds.token;
+      }
+      
+      else
+        var ret = this.data.url;
+      
+      return ret;
     }
     
     this.setContainingCard = function(card)

@@ -849,6 +849,20 @@ var Card = function(data)
     }
 
     /**
+    * Mark the due date on this card incomplete
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * //Mark the due date complete on a card that was moved into the Done list
+    * new Notification(posted).movedCard("Done").markDueDateIncomplete();
+    */
+    this.markDueDateIncomplete = function()
+    {
+        TrelloApi.put("cards/"+this.data.id+"?dueComplete=false");
+        this.data.dueComplete = false;
+        return this;
+    }
+
+    /**
     * Clear the due date on this card
     * @memberof module:TrelloEntities.Card
     * @example
@@ -1178,6 +1192,7 @@ var Card = function(data)
         catch(e)
         {
             //var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position))).setContainingCard(this);
+            Notification.expectException(InvalidDataException,e);
             var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name))).setContainingCard(this);
             this.checklist_list = null;
         }
