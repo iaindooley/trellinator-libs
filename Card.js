@@ -431,11 +431,24 @@ var Card = function(data)
     */
     this.link = function()
     {
+        return "https://trello.com/c/"+this.shortId();
+    }
+
+    /**
+    * Return the short ID of this card
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * var notif = new Notification(posted);
+    * notif.card().shortId();
+    */
+    this.shortId = function()
+    {
         if(!this.data.shortLink)
             this.load();
         
-        return "https://trello.com/c/"+this.data.shortLink;
+        return this.data.shortLink;
     }
+    
     
     /**
     * Return a link to this card formatted so
