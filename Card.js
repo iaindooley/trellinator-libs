@@ -666,6 +666,32 @@ var Card = function(data)
     }
 
     /**
+    * Return a Label if it is on this card, or false
+    * if the label is not on the card
+    * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} a string or RegExp to match
+    * the label name against
+    * @example
+    * //check if a due date was marked complete on a card with label starting with "Process"
+    * var added = new Notification(posted).addedLabel("Old");
+    * 
+    * if(added.card().hasLabel("New"))
+    *     added.card().postComment("Something old and something new");
+    */
+    this.hasLabel = function(name)
+    {
+        try
+        {
+            return this.labels(name).first();
+        }
+        
+        catch(e)
+        {
+            return false;
+        }
+    }
+
+    /**
     * Return a Label if it is on this card, or throw
     * InvalidDataException if it isn't on the card
     * @memberof module:TrelloEntities.Card
