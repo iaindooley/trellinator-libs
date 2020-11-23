@@ -21,7 +21,7 @@
 * @example
 * new Trellinator().board("Some Board").card(new RegExp("Find me.*"));
 * @example
-* new Notifiation(posted).board().list("ToDo").cards().first().moveToNextList();
+* new Notification(posted).board().list("ToDo").cards().first().moveToNextList();
 * @example
 * Card.create(new Trellinator().board("Some board").list("ToDo"),"Do it!");
 * @xample
