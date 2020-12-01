@@ -535,6 +535,7 @@ var Card = function(data)
     {
         TrelloApi.put("cards/"+this.data.id+"?name="+encodeURIComponent(name));
         this.data.name = name;
+        this.data.text = name;
         return this;
     }
 
