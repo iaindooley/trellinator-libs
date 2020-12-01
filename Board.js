@@ -746,7 +746,10 @@ Board.findOrCreate = function(data,global_command_group)
     {
         Notification.expectException(InvalidDataException,e);
         var ret = Board.create(data);
-        Trellinator.addBoardToGlobalCommandGroup(ret,global_command_group);
+        
+        if(global_command_group)
+            Trellinator.addBoardToGlobalCommandGroup(ret,global_command_group);
+
         return ret;
     }
 }

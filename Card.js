@@ -21,7 +21,7 @@
 * @example
 * new Trellinator().board("Some Board").card(new RegExp("Find me.*"));
 * @example
-* new Notifiation(posted).board().list("ToDo").cards().first().moveToNextList();
+* new Notification(posted).board().list("ToDo").cards().first().moveToNextList();
 * @example
 * Card.create(new Trellinator().board("Some board").list("ToDo"),"Do it!");
 * @xample
@@ -431,11 +431,24 @@ var Card = function(data)
     */
     this.link = function()
     {
+        return "https://trello.com/c/"+this.shortId();
+    }
+
+    /**
+    * Return the short ID of this card
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * var notif = new Notification(posted);
+    * notif.card().shortId();
+    */
+    this.shortId = function()
+    {
         if(!this.data.shortLink)
             this.load();
         
-        return "https://trello.com/c/"+this.data.shortLink;
+        return this.data.shortLink;
     }
+    
     
     /**
     * Return a link to this card formatted so
@@ -487,7 +500,11 @@ var Card = function(data)
       var url = "cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link);
       
       if(data.name)
-        url += "&name="+encodeURIComponent(data.name);
+      {
+        var maxlength = 256;
+        var ltrimmed_name = data.name.substr(data.name.length-maxlength);
+        url += "&name="+encodeURIComponent(ltrimmed_name);
+      }
       
       TrelloApi.post(url);
       
@@ -660,6 +677,32 @@ var Card = function(data)
             this.load();
         
         return this.data.desc;
+    }
+
+    /**
+    * Return a Label if it is on this card, or false
+    * if the label is not on the card
+    * @memberof module:TrelloEntities.Card
+    * @param name {string|RegExp} a string or RegExp to match
+    * the label name against
+    * @example
+    * //check if a due date was marked complete on a card with label starting with "Process"
+    * var added = new Notification(posted).addedLabel("Old");
+    * 
+    * if(added.card().hasLabel("New"))
+    *     added.card().postComment("Something old and something new");
+    */
+    this.hasLabel = function(name)
+    {
+        try
+        {
+            return this.labels(name).first();
+        }
+        
+        catch(e)
+        {
+            return false;
+        }
     }
 
     /**
@@ -842,6 +885,20 @@ var Card = function(data)
     {
         TrelloApi.put("cards/"+this.data.id+"?dueComplete=true");
         this.data.dueComplete = true;
+        return this;
+    }
+
+    /**
+    * Mark the due date on this card incomplete
+    * @memberof module:TrelloEntities.Card
+    * @example
+    * //Mark the due date complete on a card that was moved into the Done list
+    * new Notification(posted).movedCard("Done").markDueDateIncomplete();
+    */
+    this.markDueDateIncomplete = function()
+    {
+        TrelloApi.put("cards/"+this.data.id+"?dueComplete=false");
+        this.data.dueComplete = false;
         return this;
     }
 
@@ -1175,6 +1232,7 @@ var Card = function(data)
         catch(e)
         {
             //var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position))).setContainingCard(this);
+            Notification.expectException(InvalidDataException,e);
             var checklist = new Checklist(TrelloApi.post("cards/"+this.data.id+"/checklists?name="+encodeURIComponent(name))).setContainingCard(this);
             this.checklist_list = null;
         }
