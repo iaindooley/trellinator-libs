@@ -170,6 +170,7 @@ var Board = function(data)
     /**
     * Make this a personal board (remove from any team)
     * will not effect membership of the board
+    * DEPRECATED: Looks like personal boards aren't allowd in Trello anymore
     * @memberof module:TrelloEntities.Board
     * @example
     * new Notification(posted).board().makePersonal();
@@ -433,8 +434,12 @@ var Board = function(data)
     * into a team, preserving members
     * @memberof module:TrelloEntities.Board
     * @param name {string} the name for the new board
-    * @param team {Team} optional - a Team object to add this board to
-    * @param permission {string} optional - org, private, public (defaults to "org" if team provided)
+    * @param team {Team} optional - a Team object to add this board to.
+    * All boards must now be members of a team in Trello, so if this is not provided
+    * default to new Trellinator().teams().first().id()
+    * @param permission {string} optional - org, private, public (defaults to "org")
+    * @param no_members {string} optional - true if you don't want to invite members
+    * from the template board
     * @example
     * var trellinator = new Trellinator();
     * trellinator.board("My Template").copy("My Project",trellinator.team("Some Team"));
@@ -444,14 +449,16 @@ var Board = function(data)
         var teamstr = "";
         var permstr = "";
 
-        if(permission && team)
+        if(permission)
             permstr = "&prefs_permissionLevel="+permission;
-        else if(team)
+        else
             permstr = "&prefs_permissionLevel=org";
 
 
         if(team)
             teamstr = "&idOrganization="+team.data.id;
+        else
+            teamstr = "&idOrganization="+new Trellinator().teams().first().id();
 
         var new_board = new Board(TrelloApi.post("/boards/?name="+encodeURIComponent(name)+teamstr+"&idBoardSource="+this.data.id+"&keepFromSource=cards"+permstr+"&prefs_voting=disabled&prefs_comments=members&prefs_invitations=members&prefs_selfJoin=true&prefs_cardCovers=true&prefs_background=blue&prefs_cardAging=regular"));
         
@@ -714,6 +721,9 @@ Board.create = function(data)
 {
     if(typeof data === "string")
         data = {name: data};
+    
+    if(!data.idOrganization)
+        data.idOrganization = new Trellinator().teams().first().id();
 
     return new Board(TrelloApi.post("boards/?"+new IterableCollection(data).implode("&",encodeURIComponent)));
 }
