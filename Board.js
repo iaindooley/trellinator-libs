@@ -621,6 +621,7 @@ var Board = function(data)
                 name: field_name,
                 pos: "bottom",
                 type: "text",
+                display_cardFront: CustomField.DEFAULT_CARDFRONT_DISPLAY,
                 key: TrelloApi.checkControlValues().key,
                 token: TrelloApi.checkControlValues().token
               };

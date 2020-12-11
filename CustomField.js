@@ -126,3 +126,5 @@ var CustomField = function(data)
         return this;
     }
 }
+
+CustomField.DEFAULT_CARDFRONT_DISPLAY = true;
