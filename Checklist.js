@@ -242,17 +242,20 @@ var Checklist = function(data)
     *     list.addUniqueItem(card.link());
     * });
     */
-    this.addUniqueItem = function(name,position)
+    this.addUniqueItem = function(name,position,checked)
     {
         try
         {
-            this.items().findByName(name).first();
+            var existing = this.items().findByName(name).first();
+            
+            if(checked)
+                existing.markComplete();
         }
         
         catch(e)
         {
             Notification.expectException(InvalidDataException,e);
-            this.addItem(name,position);
+            this.addItem(name,position,checked);
         }
         
         return this;
@@ -270,12 +273,12 @@ var Checklist = function(data)
     *     list.addItem(card.link());
     * });
     */
-    this.addItem = function(name,position)
+    this.addItem = function(name,position,checked)
     {
         if(!position)
             position = "bottom";
 
-        new CheckItem(TrelloApi.post("checklists/"+this.data.id+"/checkItems?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position))).setContainingChecklist(this);
+        new CheckItem(TrelloApi.post("checklists/"+this.data.id+"/checkItems?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position))+"&checked="+checked).setContainingChecklist(this);
         this.item_list = null;
         return this;
     }
