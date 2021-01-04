@@ -270,12 +270,12 @@ var Notification = function(notification)
     
             new IterableCollection(TrelloApi.get("cards/"+this.card().data.id+"/actions?filter=updateCheckItemStateOnCard")).each(function(elem)
             {
-                if(elem.data.checkItem.state == "complete")
+                if((elem.data.checkItem.state == "complete") && elem.data.checklist.id == ret.id())
                     completed_actions.push(elem);
             });
     
             if(this.notification.action.id != completed_actions[0].id)
-                throw new InvalidActionException("This was not the most recent completed notification so couldn't be the one that caused the checklist to be completed");
+                throw new InvalidActionException("This was not the most recent completed notification for the checklist in question so couldn't be the one that caused the checklist to be completed");
         }
         
         ret.setContainingCard(this.card());

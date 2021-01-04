@@ -132,6 +132,22 @@ var Comment = function(data)
         TrelloApi.del("actions/"+this.id());
         return this.card();
     }
+
+    /**
+    * Edit this comment, works only if you have 
+    * more permissions than the person who made the
+    * comment, you made the comment or the person
+    * who made the comment has deleted their account
+    * Returns the containing card
+    * @memberof module:TrelloEntities.Comment
+    * @example
+    * card.comments().first().del();
+    */
+    this.setText = function(text)
+    {
+        TrelloApi.put("actions/"+this.id()+"/text?value="+encodeURIComponent(text));
+        return this.card();
+    }
     
     //INTERNAL USE ONLY
     this.setContainingCard = function(card)
