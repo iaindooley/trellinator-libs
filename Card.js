@@ -922,7 +922,7 @@ var Card = function(data)
     * @param datetime {Date} a Date object
     * @example
     * //When a card is created in the ToDo list set it due in 3 days time at 9am 
-    * new Notification(posted).createdCard("ToDo").setDue(Trellinator.now().plusDays(3).at("9:00"));
+    * new Notification(posted).createdCard("ToDo").setDue(Trellinator.now().addDays(3).at("9:00"));
     */
     this.setDue = function(datetime)
     {
