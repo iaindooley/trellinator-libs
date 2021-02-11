@@ -86,6 +86,11 @@ TrelloApi.get = function(baseURL)
     return HttpApi.call("get",TrelloApi.constructTrelloURL(baseURL));
 }
 
+TrelloApi.authorisedGet = function(full_url)
+{
+    return HttpApi.call("get",full_url,null,{Authorization: "OAuth oauth_consumer_key=\""+creds.key+"\", oauth_token=\""+creds.token+"\""},null,true);
+}
+
 TrelloApi.del = function(baseURL)
 {
     return HttpApi.call("delete",TrelloApi.constructTrelloURL(baseURL));
