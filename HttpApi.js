@@ -41,7 +41,7 @@ var HttpApi = function(){};
 * @param force_get {string} (optional) force a parameter to be
 *        sent in the GET query string even for post or put queries
 */
-HttpApi.call = function(method,url,force_get,headers,payload)
+HttpApi.call = function(method,url,force_get,headers,payload,raw_response)
 {
   var params  = {"method": method,"muteHttpExceptions":true};
   
@@ -95,7 +95,10 @@ HttpApi.call = function(method,url,force_get,headers,payload)
   
   try
   {
-    ret = JSON.parse(resp);
+    if(!raw_response)
+      ret = JSON.parse(resp);
+    else
+      ret = resp;
     
     if(ret.error) 
         throw new InvalidRequestException(ret.message);
