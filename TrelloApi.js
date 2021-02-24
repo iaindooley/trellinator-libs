@@ -88,6 +88,7 @@ TrelloApi.get = function(baseURL)
 
 TrelloApi.authorisedGet = function(full_url)
 {
+    var creds = TrelloApi.checkControlValues();
     return HttpApi.call("get",full_url,null,{Authorization: "OAuth oauth_consumer_key=\""+creds.key+"\", oauth_token=\""+creds.token+"\""},null,true);
 }
 
