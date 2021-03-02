@@ -458,7 +458,20 @@ var Board = function(data)
         if(team)
             teamstr = "&idOrganization="+team.data.id;
         else
-            teamstr = "&idOrganization="+new Trellinator().teams().first().id();
+        {
+            try
+            {
+                team_id = new Trellinator().teams().first().id();
+            }
+            
+            catch(e)
+            {
+                Notification.expectException(InvalidDataException,e);
+                team_id = new Trellinator().team("My New Free Team").id();
+            }
+
+            teamstr = "&idOrganization="+team_id;
+        }
 
         var new_board = new Board(TrelloApi.post("/boards/?name="+encodeURIComponent(name)+teamstr+"&idBoardSource="+this.data.id+"&keepFromSource=cards"+permstr+"&prefs_voting=disabled&prefs_comments=members&prefs_invitations=members&prefs_selfJoin=true&prefs_cardCovers=true&prefs_background=blue&prefs_cardAging=regular"));
         
