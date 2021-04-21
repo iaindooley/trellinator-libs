@@ -1158,10 +1158,14 @@ var Notification = function(notification)
     * passed into the original function
     * @param callback {Function} (optional) a function into which the due date
     * as a Date object, and a second argument with the notification params that
-    * will be passed into the function
+    * will be passed into the function, and the card to which the due date was added
+    * as a third parameter
     * @example
-    * new Notification(posted).actionOnDueDateAdded("doSomething",signature,function(date,params)
+    * new Notification(posted).actionOnDueDateAdded("doSomething",signature,function(date,params,card)
     * {
+    *     if(card.currentList().name() != "Action")
+    *         throw new InvalidActionException("Don't action if card not in Action list");
+    *
     *     date.addDays(3).at("9:00");
     *     params.arbitrary_string = "I ain't afraid of no ghost";
     * });
@@ -1239,7 +1243,7 @@ var Notification = function(notification)
         clear(trigger_signature);
         params = this.notification;
         var date = new Date(card.due());
-        callback(date,params);
+        callback(date,params,card);
         ExecutionQueue.push(function_name,params,trigger_signature,date);
     }
 
