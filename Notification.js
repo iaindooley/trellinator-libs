@@ -1191,6 +1191,10 @@ var Notification = function(notification)
     * By default, will execute on the due date, but
     * you can optionally pass in a callback to modify
     * the date relative to the due date of the card.
+    *
+    * The original notification object is passed into
+    * the scheduled function, so you will need to
+    * call new Notification(params) in the scheduled function
     * 
     * @memberof module:TrellinatorCore.Notification
     * @param function_name {string} the name of the function to execute
