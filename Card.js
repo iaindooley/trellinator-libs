@@ -1317,7 +1317,10 @@ var Card = function(data)
             
             catch(e)
             {
+                if(e.toString().indexOf("that label is already on the card") !== 0)
+                    throw e;
             }
+
         }.bind(this));
         
         this.labels_list = null;
@@ -1341,6 +1344,8 @@ var Card = function(data)
             
             catch(e)
             {
+                if(e.toString().indexOf("that label is already on the card") !== 0)
+                    throw e;
             }
         }.bind(this));
 
