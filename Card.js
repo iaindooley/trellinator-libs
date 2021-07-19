@@ -1484,6 +1484,7 @@ var Card = function(data)
       //Clear the field if the value is empty
       if ( value === "" || value === null || value === undefined ) {
         payload.value = "";
+        payload.idValue = "";
       }
       
       else
