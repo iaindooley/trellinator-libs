@@ -18,6 +18,7 @@ var Team = function(data)
 {    
     this.data       = data;
     this.board_list = null;
+    this.member_list = null;
 
     /**
     * Return the id of this Team
@@ -97,8 +98,25 @@ var Team = function(data)
     }
     
     /**
-    * Add a member to this team, must be via
-    * email rather than by username (weirdly!)
+    * Add a member to this team 
+    * @memberof module:TrelloEntities.Team
+    * @param member {string} an object of type Member
+    * @param type {string} either "admin" or "normal", optional, default normal
+    * @example
+    * new Trellinator().team("Some Team").addMember("iaindooley","admin");
+    */
+    this.addMember = function(member,type)
+    {
+        if(!type)
+            type = "normal";
+
+        TrelloApi.put("organizations/"+this.id()+"/members/"+member.id()+"?type="+encodeURIComponent(type));
+        this.member_list = null;
+        return this;
+    }
+
+    /**
+    * Add a member to this team by email
     * @memberof module:TrelloEntities.Team
     * @param email {string} the email of the person to invite
     * @param full_name {string} full name for the person
@@ -106,13 +124,36 @@ var Team = function(data)
     * @example
     * new Trellinator().team("Some Team").addMember("team@theprocedurepeople.com","Cool Folks","admin");
     */
-    this.addMember = function(email,full_name,type)
+    this.addMemberByEmail = function(email,full_name,type)
     {
         if(!type)
             type = "normal";
 
         TrelloApi.put("organizations/"+this.id()+"/members?email="+encodeURIComponent(email)+"&fullName="+encodeURIComponent(full_name)+"&type="+encodeURIComponent(type));
+        this.member_list = null;
         return this;
+    }
+
+    /**
+    * Return an IterableCollection of Member objects
+    * @memberof module:TrelloEntities.Team
+    * @example
+    * new Trellinator().team("Some Team").members().each(function(member)
+    * {
+    *     console.log(member.name());
+    * });
+    */
+    this.members = function()
+    {
+        if(!this.member_list)
+        {
+            this.member_list = new IterableCollection(TrelloApi.get("organizations/"+this.id()+"/members")).find(function(elem)
+            {
+                return new Member(elem);
+            });
+        }
+
+        return this.member_list;
     }
 
     //INTERNAL USE ONLY
