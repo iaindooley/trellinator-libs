@@ -160,15 +160,10 @@ var Attachment = function(data)
     //INTERNAL USE ONLY
     this.load = function()
     {
-        this.data = TrelloApi.get("lists/"+this.data.id+"?fields=all");
-        return this;
-    }
+        if(!this.card_object)
+            throw new InvalidDataException("Unable to load attachment data without a containing card");
 
-    //DEPRECATED used setName
-    this.rename = function(new_name)
-    {
-        var updated = TrelloApi.put("lists/"+this.data.id+"/name?value="+encodeURIComponent(new_name));
-        this.data.name = new_name;
+        this.data = TrelloApi.get("cards/"+this.card_object+"/attachments/"+this.data.id+"?fields=all");
         return this;
     }
 }
