@@ -783,6 +783,44 @@ var Notification = function(notification)
         
         return this.card();
     }
+
+    /**
+    * Return a Board object if it was archived
+    * as part of this notification, or throw
+    * an InvalidActionException. Note that this
+    * is just an alias of closedBoard, both function
+    * names are included because the terminology is
+    * inconsistent between cards, lists and boards
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .archivedBoard()
+    * .unArchive();
+    */
+    this.archivedBoard = function()
+    {
+        return this.closedBoard();
+    }
+
+    /**
+    * Return a Board object if it was closed
+    * as part of this notification, or throw
+    * an InvalidActionException
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .closedBoard()
+    * .unArchive();
+    */
+    this.closedBoard = function()
+    {
+        if(this.notification.action.display.translationKey != "action_closed_board")
+            throw new InvalidActionException("No board was closed in this update");
+        
+        return this.board();
+    }
    
     /**
     * Return a Card object if a due 
