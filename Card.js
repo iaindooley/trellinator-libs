@@ -937,6 +937,7 @@ var Card = function(data)
     * @memberof module:TrelloEntities.Card
     * @param list {List} a List object to copy this card to
     * @param position {string|int} either top, bottom or a number
+    * @param keep (optional) {string} default is "all", but can be "none" or a comma separated list: attachments, checklists, due, labels, members, stickers, customFields
     * @example
     * var list = new Trellinator().board("Some Board").findOrCreateList("ToDo");
     * //Copy the card to a list ToDo in the board Some Board in position 2
