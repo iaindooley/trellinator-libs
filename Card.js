@@ -739,18 +739,10 @@ var Card = function(data)
             if(!this.data.labels)
                 this.load();
     
-            try
+            this.labels_list = new IterableCollection(this.data.labels).transform(function(elem)
             {
-              this.labels_list = new IterableCollection(this.data.labels).transform(function(elem)
-              {
-                  return new Label(elem).setContainingCard(this);
-              }.bind(this));
-            }
-            
-            catch(e)
-            {
-              throw new InvalidDataException("No labels present on card");
-            }
+                return new Label(elem).setContainingCard(this);
+            }.bind(this));
         }
         
         return this.labels_list.findByName(name);
