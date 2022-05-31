@@ -23,6 +23,10 @@
 */
 var Checklist = function(data)
 {
+    //allow Trello style IDs
+    if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        data['_id'] = data['_id'] || data.id;
+
     this.data            = data;
     this.item_list       = null;
     this.containing_card = null;
@@ -35,7 +39,7 @@ var Checklist = function(data)
     */
     this.id = function()
     {
-        return this.data.id;
+        return Trellinator.standardId(this.data);
     }
   
     /**
@@ -224,10 +228,10 @@ var Checklist = function(data)
     */
     this.name = function()
     {
-        if(!this.data.name && !this.data.text)
+        if(!this.data.name && !this.data.text && !this.data.title)
             this.load();
         
-        return this.data.name ? this.data.name:this.data.text;
+        return this.data.name || this.data.text || this.data.title;
     }
 
     /**
@@ -278,9 +282,19 @@ var Checklist = function(data)
         if(!position)
             position = "bottom";
 
-        new CheckItem(TrelloApi.post("checklists/"+this.data.id+"/checkItems?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position))+"&checked="+checked).setContainingChecklist(this);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            //NEED TO GET CURRENT ITEMS, ADD NEW ITEM TO THE LIST, THEN SET ITEMS
+            new CheckItem(WekanApi.post("boards/"+this.card().board().id()+"/cards/"+this.card().id()+"/checklists/"+this.id()+"/items",{title: name})).setContainingChecklist(this);
+        else
+            new CheckItem(TrelloApi.post("checklists/"+this.data.id+"/checkItems?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position))+"&checked="+checked).setContainingChecklist(this);
+
         this.item_list = null;
         return this;
+    }
+    
+    this.setItems = function(items)
+    {
+        //DELETE THE CHECKLIST, RE-CREATE IT AND UPDATE THE CHECKED STATE OF THE ITEMS
     }
     
     /**
@@ -312,10 +326,24 @@ var Checklist = function(data)
     {
         if(!this.item_list)
         {
-            this.item_list = new IterableCollection(TrelloApi.get("checklists/"+this.data.id+"/checkItems")).transform(function(item)
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
             {
-                return new CheckItem(item).setContainingChecklist(this);
-            }.bind(this));
+                if(!this.data.items)
+                    this.load();
+
+                this.item_list = new IterableCollection(this.data.items).transform(function(item)
+                {
+                    return new CheckItem(item).setContainingChecklist(this);
+                }.bind(this));
+            }
+            
+            else
+            {
+                this.item_list = new IterableCollection(TrelloApi.get("checklists/"+this.data.id+"/checkItems")).transform(function(item)
+                {
+                    return new CheckItem(item).setContainingChecklist(this);
+                }.bind(this));
+            }
         }
 
         return this.item_list.findByName(name);
@@ -324,10 +352,15 @@ var Checklist = function(data)
     //INTERNAL USE ONLY
     this.load = function()
     {
-        this.data = TrelloApi.get("checklists/"+this.data.id+"?cards=all&checkItems=all&checkItem_fields=all&fields=all");
+        this.item_list = null;
+
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            this.data = WekanApi.get("boards/"+this.card().board().id()+"/cards/"+this.card().id()+"/checklists/"+this.id());
+        else
+            this.data = TrelloApi.get("checklists/"+this.data.id+"?cards=all&checkItems=all&checkItem_fields=all&fields=all");
       
-      if(!this.data)
-        throw new InvalidDataException("We appear to not exist ... ");
+        if(!this.data)
+            throw new InvalidDataException("We appear to not exist ... ");
       
         return this;
     }

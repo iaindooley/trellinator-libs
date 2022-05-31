@@ -23,6 +23,10 @@
 */
 var List = function(data)
 {    
+    //allow Trello style IDs
+    if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        data['_id'] = data['_id'] || data.id;
+
     this.data         = data;
     this.card_list    = null;
     this.board_object = null;
@@ -35,7 +39,7 @@ var List = function(data)
     */
     this.id = function()
     {
-        return this.data.id;
+        return Trellinator.standardId(this.data);
     }
   
     /**
@@ -92,9 +96,7 @@ var List = function(data)
       TrelloApi.put("lists/"+this.data.id+"/pos?value="+pos);
       
       if(this.board_object)
-      {
         this.board_object.list_of_lists = null;
-      }
       
       return this;
     }
@@ -199,10 +201,10 @@ var List = function(data)
     */
     this.name = function()
     {
-        if(!this.data.name && !this.data.text)
+        if(!this.data.name && !this.data.text && !this.data.title)
             this.load();
 
-        return this.data.name ? this.data.name:this.data.text;
+        return this.data.name || this.data.text || this.data.title;
     }
     
     /**
@@ -265,10 +267,24 @@ var List = function(data)
     {
         if(!this.card_list)
         {
-            this.card_list = new IterableCollection(TrelloApi.get("lists/"+this.data.id+"/cards?fields=id,name")).transform(function(elem)
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
             {
-                return new Card(elem).setCurrentList(this);
-            }.bind(this));
+                if(!this.board_object)
+                    this.load();
+
+                this.card_list = new IterableCollection(WekanApi.get("boards/"+this.board_object.id()+"/lists/"+this.id()+"/cards")).transform(function(elem)
+                {
+                    return new Card(elem).setCurrentList(this);
+                }.bind(this));
+            }
+
+            else
+            {
+                this.card_list = new IterableCollection(TrelloApi.get("lists/"+this.data.id+"/cards?fields=id,name")).transform(function(elem)
+                {
+                    return new Card(elem).setCurrentList(this);
+                }.bind(this));
+            }
         }
 
         return this.card_list.findByName(name);
@@ -359,8 +375,17 @@ var List = function(data)
     this.load = function()
     {
         this.card_list = null;
-        this.board_object = null;
-        this.data = TrelloApi.get("lists/"+this.data.id+"?fields=all");
+        
+        if(!this.board_object && this.data['boardId'])
+            this.board_object = new Board({id: this.data.boardId});
+        else if(!this.board_object)
+            throw "List must either have a board object or a boardId in order to be loaded";
+        
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            this.data = WekanApi.get("boards/"+this.board_object.id()+"/lists/"+this.data['_id']);
+        else
+            this.data = TrelloApi.get("lists/"+this.data.id+"?fields=all");
+
         return this;
     }
 

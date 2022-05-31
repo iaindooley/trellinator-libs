@@ -25,6 +25,10 @@
 */
 var CheckItem = function(data)
 {
+    //allow Trello style IDs
+    if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        data['_id'] = data['_id'] || data.id;
+
     this.data                 = data;
     this.containing_checklist = null;
 
@@ -36,7 +40,7 @@ var CheckItem = function(data)
     */
     this.id = function()
     {
-        return this.data.id;
+        return Trellinator.standardId(this.data);
     }
 
     /**
@@ -138,10 +142,10 @@ var CheckItem = function(data)
     */
     this.name = function()
     {
-        if(!this.data.text && !this.data.name)
+        if(!this.data.text && !this.data.name && !this.data.title)
             this.load();
         
-      return (this.data.text)?this.data.text:this.data.name;
+      return this.data.text || this.data.name || this.data.title;
     }
     
     /**
@@ -189,7 +193,11 @@ var CheckItem = function(data)
     //INTERNAL USE ONLY
     this.load = function()
     {
-        this.data = TrelloApi.get("checklists/"+this.containing_checklist.data.id+"/checkitems/"+this.data.id+"?fields=all");
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            this.data = WekanApi.get("boards/"+this.checklist().card().board().id()+"/cards/"+this.checklist().card().id()+"/checklists/"+this.checklist().id()+"/items/"+this.id());
+        else
+            this.data = TrelloApi.get("checklists/"+this.containing_checklist.data.id+"/checkitems/"+this.data.id+"?fields=all");
+
         return this;
     }
 

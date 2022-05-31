@@ -27,6 +27,10 @@
 */
 var Member = function(data)
 {    
+    //allow Trello style IDs
+    if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        data['userId'] = data['userId'] || data.id;
+
     this.data = data;
     this.list_of_teams = null;
     this.board_list  = null;
@@ -40,7 +44,10 @@ var Member = function(data)
     */
     this.id = function()
     {
-        return this.data.id;
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            return this.data['userId'];
+        else
+            return this.data.id;
     }
 
     //INTERNAL
@@ -248,14 +255,18 @@ var Member = function(data)
         this.list_of_teams = null;
         this.board_list  = null;
 
-        if(this.data.id)
-            var toload = this.data.id;
+        if(this.id())
+            var toload = this.id();
         else if(this.data.username)
             var toload = this.data.username;
         else
             throw new Error("You have to pass in either an ID or a username to a new Member");
 
-        this.data = TrelloApi.get("members/"+toload+"?fields=id,username,fullName");
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            this.data = WekanApi.get("users/"+toload);
+        else
+            this.data = TrelloApi.get("members/"+toload+"?fields=id,username,fullName");
+
         return this;
     }
     

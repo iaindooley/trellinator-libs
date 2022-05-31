@@ -83,14 +83,19 @@
 */
 var Board = function(data)
 {    
+    //allow Trello style IDs
+    if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        data['_id'] = data['_id'] || data.id;
+
     this.data          = data;
     this.list_of_lists = null;
+    this.list_of_swimlanes = null;
     this.members_list  = null;
     this.labels_list   = null;
     this.card_list     = null;
-  this.containing_team = null;
-  this.custom_fields_enabled = false;
-        this.custom_fields     = null;
+    this.containing_team = null;
+    this.custom_fields_enabled = false;
+    this.custom_fields     = null;
 
     /**
     * Return the board ID
@@ -100,7 +105,7 @@ var Board = function(data)
     */
     this.id = function()
     {
-        return this.data.id;
+        return Trellinator.standardId(this.data);
     }
 
     /**
@@ -111,10 +116,15 @@ var Board = function(data)
     */
     this.name = function()
     {
-        if(!this.data.name)
+        if(!this.data.name && !this.data.title)
             this.load();
-        
-        return this.data.name;
+
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            var ret = this.data.title;
+        else
+            var ret = this.data.name;
+
+        return ret;
     }
     
     /**
@@ -136,13 +146,21 @@ var Board = function(data)
     {
       if(!this.containing_team)
       {
-          if(!this.data.idOrganization)
-              this.load();
+          if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+          {
+              this.containing_team = new Team();
+          }
 
-          if(this.data.idOrganization)
-              this.containing_team = new Team({id: this.data.idOrganization});
           else
-              throw new InvalidDataException("This Board does not belong to a team");
+          {
+              if(!this.data.idOrganization)
+                  this.load();
+    
+              if(this.data.idOrganization)
+                  this.containing_team = new Team({id: this.data.idOrganization});
+              else
+                  throw new InvalidDataException("This Board does not belong to a team");
+          }
       }
 
       return this.containing_team;
@@ -156,14 +174,23 @@ var Board = function(data)
     */
     this.moveToTeam = function(team)
     {
-      if(this.containing_team)
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
       {
-          this.containing_team.board_list = null;
-          this.containing_team = team;
-          this.data.idOrganization = team.id();
+          //NO TEAMS IN WEKAN
+      }
+      
+      else
+      {
+          if(this.containing_team)
+          {
+              this.containing_team.board_list = null;
+              this.containing_team = team;
+              this.data.idOrganization = team.id();
+          }
+    
+          TrelloApi.put("boards/"+this.id()+"?idOrganization="+team.id());
       }
 
-      TrelloApi.put("boards/"+this.id()+"?idOrganization="+team.id());
       return this;
     }
 
@@ -177,12 +204,21 @@ var Board = function(data)
     */
     this.makePersonal = function()
     {
-      if(this.containing_team)
-          this.containing_team.board_list = null;
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+      {
+          //NO TEAMS IN WEKAN
+      }
+      
+      else
+      {
+          if(this.containing_team)
+              this.containing_team.board_list = null;
+    
+          this.containing_team = null;
+          this.data.idOrganization = "";
+          TrelloApi.put("boards/"+this.id()+"?idOrganization=");
+      }
 
-      this.containing_team = null;
-      this.data.idOrganization = "";
-      TrelloApi.put("boards/"+this.id()+"?idOrganization=");
       return this;
     }
     
@@ -195,6 +231,9 @@ var Board = function(data)
     */
     this.setName = function(name)
     {
+       if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+           throw new InvalidRequestException("Editing board attributes not available yet in WeKan API");
+
        return this.rename(name);
     }
 
@@ -217,7 +256,10 @@ var Board = function(data)
     */
     this.shortId = function()
     {
-        return this.link().replace("https://trello.com/b/","")
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            return this.id();
+        else
+            return this.link().replace("https://trello.com/b/","")
     }
   
     /**
@@ -250,10 +292,15 @@ var Board = function(data)
     {
         if(!this.members_list)
         {
-            this.members_list = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/members?fields=fullName,username")).transform(function(elem)
-                                {
-                                    return new Member(elem);
-                                });
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+                this.load();
+            else
+            {
+                this.members_list = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/members?fields=fullName,username")).transform(function(elem)
+                {
+                    return new Member(elem);
+                });
+            }
         }
 
         return this.members_list.findByName(name);
@@ -288,10 +335,23 @@ var Board = function(data)
     {
         if(!this.labels_list)
         {
-            this.labels_list = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/labels?fields=id,name&limit=1000")).transform(function(elem)
-                               {
-                                   return new Label(elem);
-                               });
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            {
+                this.load();
+
+                this.labels_list = new IterableCollection(this.data.labels).transform(function(elem)
+                {
+                    return new Label(elem);
+                });
+            }
+
+            else
+            {
+                this.labels_list = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/labels?fields=id,name&limit=1000")).transform(function(elem)
+                {
+                    return new Label(elem);
+                });
+            }
         }
       
         return this.labels_list.findByName(name);
@@ -337,10 +397,21 @@ var Board = function(data)
     {
         if(!this.list_of_lists)
         {
-            this.list_of_lists = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/lists?cards=none&card_fields=none&filter=open&fields=all")).transform(function(elem)
-                                 {
-                                     return new List(elem).setBoard(this);
-                                 }.bind(this));
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            {
+                this.list_of_lists = new IterableCollection(WekanApi.get("boards/"+this.id()+"/lists")).transform(function(elem)
+                {
+                    return new List(elem).setBoard(this);
+                }.bind(this));
+            }
+
+            else
+            {
+                this.list_of_lists = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/lists?cards=none&card_fields=none&filter=open&fields=all")).transform(function(elem)
+                {
+                    return new List(elem).setBoard(this);
+                }.bind(this));
+            }
         }
       
         return this.list_of_lists.findByName(name);
@@ -373,10 +444,28 @@ var Board = function(data)
     {
         if(!this.card_list)
         {
-            this.card_list = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/cards?fields=id,name")).transform(function(card)
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
             {
-                return new Card(card).setContainingBoard(this);
-            }.bind(this));
+                var card_list = [];
+                
+                this.lists().each(function(list)
+                {
+                    list.cards().each(function(card)
+                    {
+                        card_list.push(card);
+                    });
+                });
+                
+                this.card_list = new IterableCollection(card_list);
+            }
+            
+            else
+            {
+                this.card_list = new IterableCollection(TrelloApi.get("boards/"+this.data.id+"/cards?fields=id,name")).transform(function(card)
+                {
+                    return new Card(card).setContainingBoard(this);
+                }.bind(this));
+            }
         }
 
         return this.card_list.findByName(name);
@@ -424,10 +513,83 @@ var Board = function(data)
         if(!pos)
             pos = "top";
 
-        var list = new List(TrelloApi.post("lists?name="+encodeURIComponent(name)+"&idBoard="+this.data.id+"&pos="+pos));
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            var list = new List(WekanApi.post("boards/"+this.id()+"/lists",{title: name})).setBoard(this);
+        else
+            var list = new List(TrelloApi.post("lists?name="+encodeURIComponent(name)+"&idBoard="+this.data.id+"&pos="+pos)).setBoard(this);
+
         this.list_of_lists = null;
         return list;
     }
+
+    /**
+    * Return the default Swimlane, ONLY AVAILABLE FOR WEKAN API
+    * @memberof module:TrelloEntities.Board
+    */
+    this.defaultSwimlane = function()
+    {
+        return this.swimlanes().first();
+    }
+    
+    /**
+    * Return a list of swimlanes, ONLY AVAILABLE FOR WEKAN API
+    * @memberof module:TrelloEntities.Board
+    */
+    this.swimlanes = function(name)
+    {
+        if(!this.list_of_swimlanes)
+        {
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            {
+                this.list_of_swimlanes = new IterableCollection(WekanApi.get('boards/'+this.id()+'/swimlanes')).transform(function(lane)
+                {
+                    return new Swimlane(lane);
+                });
+            }
+            
+            else
+                throw new InvalidRequestException("Swimlanes only available in WeKan API");
+        }
+
+        return this.list_of_swimlanes.findByName(name);
+    }
+
+    /**
+    * Add a new label by name to the board
+    * AVAILABLE ONLY IN WEKAN API
+    * @memberof module:TrelloEntities.Board
+    */
+    this.addLabel = function(name,color)
+    {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(!color)
+                color = "none";
+
+            try
+            {
+                var ret = this.label(name);
+            }
+            
+            catch(e)
+            {
+                Notification.expectException(InvalidDataException,e);
+                var ret = new Label(WekanApi.put('boards/'+this.id()+'/labels',{
+                    label: {
+                        color: color,
+                        name: name
+                    }
+                }));
+            }
+        }
+        
+        else
+            throw new InvalidRequestException("Add label to board only available in WeKan API");
+
+        this.labels_list = null;
+        return ret;
+    }
+    
     
     /**
     * Create a new board by copying this one
@@ -446,41 +608,111 @@ var Board = function(data)
     */
     this.copy = function(name,team,permission,no_members)
     {
-        var teamstr = "";
-        var permstr = "";
-
-        if(permission)
-            permstr = "&prefs_permissionLevel="+permission;
-        else
-            permstr = "&prefs_permissionLevel=org";
-
-
-        if(team)
-            teamstr = "&idOrganization="+team.data.id;
-        else
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
         {
-            try
+            new_board = Board.create(name);
+            
+            this.labels().each(function(label)
             {
-                team_id = new Trellinator().teams().first().id();
+                new_board.addLabel(label.name(),label.color());
+            }.bind(this));
+
+            if(!no_members)
+            {
+                this.members().each(function(elem)
+                {
+                    new_board.addMember(elem);
+                }.bind(this));
             }
             
-            catch(e)
+            this.lists().each(function(list)
             {
-                Notification.expectException(InvalidDataException,e);
-                team_id = new Trellinator().team("My New Free Team").id();
-            }
+                var curlist = new_board.createList(list.name());
 
-            teamstr = "&idOrganization="+team_id;
+                list.cards().each(function(card)
+                {
+                    var member_ids = [];
+
+                    if(!no_members)
+                    {
+                        card.members().each(function(member)
+                        {
+                            member_ids.push(member.id());
+                        });
+                    }
+
+                    var carddata = {
+                        title: card.name(),
+                        description: card.description(),
+                        members: member_ids.join(","),
+                        authorId: WekanApi.login().id,
+                        swimlaneId: new_board.defaultSwimlane().id()
+                    };
+                    
+                    if(member_ids.length)
+                        carddata.members = member_ids.join(",");
+                    
+                    var curcard = Card.create(curlist,carddata);
+                    var label_ids = [];
+
+                    card.labels().each(function(label)
+                    {
+                        label_ids.push(new_board.label(label.name()).id());
+                    });
+
+                    if(label_ids.length)
+                        curcard.applyLabelIds(new IterableCollection(label_ids));
+                    
+                    card.checklists().each(function(cl)
+                    {
+                        var items = cl.items().find(function(item)
+                        {
+                            return item.name();
+                        }).asArray();
+
+                        curcard.addChecklist({title: cl.name(),items: items});
+                    });
+                });
+            });
         }
-
-        var new_board = new Board(TrelloApi.post("/boards/?name="+encodeURIComponent(name)+teamstr+"&idBoardSource="+this.data.id+"&keepFromSource=cards"+permstr+"&prefs_voting=disabled&prefs_comments=members&prefs_invitations=members&prefs_selfJoin=true&prefs_cardCovers=true&prefs_background=blue&prefs_cardAging=regular"));
         
-        if(!no_members)
+        else
         {
-            this.members().each(function(elem)
+            var teamstr = "";
+            var permstr = "";
+    
+            if(permission)
+                permstr = "&prefs_permissionLevel="+permission;
+            else
+                permstr = "&prefs_permissionLevel=org";
+    
+            if(team)
+                teamstr = "&idOrganization="+team.data.id;
+            else
             {
-                new_board.addMember(elem);
-            }.bind(this));
+                try
+                {
+                    team_id = new Trellinator().teams().first().id();
+                }
+                
+                catch(e)
+                {
+                    Notification.expectException(InvalidDataException,e);
+                    team_id = new Trellinator().team("My New Free Team").id();
+                }
+    
+                teamstr = "&idOrganization="+team_id;
+            }
+    
+            var new_board = new Board(TrelloApi.post("/boards/?name="+encodeURIComponent(name)+teamstr+"&idBoardSource="+this.data.id+"&keepFromSource=cards"+permstr+"&prefs_voting=disabled&prefs_comments=members&prefs_invitations=members&prefs_selfJoin=true&prefs_cardCovers=true&prefs_background=blue&prefs_cardAging=regular"));
+
+            if(!no_members)
+            {
+                this.members().each(function(elem)
+                {
+                    new_board.addMember(elem);
+                }.bind(this));
+            }
         }
         
         return new_board;
@@ -496,6 +728,9 @@ var Board = function(data)
     */
     this.inviteMemberByEmail = function(email,type)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException('Cannot invite by email in the WeKan API');
+
         if(!type)
           type = "admin";
       
@@ -516,8 +751,21 @@ var Board = function(data)
     {
         if(!type)
           type = "admin";
+
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            var payload = {
+                action: 'add',
+                isAdmin: (type === "admin"),
+                isNoComments: false,
+                isCommentOnly: false
+            };
+            WekanApi.post('boards/'+this.id()+'/members/'+member.id()+'/add',payload);
+        }
       
-        TrelloApi.put("boards/"+this.data.id+"/members/"+member.username()+"?type="+type);
+        else
+            TrelloApi.put("boards/"+this.data.id+"/members/"+member.username()+"?type="+type);
+
         this.members_list  = null;
         return this;
     }
@@ -531,6 +779,9 @@ var Board = function(data)
     */
     this.removeMember = function(member)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException('Unable to remove board members with WeKan API yet');
+
         TrelloApi.del("boards/"+this.data.id+"/members/"+member.username());
         this.members_list  = null;
         return this;
@@ -544,6 +795,9 @@ var Board = function(data)
     */
     this.archive = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException('Unable to archive boards with WeKan API yet');
+
         return TrelloApi.put("boards/"+this.data.id+"?closed=true");
     }
 
@@ -555,6 +809,9 @@ var Board = function(data)
     */
     this.unArchive = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException('Unable to unArchive boards with WeKan API yet');
+
         return TrelloApi.put("boards/"+this.data.id+"?closed=false");
     }
 
@@ -566,7 +823,10 @@ var Board = function(data)
     */
     this.del = function()
     {
-        return TrelloApi.del("boards/"+this.data.id);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            return WekanApi.del("boards/"+this.id());
+        else
+            return TrelloApi.del("boards/"+this.data.id);
     }
 
     /**
@@ -584,12 +844,26 @@ var Board = function(data)
     this.load = function()
     {
         this.list_of_lists = null;
+        this.list_of_swimlanes = null;
         this.members_list  = null;
         this.labels_list   = null;
         this.card_list     = null;
-        this.custom_fields     = null;
-        this.custom_fields_enabled     = null;
-        this.data = TrelloApi.get("boards/"+this.data.id+"?actions=none&boardStars=none&cards=none&checklists=none&fields=name%2Cdesc%2CdescData%2Cclosed%2CidOrganization%2Curl%2CshortUrl&lists=none&members=none&memberships=none&membersInvited=none");
+        this.custom_fields         = null;
+        this.custom_fields_enabled = null;
+        
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            this.data = WekanApi.get('boards/'+this.data['_id']);
+            
+            this.members_list = new IterableCollection(this.data.members).transform(function(elem)
+            {
+                return new Member(elem);
+            });
+        }
+
+        else
+            this.data = TrelloApi.get("boards/"+this.data.id+"?actions=none&boardStars=none&cards=none&checklists=none&fields=name%2Cdesc%2CdescData%2Cclosed%2CidOrganization%2Curl%2CshortUrl&lists=none&members=none&memberships=none&membersInvited=none");
+
         return this;
     }
 
@@ -601,6 +875,9 @@ var Board = function(data)
     */
     this.customFields = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("Custom fields not yet available in WeKan API");
+
         this.enableCustomFields();
         return new IterableCollection(TrelloApi.get("boards/"+this.id()+"/customFields")).find(function(field)
         {
@@ -612,6 +889,9 @@ var Board = function(data)
     //INTERNAL
     this.findOrCreateCustomFieldFromName = function(field_name)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("Custom fields not yet available in WeKan API");
+
         this.enableCustomFields();
 
         if(!this.custom_fields)
@@ -653,6 +933,9 @@ var Board = function(data)
     //INTERNAL
     this.enableCustomFields = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("Custom fields not yet available in WeKan API");
+
         if(!this.custom_fields_enabled)
         {
           var enabled = false;
@@ -684,6 +967,9 @@ var Board = function(data)
     //DEPRECATED: use setName
     this.rename = function(name)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("Editing board attributes not available yet in WeKan API");
+
         TrelloApi.put("boards/"+this.data.id+"?name="+encodeURIComponent(name));
         this.data.name = name;
         return this;
@@ -692,15 +978,29 @@ var Board = function(data)
     //DEPRECATED: use link()
     this.shortUrl = function()
     {
-        if(!this.data.shortUrl)
-            this.load();
-        
-        return this.data.shortUrl;
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(!this.data.slug)
+                this.load();
+
+            return prov.url+"/b/"+this.id()+"/"+this.data.slug;
+        }
+
+        else
+        {
+            if(!this.data.shortUrl)
+                this.load();
+
+            return this.data.shortUrl;
+        }
     }
 
     //DEPRECATED: use List.moveAllCards
     this.moveAllCards = function(from_list,to_list)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException('Deprecated Board function not implemented for WeKan API, use List.moveAllCards instead');
+
         var ret = new IterableCollection(TrelloApi.post("lists/"+from_list.id()+"/moveAllCards?idBoard="+to_list.board().id()+"&idList="+to_list.id()));
         
         ret.transform(function(elem)
@@ -733,13 +1033,25 @@ var Board = function(data)
 */
 Board.create = function(data)
 {
-    if(typeof data === "string")
-        data = {name: data};
+    if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+    {
+        if(typeof data === "string")
+            data = {title: data};
+        
+        data.owner = WekanApi.login().id;
+        return new Board(WekanApi.post('boards',data));
+    }
     
-    if(!data.idOrganization)
-        data.idOrganization = new Trellinator().teams().first().id();
-
-    return new Board(TrelloApi.post("boards/?"+new IterableCollection(data).implode("&",encodeURIComponent)));
+    else
+    {
+        if(typeof data === "string")
+            data = {name: data};
+        
+        if(!data.idOrganization)
+            data.idOrganization = new Trellinator().teams().first().id();
+    
+        return new Board(TrelloApi.post("boards/?"+new IterableCollection(data).implode("&",encodeURIComponent)));
+    }
 }
 
 /**

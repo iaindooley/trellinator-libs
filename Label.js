@@ -19,6 +19,10 @@
 */
 var Label = function(data)
 {    
+    //allow Trello style IDs
+    if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        data['_id'] = data['_id'] || data.id;
+
     this.data  = data;
     this.containing_card  = null;
 
@@ -30,7 +34,7 @@ var Label = function(data)
     */
     this.id = function()
     {
-        return this.data.id;
+        return Trellinator.standardId(this.data);
     }
     
     /**
@@ -76,6 +80,20 @@ var Label = function(data)
     }
 
     /**
+    * Return the color of this Label
+    * @memberof module:TrelloEntities.Label
+    * @example
+    * card.labels().first().color();
+    */
+    this.color = function()
+    {
+        if(!('color' in this.data))
+            this.load();
+
+        return this.data.color;
+    }
+
+    /**
     * Remove this label
     * @memberof module:TrelloEntities.Label
     * @example
@@ -83,16 +101,37 @@ var Label = function(data)
     */
     this.del = function()
     {
-        if(typeof this.data.name == undefined)
-            this.load();
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            throw new InvalidRequestException("Unable to delete label from WeKan API");
+        }
 
-        TrelloApi.del("labels/"+this.data.id);
+        else
+        {
+            if(typeof this.data.name == undefined)
+                this.load();
+    
+            TrelloApi.del("labels/"+this.data.id);
+        }
     }
     
     //INTERNAL USE ONLY
     this.load = function()
     {
-        this.data = TrelloApi.get("labels/"+this.data.id+"?fields=all");
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            this.data = this.containing_card.board().labels().find(function(label)
+            {
+                if(label.id() == this.id())
+                    return label.data;
+                else
+                    return false;
+            }.bind(this)).first();
+        }
+
+        else
+            this.data = TrelloApi.get("labels/"+this.data.id+"?fields=all");
+
         return this;
     }
 }
