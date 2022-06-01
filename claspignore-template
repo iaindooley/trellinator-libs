@@ -12,5 +12,7 @@
 !apps/trellinator-libs/List.js
 !apps/trellinator-libs/Member.js
 !apps/trellinator-libs/Notification.js
+!apps/trellinator-libs/Swimlane.js
 !apps/trellinator-libs/Team.js
 !apps/trellinator-libs/TrelloApi.js
+!apps/trellinator-libs/WekanApi.js
