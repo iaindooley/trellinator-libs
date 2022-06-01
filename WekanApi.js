@@ -126,11 +126,10 @@ WekanApi.login.logindata = null;
 
 WekanApi.cardLinkRegExp = function()
 {   
-    return Trellinator.regex(".*https:\\/\\/.+?\\/b\\/.+?\\/.+?\\/(.+)","i");
-                                
+    return Trellinator.regex("https:\\/\\/.+?\\/b\\/.+?\\/[a-z\-]+?\\/([a-zA-Z0-9]+)","i");
 }
 
 WekanApi.boardLinkRegExp = function()
 {
-    return Trellinator.regex(".*https:\\/\\/.+?\\/b\\/(.+?)\\/[a-z\-]+(\b|$)","i");
+    return Trellinator.regex("https:\\/\\/.+?\\/b\\/(.+?)\\/[a-z\-]+","i");
 }

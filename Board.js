@@ -631,47 +631,10 @@ var Board = function(data)
 
                 list.cards().each(function(card)
                 {
-                    var member_ids = [];
-
                     if(!no_members)
-                    {
-                        card.members().each(function(member)
-                        {
-                            member_ids.push(member.id());
-                        });
-                    }
+                        var keep = "members";
 
-                    var carddata = {
-                        title: card.name(),
-                        description: card.description(),
-                        members: member_ids.join(","),
-                        authorId: WekanApi.login().id,
-                        swimlaneId: new_board.defaultSwimlane().id()
-                    };
-                    
-                    if(member_ids.length)
-                        carddata.members = member_ids.join(",");
-                    
-                    var curcard = Card.create(curlist,carddata);
-                    var label_ids = [];
-
-                    card.labels().each(function(label)
-                    {
-                        label_ids.push(new_board.label(label.name()).id());
-                    });
-
-                    if(label_ids.length)
-                        curcard.applyLabelIds(new IterableCollection(label_ids));
-                    
-                    card.checklists().each(function(cl)
-                    {
-                        var items = cl.items().find(function(item)
-                        {
-                            return item.name();
-                        }).asArray();
-
-                        curcard.addChecklist({title: cl.name(),items: items});
-                    });
+                    card.copyToList(curlist,null,keep);
                 });
             });
         }

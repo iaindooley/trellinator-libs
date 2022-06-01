@@ -777,7 +777,11 @@ var Card = function(data)
     */
     this.setName = function(name)
     {
-        TrelloApi.put("cards/"+this.data.id+"?name="+encodeURIComponent(name));
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            WekanApi.put("boards/"+this.board().id()+"/lists/"+this.currentList().id()+"/cards/"+this.id(),{title: name});
+        else
+            TrelloApi.put("cards/"+this.data.id+"?name="+encodeURIComponent(name));
+
         this.data.name = name;
         this.data.text = name;
         return this;
@@ -820,7 +824,28 @@ var Card = function(data)
     {
         try
         {
-            TrelloApi.post("cards/"+this.data.id+"/idMembers?value="+member.data.id);
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            {
+                var unique_mems = {};
+                
+                this.members().each(function(loop)
+                {
+                    unique_mems[loop.id()] = 1;
+                });
+                
+                unique_mems[member.id()] = 1;
+                
+                WekanApi.put(
+                    "boards/"+this.board().id()+"/lists/"+this.currentList().id()+"/cards/"+this.id(),
+                    {
+                        members: Object.keys(unique_mems)
+                    }
+                );
+            }
+            
+            else
+                TrelloApi.post("cards/"+this.data.id+"/idMembers?value="+member.data.id);
+
             this.members_list    = null;
         }
         
@@ -868,9 +893,15 @@ var Card = function(data)
             if(!this.data.members)
                 this.load();
 
-            this.members_list = new IterableCollection(this.data.members).transform(function(elem)
+            this.members_list = new IterableCollection(this.data.members).find(function(elem)
             {
-                return new Member(elem);
+                if((prov = Trellinator.provider()) && (prov.name == "WeKan") && elem)
+                    elem = {id: elem};
+                
+                if(elem)
+                    return new Member(elem);
+                else
+                    return false;
             });
         }
                        
@@ -887,7 +918,13 @@ var Card = function(data)
     this.cardLinkedInDescription = function()
     {
         if(parts = TrelloApi.cardLinkRegExp().exec(this.description()))
-            var ret = new Card({id: parts[1]});
+        {
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+                var ret = new Card({link: parts[0]});
+            else
+                var ret = new Card({id: parts[1]});
+        }
+
         else
             throw new InvalidDataException("No card linked in description");
         
@@ -1003,8 +1040,13 @@ var Card = function(data)
         if(desc.length > 16384)
             desc = desc.substring(0,16381)+"...";
 
-        TrelloApi.put("cards/"+this.data.id+"?desc="+encodeURIComponent(desc));
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            WekanApi.put("boards/"+this.board().id()+"/lists/"+this.currentList().id()+"/cards/"+this.id(),{description: desc});
+        else
+            TrelloApi.put("cards/"+this.data.id+"?desc="+encodeURIComponent(desc));
+        
         this.data.desc = desc;
+        this.data.description = desc;
         return this;
     }
 
@@ -1017,10 +1059,10 @@ var Card = function(data)
     */
     this.due = function()
     {
-        if(!this.data.due)
+        if(!this.data.due && !this.data.dueAt)
             this.load();
         
-        return this.data.due;
+        return this.data.due || this.data.dueAt;
     }
     
     /**
@@ -1074,8 +1116,34 @@ var Card = function(data)
     {
         try
         {
-            TrelloApi.del("cards/"+this.data.id+"/idMembers/"+member.data.id);
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            {
+                var unique_mems = {};
+                
+                this.members().each(function(loop)
+                {
+                    if(
+                        (loop.id() != member.id()) &&
+                        (loop.username() != member.username())
+                    )
+                        unique_mems[loop.id()] = 1;
+                });
+                
+                WekanApi.put(
+                    "boards/"+this.board().id()+"/lists/"+this.currentList().id()+"/cards/"+this.id(),
+                    {
+                        members: Object.keys(unique_mems)
+                    }
+                );
+            }
+            
+            else
+            {
+                TrelloApi.del("cards/"+this.data.id+"/idMembers/"+member.data.id);
+            }
+
             this.members_list = null;
+            this.data.members = null;
         }
 
         catch(e)
@@ -1096,6 +1164,9 @@ var Card = function(data)
     */
     this.markDueDateComplete = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("Unable to mark due dates complete in WeKan API");
+        
         TrelloApi.put("cards/"+this.data.id+"?dueComplete=true");
         this.data.dueComplete = true;
         return this;
@@ -1110,6 +1181,9 @@ var Card = function(data)
     */
     this.markDueDateIncomplete = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("Unable to mark due dates incomplete in WeKan API");
+
         TrelloApi.put("cards/"+this.data.id+"?dueComplete=false");
         this.data.dueComplete = false;
         return this;
@@ -1124,8 +1198,13 @@ var Card = function(data)
     */
     this.removeDueDate = function()
     {
-        TrelloApi.put("cards/"+this.data.id+"?due=null");
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            WekanApi.put("boards/"+this.board().id()+"/lists/"+this.currentList().id()+"/cards/"+this.id(),{dueAt: null});
+        else
+            TrelloApi.put("cards/"+this.data.id+"?due=null");
+
         this.data.due = null;
+        this.data.dueAt = null;
         return this;
     }
 
@@ -1139,8 +1218,13 @@ var Card = function(data)
     */
     this.setDue = function(datetime)
     {
-        TrelloApi.put("cards/"+this.data.id+"?due="+encodeURIComponent(datetime.toUTCString()));
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            WekanApi.put("boards/"+this.board().id()+"/lists/"+this.currentList().id()+"/cards/"+this.id(),{dueAt: datetime});
+        else
+            TrelloApi.put("cards/"+this.data.id+"?due="+encodeURIComponent(datetime.toUTCString()));
+
         this.data.due = datetime;
+        this.data.dueAt = datetime;
         return this;
     }
 
@@ -1164,7 +1248,57 @@ var Card = function(data)
             keep = "all";
 
         list.card_list = null;
-        return new Card(TrelloApi.post("cards?pos="+position+"&idList="+list.data.id+"&idCardSource="+this.data.id+"&keepFromSource="+encodeURIComponent(keep)));
+        
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            var member_ids = [];
+
+            if(keep == "members")
+            {
+                this.members().each(function(member)
+                {
+                    member_ids.push(member.id());
+                });
+            }
+
+            var carddata = {
+                title: this.name(),
+                description: this.description(),
+                members: member_ids.join(","),
+                authorId: WekanApi.login().id,
+                swimlaneId: list.board().defaultSwimlane().id()
+            };
+            
+            if(member_ids.length)
+                carddata.members = member_ids.join(",");
+            
+            var curcard = Card.create(list,carddata);
+            var label_ids = [];
+
+            this.labels().each(function(label)
+            {
+                label_ids.push(list.board().label(label.name()).id());
+            });
+
+            if(label_ids.length)
+                curcard.applyLabelIds(new IterableCollection(label_ids));
+            
+            this.checklists().each(function(cl)
+            {
+                var items = cl.items().find(function(item)
+                {
+                    return item.name();
+                }).asArray();
+
+                curcard.addChecklist({title: cl.name(),items: items});
+            });
+            
+            if(this.due())
+                curcard.setDue(this.due());
+        }
+
+        else
+            return new Card(TrelloApi.post("cards?pos="+position+"&idList="+list.data.id+"&idCardSource="+this.data.id+"&keepFromSource="+encodeURIComponent(keep)));
     }
 
     /**

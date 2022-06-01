@@ -30,6 +30,8 @@ var Member = function(data)
     //allow Trello style IDs
     if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
         data['userId'] = data['userId'] || data.id;
+    if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        data['_id'] = data['_id'] || data.id;
 
     this.data = data;
     this.list_of_teams = null;
@@ -45,7 +47,7 @@ var Member = function(data)
     this.id = function()
     {
         if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
-            return this.data.userId || this.data.username;
+            return this.data['_id'] || this.data.userId || this.data.username;
         else
             return this.data.id;
     }
