@@ -564,7 +564,7 @@ var Board = function(data)
         if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
         {
             if(!color)
-                color = "none";
+                color = "white";
 
             try
             {
@@ -574,6 +574,7 @@ var Board = function(data)
             catch(e)
             {
                 Notification.expectException(InvalidDataException,e);
+
                 var ret = new Label(WekanApi.put('boards/'+this.id()+'/labels',{
                     label: {
                         color: color,

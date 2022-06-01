@@ -1344,7 +1344,10 @@ var Card = function(data)
     */
     this.del = function()
     {
-        TrelloApi.del("cards/"+this.data.id);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            WekanApi.del("boards/"+this.board().id()+"/lists/"+this.currentList().id()+"/cards/"+this.id());
+        else
+            TrelloApi.del("cards/"+this.data.id);
         return this;
     }
 
@@ -1356,7 +1359,16 @@ var Card = function(data)
     */
     this.archive = function()
     {
-        TrelloApi.put("cards/"+this.data.id+"?closed=true");
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            this.moveToList(
+                this.board().findOrCreateList("Archive")
+            );
+        }
+        
+        else
+            TrelloApi.put("cards/"+this.data.id+"?closed=true");
+
         this.currentList().card_list = null;
         return this;
     }
@@ -1369,7 +1381,11 @@ var Card = function(data)
     */
     this.unArchive = function()
     {
-        TrelloApi.put("cards/"+this.data.id+"?closed=false");
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("Cannot unarchive cards with the WeKan API");
+        else
+            TrelloApi.put("cards/"+this.data.id+"?closed=false");
+
         this.currentList().card_list = null;
         return this;
     }
@@ -1382,12 +1398,18 @@ var Card = function(data)
     */
     this.isArchived = function()
     {
-      if(typeof this.data.closed === 'undefined')
-      {
-        this.load();
-      }
-      
-      return this.data.closed;
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            return (this.currentList().name() == "Archive");
+        }
+        
+        else
+        {
+            if(typeof this.data.closed === 'undefined')
+              this.load();
+            
+            return this.data.closed;
+        }
     }
     
     /**
@@ -1456,7 +1478,12 @@ var Card = function(data)
             checklist.items().each(function(item)
             {
                 if((item.state() == "incomplete") && TrelloApi.nameTest(name,item.name()))
-                    TrelloApi.put("cards/"+this.data.id+"/checkItem/"+item.data.id+"?state=complete");
+                {
+                    if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+                        WekanApi.put("boards/"+this.board().id()+"/cards/"+this.id()+"/checklists/"+checklist.id()+"/items/"+item.id(),{isFinished: "true"});
+                    else
+                        TrelloApi.put("cards/"+this.data.id+"/checkItem/"+item.data.id+"?state=complete");
+                }
             }.bind(this));
         }.bind(this));
         
@@ -1508,7 +1535,26 @@ var Card = function(data)
     */
     this.copyChecklist = function(name,to_card,position)
     {
-        var ret = new Checklist(TrelloApi.post("cards/"+to_card.id()+"/checklists?idChecklistSource="+this.checklist(name).id())).setContainingCard(to_card);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            var ret = null;
+            to_card.addChecklist(
+                {   
+                    title: name,
+                    items: this.checklist(name).items().find(function(item)
+                    {   
+                        return item.name();
+                    }).asArray()
+                },
+                function(cl)
+                {
+                    ret = cl;
+                }
+            );
+        }
+
+        else
+            var ret = new Checklist(TrelloApi.post("cards/"+to_card.id()+"/checklists?idChecklistSource="+this.checklist(name).id())).setContainingCard(to_card);
 
         //HACK: The post endpoint for adding a checklist to a card ignores the pos parameter
         //so we need a separate put to update the position once added
@@ -1530,7 +1576,11 @@ var Card = function(data)
     */
     this.removeChecklist = function(checklist)
     {
-        TrelloApi.del("cards/"+this.data.id+"/checklists/"+checklist.data.id);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            checklist.remove();
+        else
+            TrelloApi.del("cards/"+this.data.id+"/checklists/"+checklist.data.id);
+
         this.checklist_list  = null;
         return this;
     }
@@ -1618,7 +1668,22 @@ var Card = function(data)
     {
         try
         {
-            TrelloApi.del("cards/"+this.data.id+"/idLabels/"+label.id());
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            {
+                var new_ids = this.labels().find(function(loop)
+                {
+                    if(loop.id() != label.id())
+                        return label.id();
+                    else
+                        return false;
+                }).asArray();
+                	
+                WekanApi.put('boards/'+this.board().id()+'/lists/'+this.currentList().id()+'/cards/'+this.id(),{labelIds: new_ids.join(",")});
+            }
+            
+            else
+                TrelloApi.del("cards/"+this.data.id+"/idLabels/"+label.id());
+
             this.labels_list = null;
         }
 
@@ -1666,20 +1731,45 @@ var Card = function(data)
     */
     this.addNewLabels = function(new_labels)
     {
-        new_labels.each(function(label)
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
         {
-            try
-            {
-                TrelloApi.post("cards/"+this.data.id+"/labels?color=null&name="+encodeURIComponent(label));
-            }
-            
-            catch(e)
-            {
-                if(e.toString().indexOf("that label is already on the card") == -1)
-                    throw e;
-            }
+            var to_add = [];
 
-        }.bind(this));
+            new_labels.each(function(label)
+            {
+                try
+                {
+                    to_add.push(this.board().label(label).id());
+                }
+
+                catch(e)
+                {
+                    var labadd = this.board().addLabel(label);
+                    to_add.push(labadd.id());
+                }
+
+                console.log(to_add);
+                this.applyLabelIds(new IterableCollection(to_add));
+            }.bind(this));
+        }
+        
+        else
+        {
+            new_labels.each(function(label)
+            {
+                try
+                {
+                    TrelloApi.post("cards/"+this.data.id+"/labels?color=null&name="+encodeURIComponent(label));
+                }
+                
+                catch(e)
+                {
+                    if(e.toString().indexOf("that label is already on the card") == -1)
+                        throw e;
+                }
+    
+            }.bind(this));
+        }
         
         this.labels_list = null;
         return this;
