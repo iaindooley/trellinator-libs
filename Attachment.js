@@ -17,7 +17,7 @@
 var Attachment = function(data)
 {    
     this.data         = data;
-    this.name         = data.name ? data.name:data.text;
+    this.name         = data.name || data.text;
     this.url          = data.url;
     this.card_object  = null;
 

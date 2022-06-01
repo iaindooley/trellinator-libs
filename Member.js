@@ -45,7 +45,7 @@ var Member = function(data)
     this.id = function()
     {
         if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
-            return this.data['userId'];
+            return this.data.userId || this.data.username;
         else
             return this.data.id;
     }

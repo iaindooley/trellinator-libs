@@ -66,14 +66,20 @@ TrelloApi.searchCardsInBoards = function(boards,query,card_limit)
              });
 }
 
-TrelloApi.cardLinkRegExp = function()
+TrelloApi.cardLinkRegExp = function(ignore_provider)
 {
-    return new RegExp(".*https:\\/\\/trello\\.com\\/c\\/([A-Za-z0-9]+)","i");
+    if((prov = Trellinator.provider()) && (prov.name == "WeKan") && !ignore_provider)
+        return WekanApi.cardLinkRegExp();
+    else
+        return Trellinator.regex(".*https:\\/\\/trello\\.com\\/c\\/([A-Za-z0-9]+)","i");
 }
 
-TrelloApi.boardLinkRegExp = function()
+TrelloApi.boardLinkRegExp = function(ignore_provider)
 {
-    return new RegExp(".*https:\\/\\/trello\\.com\\/b\\/([A-Za-z0-9]+)","i");
+    if((prov = Trellinator.provider()) && (prov.name == "WeKan") && !ignore_provider)
+        return WekanApi.boardLinkRegExp();
+    else
+        return Trellinator.regex(".*https:\\/\\/trello\\.com\\/b\\/([A-Za-z0-9]+)","i");
 }
 
 TrelloApi.post = function(baseURL)

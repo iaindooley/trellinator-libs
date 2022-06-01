@@ -123,3 +123,14 @@ WekanApi.login = function()
 }
 
 WekanApi.login.logindata = null;
+
+WekanApi.cardLinkRegExp = function()
+{   
+    return Trellinator.regex(".*https:\\/\\/.+?\\/b\\/.+?\\/.+?\\/(.+)","i");
+                                
+}
+
+WekanApi.boardLinkRegExp = function()
+{
+    return Trellinator.regex(".*https:\\/\\/.+?\\/b\\/(.+?)\\/[a-z\-]+(\b|$)","i");
+}

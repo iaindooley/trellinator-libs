@@ -71,7 +71,16 @@ var Card = function(data)
     */    
     this.whenCreated = function()
     {
-      return new Date(1000*parseInt(this.id().substring(0,8),16));
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+      {
+          if(!this.data.createdAt)
+              this.load();
+
+          return new Date(this.data.createdAt);
+      }
+
+      else
+          return new Date(1000*parseInt(this.id().substring(0,8),16));
     }
     
     /**
@@ -136,7 +145,8 @@ var Card = function(data)
 
     /**
     * Return true if the due date on this 
-    * card has been marked complete
+    * card has been marked complete, or in the case
+    * of the WeKan API if a due date is set and in the past
     * @memberof module:TrelloEntities.Card
     * @example
     * var card = new Notification(posted).card();
@@ -146,10 +156,25 @@ var Card = function(data)
     */
     this.dueComplete = function()
     {
-        if(typeof this.data.dueComplete == "undefined")
-            this.load();
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(!this.data.dueAt)
+                this.load();
+            
+            if(this.data.dueAt && (new Date(this.data.dueAt).getTime() < new Date().getTime()))
+                return true;
+            else
+                return false;
+        }
 
-        return this.data.dueComplete;
+        else
+        {
+            if(typeof this.data.dueComplete == "undefined")
+                this.load();
+
+            return this.data.dueComplete;
+        }
+
     }
 
     /**
@@ -170,12 +195,10 @@ var Card = function(data)
 
         if(this.containing_board)
             ret = this.containing_board;
-      
         else if(this.current_list)
-        {
             ret = this.current_list.board();
-        }
-        
+        else if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException('Cannot load a card with the WeKan API in the absence of a list/board');
         else
         {
             if(!this.data.idBoard && !this.data.board)
@@ -211,37 +234,99 @@ var Card = function(data)
     */
     this.comments = function(limit)
     {
-        if(!limit)
-            limit = 20;
-
-        return new IterableCollection(TrelloApi.get("cards/"+this.data.id+"/actions?filter=copyCommentCard,commentCard&limit="+limit))
-                                               .transform(function(elem)
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
         {
-            return new Comment(elem);
-        });
+            return new IterableCollection(
+                WekanApi.get(
+                    "boards/"+this.board().id()+"/cards/"+this.id()+"/comments"
+                )
+            ).transform(function(elem)
+            {
+                return new Comment(elem);
+            });
+        }
+        
+        else
+        {
+            if(!limit)
+                limit = 20;
+    
+            return new IterableCollection(TrelloApi.get("cards/"+this.data.id+"/actions?filter=copyCommentCard,commentCard&limit="+limit))
+                                                   .transform(function(elem)
+            {
+                return new Comment(elem);
+            });
+        }
     }
 
     /**
+    * Post a comment to this card
+    * @memberof module:TrelloEntities.Card
+    * @param comment_text {string} the text to post
+    * @example
+    * var card = new Notification(posted).movedCard("Done");
+    * 
+    * card.members().each(function(member)
+    * {
+    *     card.postComment("@"+member.name()+" this card was moved to the Done list");
+    * });
+    */
+    this.postComment = function(comment_text)
+    {
+        if(comment_text.length > 16384)
+            comment_text = comment_text.substring(0,16381)+"...";
+        
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            WekanApi.post(
+                "boards/"+this.board().id()+"/cards/"+this.id()+"/comments",
+                {
+                    authorId: WekanApi.login().id,
+                    comment: comment_text
+                }
+            );
+        }
+
+        else
+            TrelloApi.post("cards/"+this.data.id+"/actions/comments?text="+encodeURIComponent(comment_text));
+
+        return this;
+    }
+
+
+    /**
     * Return the date/time this card was moved
-    * into it's current list
+    * into it's current list, in the case of the WeKan API it just
+    * returns the last activity date of any kind
     * @memberof module:TrelloEntities.Card
     * @example
     * new Notification(posted).card().movedToList().toLocaleString();
     */
     this.movedToList = function()
     {
-        var res = TrelloApi.get("cards/"+this.data.id+"/actions?filter=updateCard:idList&limit=1");
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(!this.data.dateLastActivity)
+                this.load();
+            
+            return new Date(this.data.dateLastActivity);
+        }
         
-        if(!res.length)
-            res = TrelloApi.get("cards/"+this.data.id+"/actions?filter=createCard&limit=1");
-        
-        if(res.length)
-          var ret = new Date(res[0].date);
         else
-          var ret = Trellinator.now();
-      
-        this.moved_to_list_cache = ret;
-        return this.moved_to_list_cache;
+        {
+            var res = TrelloApi.get("cards/"+this.data.id+"/actions?filter=updateCard:idList&limit=1");
+            
+            if(!res.length)
+                res = TrelloApi.get("cards/"+this.data.id+"/actions?filter=createCard&limit=1");
+            
+            if(res.length)
+              var ret = new Date(res[0].date);
+            else
+              var ret = Trellinator.now();
+          
+            this.moved_to_list_cache = ret;
+            return this.moved_to_list_cache;
+        }
     }
 
     /**
@@ -263,6 +348,60 @@ var Card = function(data)
                      {
                        return test == elem.id();
                      }),"top");
+        return this;
+    }
+
+    /**
+    * Move a card to a given List
+    * @memberof module:TrelloEntities.Card
+    * @param list {List} a list object to move the card to
+    * @param position {string|int} top, bottom or a number (defaults to bottom)
+    * @example
+    * var to_list = new Trellinator().board("Other Board").list("ToDo");
+    * new Notification(posted).createdCard("Doing").moveToList(to_list,"top");
+    */
+    this.moveToList = function(list,position)
+    {
+        if(!position)
+            position = "bottom";
+
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(list.board().id() != this.board().id())
+            {
+                list = this.board().findOrCreateList(list.name());
+            }
+
+            WekanApi.put(
+                "boards/"+this.board().id()+"/lists/"+this.currentList().id()+"/cards/"+this.id(),
+                {listId: list.id()}
+            )
+            
+            this.current_list.card_list = null;
+            this.current_list = list;
+        }
+
+        else
+        {
+            TrelloApi.put("cards/"+this.data.id+"?idList="+list.data.id+"&idBoard="+list.board().data.id+"&pos="+position);
+
+            if(this.current_list)
+            {
+                this.current_list.card_list = null;
+                this.current_list = null;
+            }
+    
+            this.current_list = null;
+            this.moved_to_list_cache = null;
+            list.card_list = null;
+            this.containing_board = null;
+            this.data.list = null;
+        }
+
+        
+        this.moved_to_list_cache = null;
+        list.card_list = null;
+        this.containing_board = null;
         return this;
     }
 
@@ -404,26 +543,84 @@ var Card = function(data)
     */
     this.attachments = function(name)
     {
-        if(!this.data.attachments)
-            this.load();
-
-        return new IterableCollection(this.data.attachments).find(function(elem)
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
         {
-            var totest = new Attachment(elem);
-            var ret = false;
-          
-            if(name && TrelloApi.nameTest(name,totest.text()))
-                ret = new Attachment(elem);
-            else if(name && TrelloApi.nameTest(name,totest.link()))
-                ret = new Attachment(elem);
-            else if(!name)
-                ret = totest;
+            if(!this.data.attachments)
+            {
+                try
+                {
+                    var atts = this.checklist('Attachments');
+                    
+                    this.data.attachments = atts.items().find(function(att)
+                    {
+                        if(parts = Trellinator.regex(/\[(.+?)\]\((.+?)\)/).exec(att.name()))
+                        {
+                            var text = parts[1];
+                            var url = parts[2];
+                        }
+                        
+                        else
+                        {
+                            var text = att.name();
+                            var url = att.name();
+                        }
+                        
+                        var totest = new Attachment(
+                            {
+                                text: text,
+                                url: url
+                            }
+                        );
+    
+                        var ret = false;
+                      
+                        if(
+                            (name && TrelloApi.nameTest(name,totest.text())) ||
+                            (name && TrelloApi.nameTest(name,totest.link())) ||
+                            !name
+                        )
+                            ret = totest;
+            
+                        if(ret)
+                            ret.setContainingCard(this);
+                        
+                        return ret;
+                    });
+                }
+                
+                catch(e)
+                {
+                    Notification.expectException(InvalidDataException,e);
+                    this.data.attachments = new IterableCollection();
+                }
+            }
+            
+            return this.data.attachments;
+        }
 
-            if(ret)
-                ret.setContainingCard(this);
-
-            return ret;
-        }.bind(this));
+        else
+        {
+            if(!this.data.attachments)
+                this.load();
+    
+            return new IterableCollection(this.data.attachments).find(function(elem)
+            {
+                var totest = new Attachment(elem);
+                var ret = false;
+              
+                if(name && TrelloApi.nameTest(name,totest.text()))
+                    ret = new Attachment(elem);
+                else if(name && TrelloApi.nameTest(name,totest.link()))
+                    ret = new Attachment(elem);
+                else if(!name)
+                    ret = totest;
+    
+                if(ret)
+                    ret.setContainingCard(this);
+    
+                return ret;
+            }.bind(this));
+        }
     }
 
     /**
@@ -435,7 +632,10 @@ var Card = function(data)
     */
     this.link = function()
     {
-        return "https://trello.com/c/"+this.shortId();
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+           return this.board().link()+"/"+this.id();
+        else
+            return "https://trello.com/c/"+this.shortId();
     }
 
     /**
@@ -447,10 +647,15 @@ var Card = function(data)
     */
     this.shortId = function()
     {
-        if(!this.data.shortLink)
-            this.load();
-        
-        return this.data.shortLink;
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            return this.id();
+        else
+        {
+            if(!this.data.shortLink)
+                this.load();
+            
+            return this.data.shortLink;
+        }
     }
     
     
@@ -494,28 +699,46 @@ var Card = function(data)
     */
     this.attachLink = function(data)
     {
-      if(data.url)
-        var link = data.url;
-      else if(typeof data.link == "string")
-        var link = data.link;
-      else
-        var link = data;
-      
-      var url = "cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link);
-      
-      if(data.name)
-      {
-        var maxlength = 256;
-        var ltrimmed_name = data.name.substr(data.name.length-maxlength);
-        url += "&name="+encodeURIComponent(ltrimmed_name);
-      }
-      
-      TrelloApi.post(url);
-      
-      if(this.data.attachments)
-        this.data.attachments = null;
-      
-      return this;
+        if(data.url)
+            var link = data.url;
+        else if(typeof data.link == "string")
+            var link = data.link;
+        else
+            var link = data;
+
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            this.addChecklist("Attachments",function(cl)
+            {
+                if(WekanApi.cardLinkRegExp().test(link))
+                    cl.addItem(new Card({link: link}).mobileFriendlyLink());
+                else
+                {
+                    var name = data.name || link;
+                    cl.addItem('['+name+']('+link+')');
+                }
+            }.bind(this));
+        }
+
+        else
+        {
+            
+            var url = "cards/"+this.data.id+"/attachments?url="+encodeURIComponent(link);
+            
+            if(data.name)
+            {
+              var maxlength = 256;
+              var ltrimmed_name = data.name.substr(data.name.length-maxlength);
+              url += "&name="+encodeURIComponent(ltrimmed_name);
+            }
+            
+            TrelloApi.post(url);
+        }
+        
+        if(this.data.attachments)
+          this.data.attachments = null;
+        
+        return this;
     }
     
     /**
@@ -786,27 +1009,6 @@ var Card = function(data)
     }
 
     /**
-    * Post a comment to this card
-    * @memberof module:TrelloEntities.Card
-    * @param comment_text {string} the text to post
-    * @example
-    * var card = new Notification(posted).movedCard("Done");
-    * 
-    * card.members().each(function(member)
-    * {
-    *     card.postComment("@"+member.name()+" this card was moved to the Done list");
-    * });
-    */
-    this.postComment = function(comment_text)
-    {
-        if(comment_text.length > 16384)
-            comment_text = comment_text.substring(0,16381)+"...";
-
-        TrelloApi.post("cards/"+this.data.id+"/actions/comments?text="+encodeURIComponent(comment_text));
-        return this;
-    }
-
-    /**
     * Return the due date for this Card, which 
     * can be passed into the constructor of a Date object
     * @memberof module:TrelloEntities.Card
@@ -981,36 +1183,6 @@ var Card = function(data)
             position = (name.position)?name.position:"top";
 
         return this.copyToList(this.board().list(TrelloApi.nameTestData(name,"list")),position,keep);
-    }
-
-    /**
-    * Move a card to a given List
-    * @memberof module:TrelloEntities.Card
-    * @param list {List} a list object to move the card to
-    * @param position {string|int} top, bottom or a number (defaults to bottom)
-    * @example
-    * var to_list = new Trellinator().board("Other Board").list("ToDo");
-    * new Notification(posted).createdCard("Doing").moveToList(to_list,"top");
-    */
-    this.moveToList = function(list,position)
-    {
-        if(!position)
-            position = "bottom";
-
-        TrelloApi.put("cards/"+this.data.id+"?idList="+list.data.id+"&idBoard="+list.board().data.id+"&pos="+position);
-        this.data.list = null;
-        
-        if(this.current_list)
-        {
-            this.current_list.card_list = null;
-            this.current_list = null;
-        }
-
-        this.current_list = null;
-        this.moved_to_list_cache = null;
-        list.card_list = null;
-        this.containing_board = null;
-        return this;
     }
 
     /**
@@ -1250,7 +1422,13 @@ var Card = function(data)
         try
         {
             if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
-                var test = name.title;
+            {
+                if(typeof name === "string")
+                    var test = name;
+                else
+                    var test = name.title;
+            }
+
             else
                 var test = name;
 
@@ -1268,12 +1446,12 @@ var Card = function(data)
                 { 
                     name = {title: name};
             
-                    if(!pos)
-                        pos = "top";
+                    if(!position)
+                        position = "top";
             
-                    data.pos = pos;
+                    data.position = position;
                 }
-          
+
                 var checklist = new Checklist(WekanApi.post("boards/"+this.board().id()+"/cards/"+this.id()+"/checklists",name)).setContainingCard(this);
             }
 

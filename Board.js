@@ -1013,11 +1013,25 @@ var Board = function(data)
         return ret;
     }
 
-    if(!this.data.id && this.data.link)
-    {   
-        this.data.id = TrelloApi.boardLinkRegExp().exec(this.data.link)[1];
-        this.load();
-    }
+    if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+    {    
+        if(!this.data['_id'] && this.data.link)
+        {    
+            var bsplit = this.data.link.split("/b/");
+            var usplit = bsplit[1].split("/");
+            this.data['_id'] = usplit[0];
+            this.load();
+        }    
+    }    
+
+    else 
+    {    
+        if(!this.data.id && this.data.link)
+        {   
+            this.data.id = TrelloApi.boardLinkRegExp().exec(this.data.link)[1];
+            this.load();
+        }
+    } 
 }
 
 /**

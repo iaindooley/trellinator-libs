@@ -18,6 +18,10 @@
 */
 var Comment = function(data)
 {
+    //allow Trello style IDs
+    if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        data['_id'] = data['_id'] || data.id;
+
     this.data = data;
     this.containing_card = null;
 
@@ -29,10 +33,12 @@ var Comment = function(data)
     */
     this.id = function()
     {
-        if(!this.data.data)
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            return this.data['_id'];
+        else if(!this.data.data)
             throw new Error("Malformed comment object");
 
-        return this.data.data.id ? this.data.data.id:this.data.id;
+        return this.data.data.id || this.data.id;
     }
 
     /**
@@ -55,6 +61,14 @@ var Comment = function(data)
     */
     this.text = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(!this.data.comment)
+                this.load();
+            
+            return this.data.comment;
+        }
+
         if(!this.data.data)
             throw new Error("Malformed comment object");
 
@@ -69,7 +83,7 @@ var Comment = function(data)
     */
     this.member = function()
     {
-      return new Member(this.data.memberCreator);
+      return new Member({id: this.data.authorId});
     }
     
     /**

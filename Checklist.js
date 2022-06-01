@@ -65,7 +65,14 @@ var Checklist = function(data)
     */
     this.setPosition = function(position)
     {
-      TrelloApi.put("checklists/"+this.data.id+"?pos="+encodeURIComponent(position));
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+      {
+          //cannot set position yet
+      }
+      
+      else
+          TrelloApi.put("checklists/"+this.data.id+"?pos="+encodeURIComponent(position));
+
       this.data.pos = position;
       return this;
     }
@@ -116,8 +123,13 @@ var Checklist = function(data)
     */
     this.remove = function()
     {
-      TrelloApi.del("cards/"+this.card().id()+"/checklists/"+this.id());
-      return this.card();
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            WekanApi.del("boards/"+this.card().board().id()+"/cards/"+this.card().id()+"/checklists/"+this.id());
+        else
+            TrelloApi.del("cards/"+this.card().id()+"/checklists/"+this.id());
+
+        this.card().checklist_list = null;
+        return this.card();
     }
 
     /**
@@ -283,8 +295,32 @@ var Checklist = function(data)
             position = "bottom";
 
         if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
-            //NEED TO GET CURRENT ITEMS, ADD NEW ITEM TO THE LIST, THEN SET ITEMS
-            new CheckItem(WekanApi.post("boards/"+this.card().board().id()+"/cards/"+this.card().id()+"/checklists/"+this.id()+"/items",{title: name})).setContainingChecklist(this);
+        {
+            var items_to_set = [];
+            
+            this.items().each(function(item)
+            {
+                items_to_set.push(item);
+
+            }.bind(this));
+
+            items_to_set.push(
+                new CheckItem(
+                    {
+                        "title": name,
+                        "sort": position,
+                        "isFinished": checked,
+                        "checklistId": this.id(),
+                        "cardId": this.card().id(),
+                        "createdAt": new Date(),
+                        "modifiedAt": new Date()
+                    }
+                )
+            );
+
+            this.setItems(items_to_set);
+        }
+
         else
             new CheckItem(TrelloApi.post("checklists/"+this.data.id+"/checkItems?name="+encodeURIComponent(name)+"&pos="+encodeURIComponent(position))+"&checked="+checked).setContainingChecklist(this);
 
@@ -292,9 +328,44 @@ var Checklist = function(data)
         return this;
     }
     
+    /**
+    * Set items on this checklist by first removing and then re-adding
+    * with a bunch of items, temporary hack due to lack of ability to 
+    * add an item to a checklist in the WeKan API
+    * or RegExp
+    * @memberof module:TrelloEntities.Checklist
+    * @param name {string|RegExp} the name or regex to match against the
+    * item name
+    * @example
+    * card.checklist("Something").item(new RegExp("Iain's.*")).markComplete();
+    */
     this.setItems = function(items)
     {
-        //DELETE THE CHECKLIST, RE-CREATE IT AND UPDATE THE CHECKED STATE OF THE ITEMS
+        var name = this.name();
+        var curcard = this.remove();
+
+        curcard.addChecklist(
+            {
+                title: name,
+                items: new IterableCollection(items).find(function(item)
+                {
+                    return item.name();
+                }).asArray()
+            },
+            function(cl)
+            {
+                this.data = cl.data;
+                this.containing_card = curcard;
+                this.item_list = null;
+            }.bind(this)
+        );
+        
+        new IterableCollection(items).each(function(item)
+        {
+            if(item.isComplete())
+                this.item(item.name()).markComplete();
+
+        }.bind(this));
     }
     
     /**

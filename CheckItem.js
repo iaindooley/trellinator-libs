@@ -52,7 +52,11 @@ var CheckItem = function(data)
     */
     this.remove = function()
     {
-        TrelloApi.del("cards/"+this.containing_checklist.card().data.id+"/checkItem/"+this.data.id);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            WekanApi.del("boards/"+this.checklist().card().board().id()+"/cards/"+this.checklist().card().id()+"/checklists/"+this.checklist().id()+"/items/"+this.id());
+        else
+            TrelloApi.del("cards/"+this.containing_checklist.card().data.id+"/checkItem/"+this.data.id);
+
         this.containing_checklist.item_list = null;
         return this.containing_checklist;
     }
@@ -220,8 +224,16 @@ var CheckItem = function(data)
     //DEPRECATED: use isComplete
     this.state = function()
     {
-        if(!this.data.state)
+        if(!this.data.state && !("isFinished" in this.data))
             this.load();
+        
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(this.data.isFinished)
+                this.data.state = "complete";
+            else
+                this.data.state = "incomplete";
+        }
         
         return this.data.state;
     }
@@ -229,8 +241,22 @@ var CheckItem = function(data)
     //INTERNAL USE ONLY
     this.mark = function(state)
     {
-      TrelloApi.put("cards/"+this.checklist().card().data.id+"/checkItem/"+this.data.id+"?state="+state);
-      this.data.state = state;
-      return this;
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            var data = {};
+
+            if(state == "complete")
+                data.isFinished = "true";
+            else
+                data.isFinished = "false";
+
+            WekanApi.put("boards/"+this.checklist().card().board().id()+"/cards/"+this.checklist().card().id()+"/checklists/"+this.checklist().id()+"/items/"+this.id(),data);
+        }
+
+        else
+            TrelloApi.put("cards/"+this.checklist().card().data.id+"/checkItem/"+this.data.id+"?state="+state);
+
+        this.data.state = state;
+        return this;
     }
 }
