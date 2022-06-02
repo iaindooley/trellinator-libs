@@ -81,8 +81,13 @@ var CheckItem = function(data)
     */
     this.setName = function(name)
     {
-        TrelloApi.put("cards/"+this.containing_checklist.card().data.id+"/checkItem/"+this.data.id+"?name="+encodeURIComponent(name));
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            WekanApi.put("boards/"+this.checklist().card().board().id()+"/cards/"+this.checklist().card().id()+"/checklists/"+this.checklist().id()+"/items/"+this.id(),{title: name});
+        else
+            TrelloApi.put("cards/"+this.containing_checklist.card().data.id+"/checkItem/"+this.data.id+"?name="+encodeURIComponent(name));
+
         this.data.name = name;
+        this.data.title = name;
         return this;
     }
 
@@ -95,6 +100,9 @@ var CheckItem = function(data)
     */
     this.setPosition = function(pos)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("Cannot set position on checklist items with WeKan API yet");
+
         TrelloApi.put("cards/"+this.containing_checklist.card().data.id+"/checkItem/"+this.data.id+"?pos="+encodeURIComponent(pos));
         this.data.pos = pos;
         return this;
