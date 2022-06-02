@@ -1847,6 +1847,9 @@ var Card = function(data)
     */
     this.customFieldValue = function(field_name)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("No custom field support in WeKan API yet");
+
         var field = this.findOrCreateCustomFieldFromName(field_name);
         var ret = false;
 
@@ -1915,6 +1918,9 @@ var Card = function(data)
     */
     this.customFields = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("No custom field support in WeKan API yet");
+
         return new IterableCollection(TrelloApi.get("cards/"+this.id()+"/customFieldItems"));
     }
 
@@ -1938,6 +1944,9 @@ var Card = function(data)
     */
     this.setCustomFieldValue = function(field_name,value)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("No custom field support in WeKan API yet");
+
         var field = this.findOrCreateCustomFieldFromName(field_name);
         var url = "https://api.trello.com/1/card/"+this.id()+"/customField/"+field.id+"/item";
         
@@ -2080,6 +2089,9 @@ var Card = function(data)
     */
     this.addSticker = function(sticker,top,left,rotate,z)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("No sticker support in WeKan API yet");
+
         if(!top)
             top = 0;
         if(!left)
@@ -2101,6 +2113,9 @@ var Card = function(data)
     */
     this.removeAllStickers = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("No sticker support in WeKan API yet");
+
         new IterableCollection(TrelloApi.get("cards/"+this.id()+"/stickers")).each(function(sticker)
         {
             TrelloApi.del("cards/"+this.id()+"/stickers/"+sticker.id);
