@@ -50,7 +50,17 @@ var List = function(data)
     */
     this.archiveAllCards = function()
     {
-      TrelloApi.post("lists/"+this.data.id+"/archiveAllCards");
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+      {
+          this.cards().each(function(card)
+          {
+              card.archive();
+          });
+      }
+      
+      else
+          TrelloApi.post("lists/"+this.data.id+"/archiveAllCards");
+
       this.card_list = null;
       return this;
     }
@@ -65,6 +75,9 @@ var List = function(data)
     */
     this.move = function(board,pos)
     {
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+          throw new InvalidRequestException('Cannot move a list using the WeKan API yet');
+
       TrelloApi.put("lists/"+this.data.id+"/idBoard?value="+board.id());
       
       if(pos)
@@ -93,6 +106,9 @@ var List = function(data)
     */
     this.setPosition = function(pos)
     {
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+          throw new InvalidRequestException('Cannot set position on a list using the WeKan API yet');
+
       TrelloApi.put("lists/"+this.data.id+"/pos?value="+pos);
       
       if(this.board_object)
@@ -109,10 +125,10 @@ var List = function(data)
     */
     this.position = function()
     {
-        if(!this.data.pos)
+        if(!this.data.pos && !this.data.sort)
             this.load();
 
-        return this.data.pos;
+        return this.data.pos || this.data.sort;
     }
 
     /**
@@ -162,7 +178,10 @@ var List = function(data)
 
         new IterableCollection(sorted).each(function(item,key)
         {
-            item.moveToList(this,parseInt(key)+1);
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+                item.setPosition(parseInt(key)+1);
+            else
+                item.moveToList(this,parseInt(key)+1);
         }.bind(this));
     }
 
@@ -320,6 +339,9 @@ var List = function(data)
     */
     this.archive = function()
     {
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+          throw new InvalidRequestException("Unable to archive lists in WeKan API currently");
+
       TrelloApi.put("lists/"+this.data.id+"?closed=true");
       this.board().list_of_lists = null;
       return this;
@@ -333,6 +355,9 @@ var List = function(data)
     */
     this.unArchive = function()
     {
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+          throw new InvalidRequestException("Unable to unarchive lists in WeKan API currently");
+
       TrelloApi.put("lists/"+this.data.id+"?closed=false");
       this.board().list_of_lists = null;
       return this;
@@ -349,8 +374,21 @@ var List = function(data)
     {
       if(!pos)
         pos = "top";
-      
-      return new List(TrelloApi.post("lists?name="+encodeURIComponent(this.name())+"&idBoard="+this.board().id()+"&idListSource="+this.id()+"&pos="+pos));
+
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+      {
+          var ret = this.board().createList(this.name());
+          
+          this.cards().each(function(card)
+          {
+              card.copyToList(ret);
+          });
+          
+          return ret;
+      }
+
+      else
+          return new List(TrelloApi.post("lists?name="+encodeURIComponent(this.name())+"&idBoard="+this.board().id()+"&idListSource="+this.id()+"&pos="+pos));
     }
 
     /**
@@ -365,7 +403,17 @@ var List = function(data)
     */
     this.moveAllCards = function(to_list)
     {
-        new IterableCollection(TrelloApi.post("lists/"+this.id()+"/moveAllCards?idBoard="+to_list.board().id()+"&idList="+to_list.id()));
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            this.cards().each(function(card)
+            {
+                card.moveToList(to_list);
+            });
+        }
+
+        else
+            new IterableCollection(TrelloApi.post("lists/"+this.id()+"/moveAllCards?idBoard="+to_list.board().id()+"&idList="+to_list.id()));
+
         this.card_list = null;
         to_list.card_list = null;
         return this;
@@ -392,6 +440,9 @@ var List = function(data)
     //DEPRECATED used setName
     this.rename = function(new_name)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("Unable to rename lists using WeKan API yet");
+        
         var updated = TrelloApi.put("lists/"+this.data.id+"/name?value="+encodeURIComponent(new_name));
         this.data.name = new_name;
         return this;
