@@ -352,6 +352,21 @@ var Card = function(data)
     }
 
     /**
+    * Set the position of the card in its list,
+    * currently only implemented for the WeKan API
+    * @memberof module:TrelloEntities.Card
+    * @param list {List} a list object to move the card to
+    * @param position {string|int} top, bottom or a number (defaults to bottom)
+    */
+    this.setPosition = function(position)
+    {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            WekanApi.put("boards/"+this.board().id()+"/lists/"+this.currentList().id()+"/cards/"+this.id(),{sort: position});
+        else
+            throw new InvalidRequestException("Card.setPosition implemented only for WeKan API currently");
+    }
+
+    /**
     * Move a card to a given List
     * @memberof module:TrelloEntities.Card
     * @param list {List} a list object to move the card to
