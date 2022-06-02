@@ -242,8 +242,8 @@ var Card = function(data)
                 )
             ).transform(function(elem)
             {
-                return new Comment(elem);
-            });
+                return new Comment(elem).setContainingCard(this);;
+            }.bind(this));
         }
         
         else
@@ -254,8 +254,8 @@ var Card = function(data)
             return new IterableCollection(TrelloApi.get("cards/"+this.data.id+"/actions?filter=copyCommentCard,commentCard&limit="+limit))
                                                    .transform(function(elem)
             {
-                return new Comment(elem);
-            });
+                return new Comment(elem).setContainingCard(this);
+            }.bind(this));
         }
     }
 

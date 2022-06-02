@@ -83,7 +83,10 @@ var Comment = function(data)
     */
     this.member = function()
     {
-      return new Member({id: this.data.authorId});
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+          return new Member({id: this.data.authorId});
+      else
+          return new Member(this.data.memberCreator);
     }
     
     /**
@@ -116,7 +119,10 @@ var Comment = function(data)
     */
     this.when = function()
     {
-      return new Date(this.data.date);
+        if(!this.data.date && !this.data.createdAt)
+            this.load();
+
+        return new Date(this.data.date || this.data.createdAt);
     }
 
     /**
@@ -168,5 +174,13 @@ var Comment = function(data)
     {
       this.containing_card = card;
       return this;
+    }
+    
+    this.load = function()
+    {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            this.data = WekanApi.get("boards/"+this.card().board().id()+"/cards/"+this.card().id()+"/comments/"+this.id());
+        else
+            throw new InvalidRequestException("Only know how to load Comment using WeKan API");
     }
 }
