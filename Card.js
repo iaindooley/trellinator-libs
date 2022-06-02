@@ -1748,9 +1748,9 @@ var Card = function(data)
                     to_add.push(labadd.id());
                 }
 
-                console.log(to_add);
-                this.applyLabelIds(new IterableCollection(to_add));
             }.bind(this));
+
+            this.applyLabelIds(new IterableCollection(to_add));
         }
         
         else
@@ -1803,7 +1803,7 @@ var Card = function(data)
             });
             
             var unique_ids = Object.keys(all_ids);
-            WekanApi.put('boards/'+this.board().id()+'/lists/'+this.currentList().id()+'/cards/'+this.id(),{labelIds: unique_ids.join(",")});
+            WekanApi.put('boards/'+this.board().id()+'/lists/'+this.currentList().id()+'/cards/'+this.id(),{labelIds: unique_ids});
         }
         
         else

@@ -575,12 +575,12 @@ var Board = function(data)
             {
                 Notification.expectException(InvalidDataException,e);
 
-                var ret = new Label(WekanApi.put('boards/'+this.id()+'/labels',{
+                var ret = new Label({id: WekanApi.put('boards/'+this.id()+'/labels',{
                     label: {
                         color: color,
                         name: name
                     }
-                }));
+                })});
             }
         }
         
