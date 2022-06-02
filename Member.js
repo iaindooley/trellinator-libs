@@ -85,6 +85,9 @@ var Member = function(data)
     */
     this.customSticker = function(name)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestInspection("No sticker functionality in WeKan API yet");
+
         return this.customStickers().find(function(sticker)
         {
           if(sticker.url.indexOf("/"+name.replace(/ /g,"_")+".png") > -1)
@@ -103,6 +106,9 @@ var Member = function(data)
     */
     this.customStickers = function(name)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestInspection("No sticker functionality in WeKan API yet");
+
         return new IterableCollection(TrelloApi.get("members/"+this.name()+"/customStickers"));
     }
 
@@ -132,10 +138,10 @@ var Member = function(data)
     */
     this.fullName = function()
     {
-        if(!this.data.fullName)
+        if(!this.data.fullName && !this.data.fullname)
             this.load();
 
-        return this.data.fullName;
+        return this.data.fullName || this.data.fullname;
     }
 
     /**
@@ -148,6 +154,9 @@ var Member = function(data)
     */
     this.team = function(name)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("No team functionality implemented in WeKan API yet");
+
         var ret = null;
 
         try
@@ -176,6 +185,9 @@ var Member = function(data)
     */
     this.teams = function(name)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("No team functionality implemented in WeKan API yet");
+
         if(!this.list_of_teams)
         {
             this.list_of_teams = new IterableCollection(TrelloApi.get("/members/"+this.username()+"/organizations?filter=all&fields=all")).transform(function(elem)
@@ -242,10 +254,21 @@ var Member = function(data)
     {
         if(!this.board_list)
         {
-            this.board_list = new IterableCollection(TrelloApi.get("members/"+this.username()+"/boards?filter=open&fields=all&lists=open&memberships=none&organization_fields=name%2CdisplayName")).transform(function(elem)
-                              {
-                                  return new Board(elem);
-                              });
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            {
+                this.board_list = new IterableCollection(WekanApi.get("users/"+this.id()+"/boards")).transform(function(elem)
+                {
+                    return new Board(elem);
+                });
+            }
+            
+            else
+            {
+                this.board_list = new IterableCollection(TrelloApi.get("members/"+this.username()+"/boards?filter=open&fields=all&lists=open&memberships=none&organization_fields=name%2CdisplayName")).transform(function(elem)
+                {
+                    return new Board(elem);
+                });
+            }
         }
         
         return this.board_list.findByName(name);
