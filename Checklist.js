@@ -51,9 +51,14 @@ var Checklist = function(data)
     */
     this.setName = function(name)
     {
-      TrelloApi.put("checklists/"+this.data.id+"/name?value="+encodeURIComponent(name));
-      this.data.name = name;
-      return this;
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("Cannot setName on a Checklist with the WeKan API yet");
+        else
+            TrelloApi.put("checklists/"+this.data.id+"/name?value="+encodeURIComponent(name));
+
+        this.data.name = name;
+        this.data.title = name;
+        return this;
     }
 
     /**
@@ -66,10 +71,7 @@ var Checklist = function(data)
     this.setPosition = function(position)
     {
       if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
-      {
-          //cannot set position yet
-      }
-      
+            throw new InvalidRequestException("Cannot setPosition on a Checklist with the WeKan API yet");
       else
           TrelloApi.put("checklists/"+this.data.id+"?pos="+encodeURIComponent(position));
 
@@ -92,7 +94,12 @@ var Checklist = function(data)
                (elem.state() == state) ||
                !state
               )
-                TrelloApi.del("cards/"+this.card().id()+"/checkItem/"+elem.data.id);
+            {
+                if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+                    WekanApi.del("boards/"+this.card().board().id()+"/cards/"+this.card().id()+"/checklists/"+this.id()+"/items/"+elem.id());
+                else
+                    TrelloApi.del("cards/"+this.card().id()+"/checkItem/"+elem.data.id);
+            }
         }.bind(this));
         this.item_list = null;
         return this;
@@ -109,7 +116,12 @@ var Checklist = function(data)
         this.items().each(function(elem)
         {   
             if(elem.state() == "complete")
-                TrelloApi.put("cards/"+this.card().data.id+"/checkItem/"+elem.data.id+"?state=incomplete");
+            {
+                if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+                    elem.markIncomplete();
+                else
+                    TrelloApi.put("cards/"+this.card().data.id+"/checkItem/"+elem.data.id+"?state=incomplete");
+            }
         }.bind(this));
         this.item_list = null;
         return this;
@@ -143,7 +155,12 @@ var Checklist = function(data)
       this.items().each(function(elem)
                         {   
                           if(elem.state() == "incomplete")
-                            TrelloApi.put("cards/"+this.card().id()+"/checkItem/"+elem.id()+"?state=complete");
+                          {
+                              if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+                                  elem.markComplete();
+                              else
+                                  TrelloApi.put("cards/"+this.card().id()+"/checkItem/"+elem.id()+"?state=complete");
+                          }
                         }.bind(this));
       
       this.item_list = null;
@@ -206,15 +223,9 @@ var Checklist = function(data)
     {
         var ret = true;
 
-        if(!this.data.checkItems)
-            this.load();
-      //If we don't have any checkitems for some reason, then we are by definition complete
-      if(!this.data.checkItems)
-        return true;
-        
-        new IterableCollection(this.data.checkItems).each(function(elem)
+        this.items().each(function(elem)
         {
-            if(elem.state == "incomplete")
+            if(elem.state() == "incomplete")
                 ret = false;
         });
             
