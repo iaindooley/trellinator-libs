@@ -54,6 +54,7 @@ WekanApi.call = function(method,endpoint,payload)
 
     if(Trellinator.isGoogleAppsScript())
     {
+        options.payload = JSON.stringify(options.payload);
         options["muteHttpExceptions"] = true;
         var resp = JSON.parse(UrlFetchApp.fetch(live_url,options));
         return resp;
@@ -142,9 +143,9 @@ WekanApi.login = function()
         }
         
         if(Trellinator.isGoogleAppsScript())
-            var resp = JSON.parse(UrlFetchApp.fetch(WekanApi.url+'/users/login',options));
+            var resp = JSON.parse(UrlFetchApp.fetch(Trellinator.provider().url+'/users/login',options));
         else
-            var resp = JSON.parse(new TestConnector().fetch(WekanApi.url+'/users/login',options));
+            var resp = JSON.parse(new TestConnector().fetch(Trellinator.provider().url+'/users/login',options));
 
         WekanApi.login.logindata = {
             id: resp.id,
