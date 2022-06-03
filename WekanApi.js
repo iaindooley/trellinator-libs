@@ -47,60 +47,70 @@ WekanApi.call = function(method,endpoint,payload)
     var options = {
         method: method,
         headers: headers,
-        payload: payload,
+        payload: payload
     };
 
-//    var resp = new TestConnector().fetch(WekanApi.url+"/api/"+endpoint,options);
     var live_url = WekanApi.url+"/api/"+endpoint;
-    var header_string = "";
 
-    if(options.headers)
-    {   
-        header_string = '--header "'+new IterableCollection(options.headers).implodeValues('" --header "',function(elem,key)
-        {   
-            return key+": "+elem;
-        })+'" ';
+    if(Trellinator.isGoogleAppsScript())
+    {
+        options["muteHttpExceptions"] = true;
+        var resp = JSON.parse(UrlFetchApp.fetch(live_url,options));
+        return resp;
     }
 
-    if(options.payload)
-        var cmd = "curl "+header_string+"--data '"+JSON.stringify(options.payload).replaceAll("'","\\'")+"' --request "+options.method.toUpperCase()+' --url "'+live_url+'"';
     else
-        var cmd = "curl "+header_string+"--request "+options.method.toUpperCase()+" --url \""+live_url+'\"';
-
-    var stdout = cp.execSync(cmd,{ stdio: ['pipe', 'pipe', 'ignore']});
-
-    if(stdout)
     {
-        if((TestConnector.test_base_dir != "") && (!TestConnector.nocache))
-        {
-            fs.writeFileSync(fixture_path,stdout);
-            var output = fs.readFileSync(fixture_path).toString();
+        var header_string = "";
+
+        if(options.headers)
+        {   
+            header_string = '--header "'+new IterableCollection(options.headers).implodeValues('" --header "',function(elem,key)
+            {   
+                return key+": "+elem;
+            })+'" ';
         }
 
+        if(options.payload)
+            var cmd = "curl "+header_string+"--data '"+JSON.stringify(options.payload).replaceAll("'","\\'")+"' --request "+options.method.toUpperCase()+' --url "'+live_url+'"';
         else
-            var output = stdout.toString();
+            var cmd = "curl "+header_string+"--request "+options.method.toUpperCase()+" --url \""+live_url+'\"';
 
-        try
+        var stdout = cp.execSync(cmd,{ stdio: ['pipe', 'pipe', 'ignore']});
+
+        if(stdout)
         {
-            JSON.parse(stdout);
+            if((TestConnector.test_base_dir != "") && (!TestConnector.nocache))
+            {
+                fs.writeFileSync(fixture_path,stdout);
+                var output = fs.readFileSync(fixture_path).toString();
+            }
+
+            else
+                var output = stdout.toString();
+
+            try
+            {
+                JSON.parse(stdout);
+            }
+
+            catch(e)
+            {
+                throw new InvalidRequestException(stdout);
+            }
+
         }
 
-        catch(e)
+        if(!output)
         {
-            throw new InvalidRequestException(stdout);
+            console.log("No test return content for: "+fixture_path);
+            console.log(JSON.stringify(options));
+            console.log(url);
+            console.log("Output: "+output);
         }
 
+        return JSON.parse(stdout);
     }
-
-    if(!output)
-    {
-        console.log("No test return content for: "+fixture_path);
-        console.log(JSON.stringify(options));
-        console.log(url);
-        console.log("Output: "+output);
-    }
-
-    return JSON.parse(stdout);
 }
 
 WekanApi.login = function()
@@ -131,7 +141,11 @@ WekanApi.login = function()
             }
         }
         
-        var resp = JSON.parse(new TestConnector().fetch(WekanApi.url+'/users/login',options));
+        if(Trellinator.isGoogleAppsScript())
+            var resp = JSON.parse(UrlFetchApp.fetch(WekanApi.url+'/users/login',options));
+        else
+            var resp = JSON.parse(new TestConnector().fetch(WekanApi.url+'/users/login',options));
+
         WekanApi.login.logindata = {
             id: resp.id,
             token: resp.token,
@@ -151,4 +165,19 @@ WekanApi.cardLinkRegExp = function()
 WekanApi.boardLinkRegExp = function()
 {
     return Trellinator.regex("https:\\/\\/.+?\\/b\\/(.+?)\\/[a-z\-]+","i");
+}
+
+function dddddddk09as8df0a9s8dfnbvbn()
+{
+//var board = new Board({link: "https://trello.com/b/MUSxbJoR"});
+var board = new Board({link: "https://wekan.benkoworks.com/b/F48ESXGtBs3qAAC5J/yet-another-new-test"});
+console.log(board.name());
+return;
+board.lists(/(YO FLEXO|YO BENDER|YO DIRECT)/).each(function(list)
+{
+	list.cards().each(function(card)
+                      {
+      console.log(card.name());
+    });
+});
 }
