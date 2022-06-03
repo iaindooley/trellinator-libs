@@ -166,18 +166,3 @@ WekanApi.boardLinkRegExp = function()
 {
     return Trellinator.regex("https:\\/\\/.+?\\/b\\/(.+?)\\/[a-z\-]+","i");
 }
-
-function dddddddk09as8df0a9s8dfnbvbn()
-{
-//var board = new Board({link: "https://trello.com/b/MUSxbJoR"});
-var board = new Board({link: "https://wekan.benkoworks.com/b/F48ESXGtBs3qAAC5J/yet-another-new-test"});
-console.log(board.name());
-return;
-board.lists(/(YO FLEXO|YO BENDER|YO DIRECT)/).each(function(list)
-{
-	list.cards().each(function(card)
-                      {
-      console.log(card.name());
-    });
-});
-}
