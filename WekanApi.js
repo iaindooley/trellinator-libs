@@ -1,10 +1,5 @@
-const path = require("path");
-const fs   = require("fs");
-const md5  = require("md5");
-const cp   = require('child_process');
-
 var WekanApi = function(){};
-WekanApi.url = process.argv[4];
+
 
 WekanApi.get = function(endpoint)
 {
@@ -28,6 +23,13 @@ WekanApi.put = function(endpoint,payload)
 
 WekanApi.call = function(method,endpoint,payload)
 {
+    if(typeof DriveApp === "undefined")
+    {
+        var fs   = require("fs");
+        var cp   = require('child_process');
+        WekanApi.url = process.argv[4];
+    }
+    
     headers = {};
 
 //    if(['post','put'].indexOf(method.toLowerCase()) > -1)
