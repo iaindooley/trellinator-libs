@@ -23,11 +23,16 @@ WekanApi.put = function(endpoint,payload)
 
 WekanApi.call = function(method,endpoint,payload)
 {
-    if(typeof DriveApp === "undefined")
+    if(!Trellinator.isGoogleAppsScript())
     {
         var fs   = require("fs");
         var cp   = require('child_process');
         WekanApi.url = process.argv[4];
+    }
+
+    else
+    {
+        WekanApi.url = Trellinator.provider().url;
     }
     
     headers = {};
@@ -102,6 +107,18 @@ WekanApi.login = function()
 {
     if(!WekanApi.login.logindata)
     {
+        if(!Trellinator.isGoogleAppsScript())
+        {
+          var username = TestConnector.live_key;
+          var password = TestConnector.live_token;
+        }
+
+        else
+        {
+          var username = Trellinator.configVariable("Trello API key");
+          var password = Trellinator.configVariable("Trello Token");
+        }
+
         var options = {
             method: 'post',
             headers: {
@@ -109,8 +126,8 @@ WekanApi.login = function()
                 'Accept': "*/*",
             },
             payload: {
-                username: TestConnector.live_key,
-                password: TestConnector.live_token
+                username: username,
+                password: password
             }
         }
         
