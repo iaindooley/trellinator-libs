@@ -264,7 +264,7 @@ var Member = function(data)
             
             else
             {
-                this.board_list = new IterableCollection(TrelloApi.get("members/"+this.username()+"/boards?filter=open&fields=all&lists=open&memberships=none&organization_fields=name%2CdisplayName")).transform(function(elem)
+                this.board_list = new IterableCollection(TrelloApi.get("members/"+this.username()+"/boards?filter=open&fields=name&lists=none&memberships=none&organization_fields=none")).transform(function(elem)
                 {
                     return new Board(elem);
                 });
