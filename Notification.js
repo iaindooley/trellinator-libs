@@ -83,6 +83,7 @@ var Notification = function(notification)
     this.board_object = null;
     this.member_object = null;
     this.card_object = null;
+    this.list_object = null;
 
     /**
     * If this notification was the result of
@@ -142,17 +143,29 @@ var Notification = function(notification)
     */
     this.addedMemberToBoard = function(name)
     {
-      if(["action_added_member_to_board","action_added_member_to_board_as_admin"].indexOf(this.notification.action.display.translationKey) == -1)
-      {
-        throw new InvalidActionException("No member added to a board");
-      }
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(["act-addBoardMember"].indexOf(this.notification.description) > -1)
+                var ret = this.member();
+            else
+                throw new InvalidActionException("Card was not moved to a list");
+        }
+
+        else
+        {
+            if(["action_added_member_to_board","action_added_member_to_board_as_admin"].indexOf(this.notification.action.display.translationKey) == -1)
+            {
+              throw new InvalidActionException("No member added to a board");
+            }
+            
+            var ret = new Member(this.notification.action.member);
+            
+        }
+
+        if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new InvalidActionException("The added member was not named "+name);
       
-      var ret = new Member(this.notification.action.member);
-      
-      if(name && !TrelloApi.nameTest(name,ret.name()))
-      throw new InvalidActionException("The added member was not named "+name);
-      
-      return ret;
+        return ret;
     }
 
     /**
@@ -297,6 +310,10 @@ var Notification = function(notification)
     */
     this.changedCustomField = function(name)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            //act-setCustomField
+            throw new InvalidRequestException("No custom field support in WeKan API yet");
+
         if(this.notification.action.display.translationKey != "action_update_custom_field_item")
             throw new InvalidActionException("No custom field was changed");
 
@@ -309,6 +326,24 @@ var Notification = function(notification)
             throw new InvalidActionException("The updated custom field was not named "+name);
         
         return ret;
+    }
+
+    /**
+    * Return a Custom Field object
+    * that was created
+    * IMPLEMENT ME!
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionaly pass in a string
+    * or RegExp to match against the name of the CARD
+    * on which the field was changed
+    * @throws InvalidActionException
+    * @example
+    * IMPLMENT ME!!
+    */
+    this.createdCustomField = function(name)
+    {
+        //act-createCustomField
+        throw new InvalidRequestException("No custom field support in WeKan API yet");
     }
 
     /**
@@ -402,16 +437,85 @@ var Notification = function(notification)
     */
     this.addedChecklist = function(name)
     {
-        if(!this.notification.action.display.translationKey == "action_add_checklist_to_card")
-            throw new InvalidActionException("No checklist was added to a card");
-        
-        var ret = new Checklist(this.notification.action.display.entities.checklist);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(["act-addChecklist"].indexOf(this.notification.description) > -1)
+            {
+                if(parts = /.*added checklist "(.+?)" to card "(.+?)".*/.exec(this.notification.text))
+                {
+                    //Our attachments hack uses a checklist right now
+                    if(parts[1] != "Attachments")
+                    {
+                        var ret = this.card().checklist(parts[1]);
+                    }
+                    
+                    else
+                        throw new InvalidActionException("Ignore attachments");
+                }
+            }
+
+            else
+                throw new InvalidActionException("Card was not moved to a list");
+        }
+
+        else
+        {
+            if(!this.notification.action.display.translationKey == "action_add_checklist_to_card")
+                throw new InvalidActionException("No checklist was added to a card");
+            
+            var ret = new Checklist(this.notification.action.display.entities.checklist);
+            ret.setContainingCard(this.card());
+    
+        }
 
         if(name && !TrelloApi.nameTest(name,ret.name()))
             throw new InvalidDataException("A checklist was added but it was not named: "+name+" it was named: "+ret.name());
 
-        ret.setContainingCard(this.card());
         return ret;
+    }
+
+    /**
+    * Return a Checklist object if a 
+    * checklist was removed from a card as part
+    * of this notification or throw an
+    * IMPLEMENT ME!!
+    * InvalidActionException
+    * @memberof module:TrellinatorCore.Notification
+    * @param name {string|RegExp} optionally pass in a string or RegExp
+    * to match against the name of the checklist that was added to the
+    * card
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .addedChecklist(new RegExp(".*Ghosts.*"))
+    * .addItem("Who you gonna call?");
+    */
+    this.removedChecklist = function(name)
+    {
+        //act-removeChecklist
+        throw new InvalidRequestException("removedChecklist not implemented yet");
+    }
+
+    /**
+    * Return a CheckItem object if a 
+    * checklist item was removed from a card as part
+    * of this notification or throw an InvalidActionException
+    * IMPLEMENT ME!!
+    * InvalidActionException
+    * @memberof module:TrellinatorCore.Notification
+    * @param name {string|RegExp} optionally pass in a string or RegExp
+    * to match against the name of the checklist that was added to the
+    * card
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .addedChecklist(new RegExp(".*Ghosts.*"))
+    * .addItem("Who you gonna call?");
+    */
+    this.removedChecklist = function(name)
+    {
+        //act-removedChecklistItem
+        throw new InvalidRequestException("act-removedChecklistItem not implemented yet");
     }
 
     /**
@@ -524,10 +628,21 @@ var Notification = function(notification)
     */
     this.createdList = function()
     {
-        if(["action_added_list_to_board"].indexOf(this.notification.action.display.translationKey) > -1)
-            ret = new List(this.notification.action.data.list);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(["act-createList"].indexOf(this.notification.description) > -1)
+                var ret = this.list();
+            else
+                throw new InvalidActionException("Card was not moved to a list");
+        }
+
         else
-            throw new InvalidActionException("No list created");
+        {
+            if(["action_added_list_to_board"].indexOf(this.notification.action.display.translationKey) > -1)
+                ret = new List(this.notification.action.data.list);
+            else
+                throw new InvalidActionException("No list created");
+        }
 
         return ret;
     }
@@ -542,12 +657,36 @@ var Notification = function(notification)
     */
     this.archivedList = function()
     {
-        if(["action_archived_list"].indexOf(this.notification.action.display.translationKey) > -1)
-            ret = new List(this.notification.action.data.list);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(["act-archivedList"].indexOf(this.notification.description) > -1)
+                var ret = this.list();
+            else
+                throw new InvalidActionException("Card was not moved to a list");
+        }
+
         else
-            throw new InvalidActionException("No list archived");
+        {
+            if(["action_archived_list"].indexOf(this.notification.action.display.translationKey) > -1)
+                var ret = new List(this.notification.action.data.list);
+            else
+                throw new InvalidActionException("No list archived");
+        }
 
         return ret;
+    }
+    /**
+    * Return a List object that was deleted
+    * IMPLEMENT ME!!
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * IMPLEMENT ME!
+    */
+    this.deletedList = function()
+    {
+        //act-removeList
+        throw new InvalidRequestException("deletedList not implemented yet");
     }
 
     /**
@@ -778,8 +917,44 @@ var Notification = function(notification)
     */
     this.archivedCard = function()
     {
-        if(this.notification.action.display.translationKey != "action_archived_card")
-            throw new InvalidActionException("No card was archived in this update");
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(["act-archivedCard"].indexOf(this.notification.description) == -1)
+                throw new InvalidActionException("No card was archived in this update");
+        }
+
+        else
+        {
+            if(this.notification.action.display.translationKey != "action_archived_card")
+                throw new InvalidActionException("No card was archived in this update");
+        }
+        
+        return this.card();
+    }
+
+    /**
+    * Return a Card object if it was unArchived
+    * as part of this notification, or throw
+    * an InvalidActionException
+    * Currently only supported in the WeKan API
+    * @memberof module:TrellinatorCore.Notification
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .archivedCard()
+    * .unArchive()
+    * .postComment("No you don't!");
+    */
+    this.unArchivedCard = function()
+    {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(["act-restoredCard"].indexOf(this.notification.description) == -1)
+                throw new InvalidActionException("No card was unArchived in this update");
+        }
+
+        else
+            throw new InvalidActionException("unArchive action only supported in WeKan API currently");
         
         return this.card();
     }
@@ -875,15 +1050,29 @@ var Notification = function(notification)
     */
     this.removedLabel = function(name)
     {
-        if(this.notification.action.display.translationKey != "action_remove_label_from_card")
-            throw new InvalidActionException("No label was removed from a card");
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(["act-removedLabel"].indexOf(this.notification.description) > -1)
+            {
+                throw new InvalidRequestException("Unable to process removedLabel with WeKan API currently");
+            }
+
+            else
+                throw new InvalidActionException("Label was not removed from a card");
+        }
         
-        var ret = new Label(this.notification.action.data.label);
-        
-        if(name && !TrelloApi.nameTest(name,ret.name()))
-            throw new InvalidActionException("Label was removed, but was not named: "+name);
-        
-        return ret.setContainingCard(this.card());
+        else
+        {
+            if(this.notification.action.display.translationKey != "action_remove_label_from_card")
+                throw new InvalidActionException("No label was removed from a card");
+            
+            var ret = new Label(this.notification.action.data.label);
+            
+            if(name && !TrelloApi.nameTest(name,ret.name()))
+                throw new InvalidActionException("Label was removed, but was not named: "+name);
+            
+            return ret.setContainingCard(this.card());
+        }
     }
 
     /**
@@ -917,16 +1106,53 @@ var Notification = function(notification)
     */
     this.completedChecklistItem = function(name)
     {
-        if(this.notification.action.display.translationKey != "action_completed_checkitem")
-            throw new InvalidActionException("No checklist item was completed");
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(["act-checkedItem"].indexOf(this.notification.description) > -1)
+            {
+                if(parts = /.* checked (.+?) of checklist "(.+?)".*/.exec(this.notification.text))
+                {
+                    //Don't ignore actions on the Attachments checklist, 
+                    //completing items is not part of our hack so may want to
+                    //react to those events for some reason
+                    var ret = this.card().checklist(parts[2]).item(parts[1]);
+                }
+            }
 
-        var ret = new CheckItem(this.notification.action.display.entities.checkitem);
-        
-        if(name && !TrelloApi.nameTest(name,ret.name()))
-            throw new InvalidActionException("A checklist item was completed but it was not named: "+name);
+            else
+                throw new InvalidActionException("Card was not moved to a list");
+        }
 
-        ret.setContainingChecklist(this.checklist().setContainingCard(this.card()));
+        else
+        {
+            if(this.notification.action.display.translationKey != "action_completed_checkitem")
+                throw new InvalidActionException("No checklist item was completed");
+    
+            var ret = new CheckItem(this.notification.action.display.entities.checkitem);
+            
+            if(name && !TrelloApi.nameTest(name,ret.name()))
+                throw new InvalidActionException("A checklist item was completed but it was not named: "+name);
+    
+            ret.setContainingChecklist(this.checklist().setContainingCard(this.card()));
+        }
+
         return ret;
+    }
+
+    /**
+    * Return a CheckItem object if it was
+    * marked as incomplete or throw an InvalidActionException
+    * IMPLEMENT ME!!!
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionally include a string
+    * or RegExp object to match against the text of the completed item
+    * @throws InvalidActionException
+    * @example IMPLEMENT ME!
+    */
+    this.uncompletedChecklistItem = function(name)
+    {
+        //act-uncompleteChecklist
+        throw new InvalidRequestException("Checklist item uncompletion not implemented");
     }
     
     /**
@@ -943,19 +1169,40 @@ var Notification = function(notification)
     */
     this.addedChecklistItem = function(name)
     {
-        if(this.notification.action.type && (this.notification.action.type == "createCheckItem"))
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
         {
-            var ret = new CheckItem(this.notification.action.data.checkItem);
+            if(["act-addChecklistItem"].indexOf(this.notification.description) > -1)
+            {
+                if(parts = /.*added checklist item (.+?) to checklist "(.+?)".*/.exec(this.notification.text))
+                {
+                    //new items added to Attachments show up in attachedLink
+                    if(parts[2] != "Attachments")
+                        var ret = this.card().checklist(parts[2]).item(parts[1]);
+                    else
+                        throw new InvalidActionException("Ignore attachments");
+                }
+            }
 
-            if(name && !TrelloApi.nameTest(name,ret.name()))
-                throw new InvalidActionException("Checklist item named: "+ret.name()+" added which doesn't match: "+name);
-
-            ret.setContainingChecklist(this.checklist().setContainingCard(this.card()));
+            else
+                throw new InvalidActionException("Card was not moved to a list");
         }
-        
+
         else
         {
-            throw new InvalidActionException("No checklist item was created");
+            if(this.notification.action.type && (this.notification.action.type == "createCheckItem"))
+            {
+                var ret = new CheckItem(this.notification.action.data.checkItem);
+    
+                if(name && !TrelloApi.nameTest(name,ret.name()))
+                    throw new InvalidActionException("Checklist item named: "+ret.name()+" added which doesn't match: "+name);
+    
+                ret.setContainingChecklist(this.checklist().setContainingCard(this.card()));
+            }
+            
+            else
+            {
+                throw new InvalidActionException("No checklist item was created");
+            }
         }
         
         return ret;
@@ -976,11 +1223,16 @@ var Notification = function(notification)
     */
     this.attachedBoard = function(name)
     {
-        if(this.notification.action.display.translationKey != "action_add_attachment_to_card")
-            throw new InvalidActionException("No attachment was added to a card");
-        
-        ret = new Attachment(this.notification.action.display.entities.attachment);
-        
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            var ret = this.attachedLink(name);
+        else
+        {
+            if(this.notification.action.display.translationKey != "action_add_attachment_to_card")
+                throw new InvalidActionException("No attachment was added to a card");
+            
+            var ret = new Attachment(this.notification.action.display.entities.attachment);
+        }
+
         if(!ret.isBoard())
             throw new InvalidActionException("An attachment was added but it wasn't a board");
 
@@ -1002,11 +1254,17 @@ var Notification = function(notification)
     */
     this.attachedCard = function(name)
     {
-        if(this.notification.action.display.translationKey != "action_add_attachment_to_card")
-            throw new InvalidActionException("No attachment was added to a card");
-        
-        ret = new Attachment(this.notification.action.display.entities.attachment);
-        
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            var ret = this.attachedLink(name);
+        else
+        {
+            if(this.notification.action.display.translationKey != "action_add_attachment_to_card")
+                throw new InvalidActionException("No attachment was added to a card");
+            
+            var ret = new Attachment(this.notification.action.display.entities.attachment);
+            
+        }
+
         if(!ret.isCard())
             throw new InvalidActionException("An attachment was added but it wasn't a card");
 
@@ -1032,10 +1290,16 @@ var Notification = function(notification)
     */
     this.attachedFile = function(name)
     {
-        if(this.notification.action.display.translationKey != "action_add_attachment_to_card")
-            throw new InvalidActionException("No attachment was added to a card");
-        
-        ret = new Attachment(this.notification.action.display.entities.attachment);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            var ret = this.attachedLink(name);
+        else
+        {
+            if(this.notification.action.display.translationKey != "action_add_attachment_to_card")
+                throw new InvalidActionException("No attachment was added to a card");
+            
+            ret = new Attachment(this.notification.action.display.entities.attachment);
+    
+        }
 
         if(!ret.isFile())
             throw new InvalidActionException("An attachment was added but it wasn't a file");
@@ -1043,6 +1307,57 @@ var Notification = function(notification)
             throw new InvalidActionException("Attachment with url: "+ret.link()+" did not match: "+name);
         
         return ret.setContainingCard(this.card());
+    }
+
+    /**
+    * IMPLEMENT ME!
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionaly pass in a string
+    * or RegExp to match against the URL of the attachment
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .attachedLink(new RegExp("*google.com*"))
+    * .card().postComment("I have a new Google link");
+    */
+    this.detachedLink = function(name)
+    {
+        //WeKan API act-deleteAttachment
+        throw new InvalidRequestException("Detaching actions not supported yet");
+    }
+
+    /*
+    * IMPLEMENT ME!
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionaly pass in a string
+    * or RegExp to match against the URL of the attachment
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .attachedLink(new RegExp("*google.com*"))
+    * .card().postComment("I have a new Google link");
+    */
+    this.detachedCard = function(name)
+    {
+        //WeKan API act-deleteAttachment
+        throw new InvalidRequestException("Detaching actions not supported yet");
+    }
+
+    /*
+    * IMPLEMENT ME!
+    * @memberof module:TrellinatorCore.Notification
+    * @param {string|RegExp} optionaly pass in a string
+    * or RegExp to match against the URL of the attachment
+    * @throws InvalidActionException
+    * @example
+    * new Notification(posted)
+    * .attachedLink(new RegExp("*google.com*"))
+    * .card().postComment("I have a new Google link");
+    */
+    this.detachedBoard = function(name)
+    {
+        //WeKan API act-deleteAttachment
+        throw new InvalidRequestException("Detaching actions not supported yet");
     }
 
     /**
@@ -1063,18 +1378,67 @@ var Notification = function(notification)
     */
     this.attachedLink = function(name)
     {
-        if(this.notification.action.display.translationKey != "action_add_attachment_to_card")
-            throw new InvalidActionException("No attachment was added to a card");
-        
-        ret = new Attachment(this.notification.action.display.entities.attachment);
-        
-        if(!ret.isLink())
-            throw new InvalidActionException("An attachment was added but it wasn't a link");
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            //act-addAttachment
+            if(["act-addChecklistItem"].indexOf(this.notification.description) > -1)
+            {
+                if(parts = /.*added checklist item (.+?) to checklist "(.+?)".*/.exec(this.notification.text))
+                {
+                    var item_name = parts[1];
+                    var checklist_name = parts[2];
+                    
+                    if(checklist_name == "Attachments")
+                    {
+                        if(parts2 = /\[(.+?)\]\((.+?)\)/.exec(parts[1]))
+                        {
+                            var text = parts2[1];
+                            var url = parts2[2];
+                        }
+                        
+                        else
+                        {
+                            var text = parts[1];
+                            var url = parts[1];
+                        }
+                        
+                        var cl = this.card().checklist("Attachments");
+                        var item = cl.item(parts[1]);
+                        
+                        var ret = new Attachment(
+                            {
+                                id: item.id(),
+                                text: text,
+                                url: url
+                            }
+                        );
+                    }
+                    
+                    else
+                        throw new InvalidActionException("Link was not attached to a card");
+                }
+            }
+
+            else
+                throw new InvalidActionException("Link was not attached to a card");
+        }
+
+        else
+        {
+            if(this.notification.action.display.translationKey != "action_add_attachment_to_card")
+                throw new InvalidActionException("No attachment was added to a card");
+            
+            var ret = new Attachment(this.notification.action.display.entities.attachment);
+            
+            if(!ret.isLink())
+                throw new InvalidActionException("An attachment was added but it wasn't a link");
+        }
+
         if(
               (name && !TrelloApi.nameTest(name,ret.link())) &&
               (name && !TrelloApi.nameTest(name,ret.text()))
           )
-            throw new InvalidActionException("Attachment with url: "+ret.link()+" and name: "+ret.text()+" did not match "+name);
+              throw new InvalidActionException("Attachment with url: "+ret.link()+" and name: "+ret.text()+" did not match "+name);
 
         return ret.setContainingCard(this.card());
     }
@@ -1094,7 +1458,12 @@ var Notification = function(notification)
     this.member = function()
     {
         if(!this.member_object)
-            this.member_object = new Member(this.notification.action.memberCreator);
+        {
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+                this.member_object = new Member({username: this.notification.user});
+            else
+                this.member_object = new Member(this.notification.action.memberCreator);
+        }
         
         return this.member_object;
     }
@@ -1148,17 +1517,77 @@ var Notification = function(notification)
     * new Notification(posted)
     * .card().postComment("You rang?");
     */
+    this.list = function()
+    {
+        if(!this.list_object)
+        {
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            {
+                if(!this.notification.listId)
+                    throw new InvalidActionException("No list  was part of this notification");
+                    
+                this.list_object = new List(
+                {
+                    id: this.notification.listId
+                }).setBoard(
+                    new Board(
+                    {
+                        id: this.notification.boardId
+                    })
+                );
+            }
+    
+            else
+            {
+                if(!this.notification.action.display.entities.card && !this.notification.action.data.card)
+                    throw new InvalidActionException("No card was part of this notification");
+        
+                    if(this.notification.action.display.entities.card)
+                        this.card_object = new Card(this.notification.action.display.entities.card);
+                    else if(this.notification.action.data.card)
+                        this.card_object = new Card(this.notification.action.data.card);
+            }
+        }
+        
+        return this.card_object.setNotification(this);
+    }
+    
+    /**
+    * Return the Card object on which this
+    * action was performed. If this action
+    * was not performed on a card, throw an
+    * InvalidActionException
+    * @memberof module:TrellinatorCore.Notification
+    * @example
+    * new Notification(posted)
+    * .card().postComment("You rang?");
+    */
     this.card = function()
     {
-        if(!this.notification.action.display.entities.card && !this.notification.action.data.card)
-            throw new InvalidActionException("No card was part of this notification");
-
         if(!this.card_object)
         {
-            if(this.notification.action.display.entities.card)
-                this.card_object = new Card(this.notification.action.display.entities.card);
-            else if(this.notification.action.data.card)
-                this.card_object = new Card(this.notification.action.data.card);
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            {
+                if(!this.notification.cardId)
+                    throw new InvalidActionException("No card was part of this notification");
+                    
+                this.card_object = new Card(
+                    {
+                        id: this.notification.cardId
+                    }
+                ).setCurrentList(this.list());
+            }
+    
+            else
+            {
+                if(!this.notification.action.display.entities.card && !this.notification.action.data.card)
+                    throw new InvalidActionException("No card was part of this notification");
+        
+                    if(this.notification.action.display.entities.card)
+                        this.card_object = new Card(this.notification.action.display.entities.card);
+                    else if(this.notification.action.data.card)
+                        this.card_object = new Card(this.notification.action.data.card);
+            }
         }
         
         return this.card_object.setNotification(this);
@@ -1272,6 +1701,39 @@ var Notification = function(notification)
       
         this.pushDueDateActionForCard(function_name,signature,callback,card);
     }
+
+    /**
+    * IMPLEMENT ME!!!
+    * @memberof module:TrellinatorCore.Notification
+    * @example
+    * IMPLEMENT ME!!
+    */
+    this.createdSwimlane = function()
+    {
+        throw new InvalidRequestException("No swimlane webhooks implemented yet");
+    }
+
+    /**
+    * IMPLEMENT ME!!!
+    * @memberof module:TrellinatorCore.Notification
+    * @example
+    * IMPLEMENT ME!!
+    */
+    this.archivedSwimlane = function()
+    {
+        throw new InvalidRequestException("No swimlane webhooks implemented yet");
+    }
+
+    /**
+    * IMPLEMENT ME!!!
+    * @memberof module:TrellinatorCore.Notification
+    * @example
+    * IMPLEMENT ME!!
+    */
+    this.removedSwimlane = function()
+    {
+        throw new InvalidRequestException("No swimlane webhooks implemented yet");
+    }
     
     //This is for internal use only
     this.pushDueDateActionForCard = function(function_name,signature,callback,card)
@@ -1298,12 +1760,33 @@ var Notification = function(notification)
     //Deprecated: use movedCard instead
     this.listCardWasMovedTo = function(name)
     {
-        if(["action_move_card_from_list_to_list"].indexOf(this.notification.action.display.translationKey) > -1)
-            var ret = new List(this.notification.action.display.entities.listAfter);
-        else if(["action_move_card_to_board"].indexOf(this.notification.action.display.translationKey) > -1)
-            var ret = this.card().currentList();
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(["act-moveCard"].indexOf(this.notification.description) > -1)
+            {
+                var ret = new List({id: this.notification.listId})
+                .setBoard(
+                    new Board(
+                        {
+                            id: this.notification.boardId
+                        }
+                    )
+                );
+            }
+            
+            else
+                throw new InvalidActionException("Card was not moved to a list");
+        }
+        
         else
-            throw new InvalidActionException("Card was not moved to a list");
+        {
+            if(["action_move_card_from_list_to_list"].indexOf(this.notification.action.display.translationKey) > -1)
+                var ret = new List(this.notification.action.display.entities.listAfter);
+            else if(["action_move_card_to_board"].indexOf(this.notification.action.display.translationKey) > -1)
+                var ret = this.card().currentList();
+            else
+                throw new InvalidActionException("Card was not moved to a list");
+        }
 
         if(name && !TrelloApi.nameTest(name,ret.name()))
             throw new InvalidActionException("Card was moved to : "+ret.name()+" rather than "+name);
@@ -1314,16 +1797,33 @@ var Notification = function(notification)
     //Deprecated: use createdCard instead
     this.listCardWasCreatedIn = function(name)
     {
-        if(["action_create_card","action_copy_card","action_email_card"].indexOf(this.notification.action.display.translationKey) > -1)
-            var ret = new List(this.notification.action.display.entities.list);
-        else if(["action_convert_to_card_from_checkitem"].indexOf(this.notification.action.display.translationKey) > -1)
-            var ret = new List(this.notification.action.data.list);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(["act-createCard"].indexOf(this.notification.description))
+            {
+                var ret = new List({id: this.notification.listId})
+                .setBoard(
+                    new Board({id: this.notification.boardId})
+                );
+            }
+            
+            else
+                throw new InvalidActionException("Card was not created in a list");
+        }
+        
         else
-            throw new InvalidActionException("Card was not created in a list");
+        {
+            if(["action_create_card","action_copy_card","action_email_card"].indexOf(this.notification.action.display.translationKey) > -1)
+                var ret = new List(this.notification.action.display.entities.list);
+            else if(["action_convert_to_card_from_checkitem"].indexOf(this.notification.action.display.translationKey) > -1)
+                var ret = new List(this.notification.action.data.list);
+            else
+                throw new InvalidActionException("Card was not created in a list");
+        }
 
         if(name && !TrelloApi.nameTest(name,ret.name()))
             throw new InvalidActionException("Card was created in : "+ret.name()+" rather than "+name);
-        
+
         return ret;
     }
 
@@ -1348,16 +1848,33 @@ var Notification = function(notification)
     //Deprecated: use addedMember instead
     this.memberAddedToCard = function(name)
     {
-      if(
-          (this.notification.action.display.translationKey != "action_member_joined_card") &&
-          (this.notification.action.display.translationKey != "action_added_member_to_card")
-        )
-            throw new InvalidActionException("No member added to card");
-      
-      var ret = new Member(this.notification.action.member);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(["act-joinMember"].indexOf(this.notification.description) > -1)
+            {
+                if(parts = /.*added member (.+?) to card "(.+?)".*/.exec(this.notification.text))
+                {
+                    ret = new Member({username: parts[1]});
+                }
+            }
 
-      if(name && !TrelloApi.nameTest(name,ret.name()))
-        throw new InvalidActionException("Member was added, but was not named: "+name);
+            else
+                throw new InvalidActionException("Member was not added to a card");
+        }
+
+        else
+        {
+          if(
+              (this.notification.action.display.translationKey != "action_member_joined_card") &&
+              (this.notification.action.display.translationKey != "action_added_member_to_card")
+            )
+                throw new InvalidActionException("No member added to card");
+          
+          var ret = new Member(this.notification.action.member);
+    
+          if(name && !TrelloApi.nameTest(name,ret.name()))
+            throw new InvalidActionException("Member was added, but was not named: "+name);
+        }
       
       return ret.setContainingCard(this.card());
     }
@@ -1365,12 +1882,50 @@ var Notification = function(notification)
     //Deprecated: use addedComment instead
     this.commentAddedToCard = function()
     {
-        if(this.notification.action.display.translationKey != "action_comment_on_card")
-            throw new InvalidActionException("No comment added as part of this notification");
-        
-        var data = {data: {id: this.notification.action.id,
-                    text: this.notification.action.data.text}};
-        return new Comment(data).setContainingCard(this.card());
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(["act-addComment"].indexOf(this.notification.description) > -1)
+            {
+                var ret = new Comment(
+                    {
+                        id: this.notification.commentId,
+                        comment: this.notification.comment,
+                        authorId: this.notification.user,
+                    }
+                )
+                .setContainingCard(
+                    new Card(
+                        {
+                            id: this.notification.cardId,
+                            title: this.notification.card
+                        }
+                    ).
+                    setContaininBoard(
+                        new Board(
+                            {
+                                id: this.notification.boardId
+                            }
+                        )
+                    )
+                );
+            }
+
+            else
+                throw new InvalidActionException("Card was not moved to a list");
+        }
+
+        else
+        {
+            if(this.notification.action.display.translationKey != "action_comment_on_card")
+                throw new InvalidActionException("No comment added as part of this notification");
+            
+            var data = {data: {id: this.notification.action.id,
+                        text: this.notification.action.data.text}};
+
+            var ret = new Comment(data).setContainingCard(this.card());
+        }
+
+        return ret;
     }
 
     //Deprecated: use completedDueDate instead
@@ -1421,13 +1976,27 @@ var Notification = function(notification)
     //Deprecated: use addedLabel instead
     this.labelAddedToCard = function(name)
     {
-        if(this.notification.action.display.translationKey != "action_add_label_to_card")
-            throw new InvalidActionException("No label as added to a card");
-        
-        var ret = new Label(this.notification.action.data.label);
-        
-        if(name && !TrelloApi.nameTest(name,ret.name()))
-            throw new InvalidActionException("Label was added, but was not named: "+name);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(["act-addedLabel"].indexOf(this.notification.description) > -1)
+            {
+                throw new InvalidRequestException("Unable to process addedLabel with WeKan API currently");
+            }
+
+            else
+                throw new InvalidActionException("Label was not added to a card");
+        }
+
+        else
+        {
+            if(this.notification.action.display.translationKey != "action_add_label_to_card")
+                throw new InvalidActionException("No label as added to a card");
+            
+            var ret = new Label(this.notification.action.data.label);
+            
+            if(name && !TrelloApi.nameTest(name,ret.name()))
+                throw new InvalidActionException("Label was added, but was not named: "+name);
+        }
         
         return ret.setContainingCard(this.card());
     }
@@ -1558,4 +2127,3 @@ Notification.fromDueDateAction = function(params)
 
     return ret;
 }
-
