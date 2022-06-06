@@ -116,6 +116,9 @@ var Notification = function(notification)
     */
     this.removedMemberFromCard = function(name)
     {
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+          throw new InvalidRequestException('WeKan API does not support removedMemberFromCard');
+
       if(
           (this.notification.action.display.translationKey != "action_member_left_card") &&
           (this.notification.action.display.translationKey != "action_removed_member_from_card")
@@ -148,7 +151,7 @@ var Notification = function(notification)
             if(["act-addBoardMember"].indexOf(this.notification.description) > -1)
                 var ret = this.member();
             else
-                throw new InvalidActionException("Card was not moved to a list");
+                throw new InvalidActionException("Member was not added to a board");
         }
 
         else
@@ -181,6 +184,9 @@ var Notification = function(notification)
     */
     this.removedMemberFromBoard = function(name)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("removedMemberFromBoard not yet implemented in WeKan API");
+
         if(this.notification.action.display.translationKey != "action_removed_from_board")
             throw new InvalidActionException("No member removed from a board");
         
@@ -203,6 +209,9 @@ var Notification = function(notification)
     */
     this.createdBoard = function()
     {
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+          throw new InvalidRequestException("createdBoard not yet implemented in WeKan API");
+
       if(["action_create_board","action_copy_board"].indexOf(this.notification.action.display.translationKey) == -1)
         throw new InvalidActionException("No member added to a board");
       
@@ -219,6 +228,9 @@ var Notification = function(notification)
     */
     this.copiedBoard = function()
     {
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        throw new InvalidRequestException("copiedBoard not yet implemented in WeKan API");
+
       if(["action_copy_board"].indexOf(this.notification.action.display.translationKey) == -1)
         throw new InvalidActionException("No member added to a board");
       
@@ -239,6 +251,9 @@ var Notification = function(notification)
     */
     this.convertedChecklistItemToCard = function(name)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("convertedChecklistItemToCard not yet implemented in WeKan API");
+
         if(this.notification.action.display.translationKey != "action_convert_to_card_from_checkitem")
             throw new InvalidActionException("No checklist item was converted to a card");
 
@@ -266,11 +281,21 @@ var Notification = function(notification)
     */
     this.completedChecklist = function(name)
     {
-        if(this.notification.action.display.translationKey != "action_completed_checkitem")
-            throw new InvalidActionException("No checklist item was completed, therefore no checklist was completed as part of this action");
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            var item = this.completedChecklistItem();
+            var ret = item.checklist();
+            
+        }
 
-        var ret = this.checklist();
-        
+        else
+        {
+            if(this.notification.action.display.translationKey != "action_completed_checkitem")
+                throw new InvalidActionException("No checklist item was completed, therefore no checklist was completed as part of this action");
+    
+            var ret = this.checklist();
+        }
+            
         if(name && !TrelloApi.nameTest(name,ret.name()))
             throw new InvalidActionException("The completed checklist was not named "+name);
 
@@ -279,16 +304,24 @@ var Notification = function(notification)
             if(!ret.isComplete())
                 throw new InvalidActionException("The checklist in which the item was checked is not complete");
 
-            var completed_actions = new Array();
-    
-            new IterableCollection(TrelloApi.get("cards/"+this.card().data.id+"/actions?filter=updateCheckItemStateOnCard")).each(function(elem)
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
             {
-                if((elem.data.checkItem.state == "complete") && elem.data.checklist.id == ret.id())
-                    completed_actions.push(elem);
-            });
-    
-            if(this.notification.action.id != completed_actions[0].id)
-                throw new InvalidActionException("This was not the most recent completed notification for the checklist in question so couldn't be the one that caused the checklist to be completed");
+                //NO WAY TO DETERMINE IF THE CHECKLIST COMPLETION EVENT WAS THE MOST RECENT ONE
+            }
+            
+            else
+            {
+                var completed_actions = new Array();
+        
+                new IterableCollection(TrelloApi.get("cards/"+this.card().data.id+"/actions?filter=updateCheckItemStateOnCard")).each(function(elem)
+                {
+                    if((elem.data.checkItem.state == "complete") && elem.data.checklist.id == ret.id())
+                        completed_actions.push(elem);
+                });
+        
+                if(this.notification.action.id != completed_actions[0].id)
+                    throw new InvalidActionException("This was not the most recent completed notification for the checklist in question so couldn't be the one that caused the checklist to be completed");
+            }
         }
         
         ret.setContainingCard(this.card());
@@ -391,7 +424,22 @@ var Notification = function(notification)
     */
     this.addedCard = function(name)
     {
-        this.listCardWasAddedTo(name);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            try
+            {
+                this.createdCard();
+            }
+            
+            catch(e)
+            {
+                Notification.expectException(InvalidActionException,e);
+                this.movedCard();
+            }
+        }
+
+        else
+            this.listCardWasAddedTo(name);
         return this.card();
     }
     
@@ -529,6 +577,9 @@ var Notification = function(notification)
     */
     this.boardBefore = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("boardBefore not supported in WeKan API because you can't move cards between boards");
+
         if(this.notification.action.display.translationKey != "action_move_card_to_board")
         {
           throw new InvalidActionException("Card not moved from a board");
@@ -567,10 +618,23 @@ var Notification = function(notification)
     */
     this.listBefore = function()
     {
-        if(this.notification.action.data.listBefore)
-            ret = new List(this.notification.action.data.listBefore);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            this.movedCard();
+            var ret = new List(
+                {
+                    id: this.notification.oldList
+                }
+            ).setBoard(this.board());
+        }
+
         else
-            throw new InvalidActionException("No list before");
+        {
+            if(this.notification.action.data.listBefore)
+                ret = new List(this.notification.action.data.listBefore);
+            else
+                throw new InvalidActionException("No list before");
+        }
         
         return ret;
     }
@@ -590,10 +654,19 @@ var Notification = function(notification)
     */
     this.listAfter = function()
     {
-        if(this.notification.action.data.listAfter)
-            ret = new List(this.notification.action.data.listAfter);
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            this.movedCard();
+            var ret = this.list();
+        }
+
         else
-            throw new InvalidActionException("No list after");
+        {
+            if(this.notification.action.data.listAfter)
+                var ret = new List(this.notification.action.data.listAfter);
+            else
+                throw new InvalidActionException("No list after");
+        }
         
         return ret;
     }
@@ -609,11 +682,18 @@ var Notification = function(notification)
     */
     this.addedList = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            var ret = this.createdList();
+        }
         
-        if(["action_added_list_to_board","action_move_list_to_board"].indexOf(this.notification.action.display.translationKey) > -1)
-            ret = new List(this.notification.action.data.list);
         else
-            throw new InvalidActionException("No list added");
+        {
+            if(["action_added_list_to_board","action_move_list_to_board"].indexOf(this.notification.action.display.translationKey) > -1)
+                var ret = new List(this.notification.action.data.list);
+            else
+                throw new InvalidActionException("No list added");
+        }
 
         return ret;
     }
@@ -662,7 +742,7 @@ var Notification = function(notification)
             if(["act-archivedList"].indexOf(this.notification.description) > -1)
                 var ret = this.list();
             else
-                throw new InvalidActionException("Card was not moved to a list");
+                throw new InvalidActionException("List was not archived");
         }
 
         else
@@ -700,6 +780,9 @@ var Notification = function(notification)
     */
     this.oldValue = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("Can't get the value from which we changed yet implemented in WeKan API");
+
         if(this.notification.action.data.old)
         {
             for(var key in this.notification.action.data.old)
@@ -724,6 +807,9 @@ var Notification = function(notification)
     */
     this.whatChanged = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("Can't see what you changed in WeKan API");
+
         if(this.notification.action.data.old)
         {
             for(var key in this.notification.action.data.old)
@@ -751,6 +837,9 @@ var Notification = function(notification)
     */
     this.changedListName = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("changedListName not yet implemented in WeKan API");
+
         return this.updatedList();
     }
 
@@ -768,6 +857,9 @@ var Notification = function(notification)
     */
     this.changedCardName = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("changedCardName not yet implemented in WeKan API");
+
         return this.cardWithNameChanged();
     }
 
@@ -786,6 +878,9 @@ var Notification = function(notification)
     */
     this.changedCardDescription = function(name)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("changedCardDescription not yet implemented in WeKan API");
+
         if(this.notification.action.display.translationKey != "action_changed_description_of_card")
             throw new InvalidActionException("Card description was not changed");
 
@@ -809,6 +904,9 @@ var Notification = function(notification)
     */
     this.oldCardDescription = function(name)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("oldCardDescription not yet implemented in WeKan API");
+
       var ret = null;
 
       if(this.notification && this.notification.action && this.notification.action.data && this.notification.action.data.old && this.notification.action.data.old.desc)
@@ -833,6 +931,9 @@ var Notification = function(notification)
     */
     this.completedDueDate = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("completedDueDate not yet implemented in WeKan API");
+
         return this.cardDueDateWasCompletedOn();
     }
 
@@ -991,6 +1092,9 @@ var Notification = function(notification)
     */
     this.closedBoard = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("archivedBoard not yet implemented in WeKan API");
+
         if(this.notification.action.display.translationKey != "action_closed_board")
             throw new InvalidActionException("No board was closed in this update");
         
@@ -1010,6 +1114,9 @@ var Notification = function(notification)
     */
     this.addedDueDate = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("addedDueDate not yet implemented in WeKan API");
+
         return this.cardDueDateWasAddedTo();
     }
 
@@ -1479,6 +1586,9 @@ var Notification = function(notification)
     */
     this.ignoreMemberWebhooks = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("ignoreMemberWebhooks not yet implemented in WeKan API -- although I don't think we actually need it for anything do we?");
+
         if(this.notification.model.id != this.notification.action.data.board.id)
             throw new InvalidActionException("We are only worried about notifications at the board level");
     }
@@ -1498,19 +1608,24 @@ var Notification = function(notification)
     {
         if(!this.board_object)
         {
-            if(this.notification.model.id == this.notification.action.data.board.id)
-                this.board_object = new Board(this.notification.model);
+            if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+                this.board_object = new Board({id: this.notification.boardId});
             else
-                this.board_object = new Board(this.notification.action.data.board);
+            {
+                if(this.notification.model.id == this.notification.action.data.board.id)
+                    this.board_object = new Board(this.notification.model);
+                else
+                    this.board_object = new Board(this.notification.action.data.board);
+            }
         }
         
         return this.board_object;
     }
 
     /**
-    * Return the Card object on which this
+    * Return the List object on which this
     * action was performed. If this action
-    * was not performed on a card, throw an
+    * was not performed on a list, throw an
     * InvalidActionException
     * @memberof module:TrellinatorCore.Notification
     * @example
@@ -1639,6 +1754,9 @@ var Notification = function(notification)
     */
     this.actionOnDueDateAdded = function(function_name,signature,callback)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("actionOnDueDateAdded not yet implemented in WeKan API");
+
         var card = this.cardDueDateWasAddedTo();      
         this.pushDueDateActionForCard(function_name,signature,callback,card);
     }
@@ -1686,6 +1804,9 @@ var Notification = function(notification)
     */
     this.actionOnDueDate = function(function_name,signature,callback)
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("actionOnDueDate not yet implemented in WeKan API");
+
         try
         {
           var card = this.cardDueDateWasAddedTo();
