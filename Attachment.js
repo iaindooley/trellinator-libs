@@ -46,7 +46,7 @@ var Attachment = function(data)
         )
             this.load();
 
-        return this.data.name ? this.data.name:this.data.text;
+        return this.data.name || this.data.text || "";
     }
 
     /**
@@ -57,24 +57,28 @@ var Attachment = function(data)
     */
     this.link = function()
     {
-      if(!("url" in this.data))
-        this.load();
-      
-      if((this.data.url.indexOf("https://trello") === 0) && (this.card_object) && (this.data.fileName))
-      {
-        var ret = "https://api.trello.com/1/cards/"+this.card_object.id()+"/attachments/"+this.data.id+"/download/"+this.data.fileName;
-        var creds = TrelloApi.checkControlValues();
-        ret = ret+"?key="+creds.key+"&token="+creds.token;
-      }
-      
-      else if(this.data.url.indexOf("https://api.trello.com") === 0)
-      {
-        var creds = TrelloApi.checkControlValues();
-        var ret = this.data.url+"?key="+creds.key+"&token="+creds.token;
-      }
-      
+      if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+          var ret = this.data.url;
       else
-        var ret = this.data.url;
+      {
+          if(!("url" in this.data))
+            this.load();
+          if((this.data.url.indexOf("https://trello") === 0) && (this.card_object) && (this.data.fileName))
+          {
+            var ret = "https://api.trello.com/1/cards/"+this.card_object.id()+"/attachments/"+this.data.id+"/download/"+this.data.fileName;
+            var creds = TrelloApi.checkControlValues();
+            ret = ret+"?key="+creds.key+"&token="+creds.token;
+          }
+          
+          else if(this.data.url.indexOf("https://api.trello.com") === 0)
+          {
+            var creds = TrelloApi.checkControlValues();
+            var ret = this.data.url+"?key="+creds.key+"&token="+creds.token;
+          }
+          
+          else
+            var ret = this.data.url;
+      }
       
       return ret;
     }
@@ -104,7 +108,7 @@ var Attachment = function(data)
     */
     this.setName = function(new_name)
     {
-        throw new Error("Unable to set names on attachments until Iain gets a response from Trello support :)");
+        throw new InvalidRequestException("Unable to set names on attachments until Iain gets a response from Trello support :)");
         return this;
     }
     
@@ -117,7 +121,11 @@ var Attachment = function(data)
     */
     this.remove = function()
     {
-        TrelloApi.del("cards/"+this.card_object.id()+"/attachments/"+this.id());
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            WekanApi.del("boards/"+this.card().board().id()+"/cards/"+this.card().id()+"/checklists/"+this.card().checklist("Attachments").id()+"/items/"+this.id());
+        else
+            TrelloApi.del("cards/"+this.card_object.id()+"/attachments/"+this.id());
+
         return this.card_object;
     }
     
@@ -163,6 +171,9 @@ var Attachment = function(data)
     //INTERNAL USE ONLY
     this.load = function()
     {
+        if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+            throw new InvalidRequestException("You can't load an Attachment object with the WeKan API, it should be loaded from a card");
+
         if(!this.card_object)
             throw new InvalidDataException("Unable to load attachment data without a containing card");
 
