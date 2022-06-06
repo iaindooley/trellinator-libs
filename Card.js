@@ -582,6 +582,7 @@ var Card = function(data)
                         
                         var totest = new Attachment(
                             {
+                                id: att.id(),
                                 text: text,
                                 url: url
                             }
