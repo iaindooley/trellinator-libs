@@ -431,15 +431,21 @@ var List = function(data)
     {
         this.card_list = null;
         
-        if(!this.board_object && this.data['boardId'])
-            this.board_object = new Board({id: this.data.boardId});
-        else if(!this.board_object)
-            throw "List must either have a board object or a boardId in order to be loaded";
-        
         if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+        {
+            if(!this.board_object && this.data['boardId'])
+                this.board_object = new Board({id: this.data.boardId});
+            else if(!this.board_object)
+                throw "List must either have a board object or a boardId in order to be loaded";
+            
             this.data = WekanApi.get("boards/"+this.board_object.id()+"/lists/"+this.data['_id']);
+        }
+
         else
+        {
+            this.board_object = null;
             this.data = TrelloApi.get("lists/"+this.data.id+"?fields=all");
+        }
 
         return this;
     }
