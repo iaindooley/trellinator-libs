@@ -63,7 +63,7 @@ var Comment = function(data)
     {
         if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
         {
-            if(!this.data.comment)
+            if(!("comment" in this.data))
                 this.load();
             
             return this.data.comment;
@@ -119,10 +119,13 @@ var Comment = function(data)
     */
     this.when = function()
     {
-        if(!this.data.date && !this.data.createdAt)
+        if(
+            !("date" in this.data) &&
+            !("createdAt" in this.data)
+        )
             this.load();
 
-        return new Date(this.data.date || this.data.createdAt);
+        return new Date(this.data.date || this.data.createdAt || new Date());
     }
 
     /**

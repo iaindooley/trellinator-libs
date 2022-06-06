@@ -154,10 +154,14 @@ var CheckItem = function(data)
     */
     this.name = function()
     {
-        if(!this.data.text && !this.data.name && !this.data.title)
+        if(
+            !("text" in this.data) &&
+            !("name" in this.data) &&
+            !("title" in this.data)
+        )
             this.load();
         
-      return this.data.text || this.data.name || this.data.title;
+      return this.data.text || this.data.name || this.data.title || "";
     }
     
     /**
@@ -223,7 +227,7 @@ var CheckItem = function(data)
     //DEPRECATED
     this.url = function()
     {
-        if(!this.data.url)
+        if(!("url" in this.data))
             this.load();
         
         return this.data.url;
@@ -232,7 +236,7 @@ var CheckItem = function(data)
     //DEPRECATED: use isComplete
     this.state = function()
     {
-        if(!this.data.state && !("isFinished" in this.data))
+        if(!("state" in this.data) && !("isFinished" in this.data))
             this.load();
         
         if((prov = Trellinator.provider()) && (prov.name == "WeKan"))

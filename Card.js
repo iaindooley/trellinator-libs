@@ -73,7 +73,7 @@ var Card = function(data)
     {
       if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
       {
-          if(!this.data.createdAt)
+          if(!("createdAt" in this.data))
               this.load();
 
           return new Date(this.data.createdAt);
@@ -158,7 +158,7 @@ var Card = function(data)
     {
         if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
         {
-            if(!this.data.dueAt)
+            if(!("dueAt" in this.data))
                 this.load();
             
             if(this.data.dueAt && (new Date(this.data.dueAt).getTime() < new Date().getTime()))
@@ -201,7 +201,7 @@ var Card = function(data)
             throw new InvalidRequestException('Cannot load a card with the WeKan API in the absence of a list/board');
         else
         {
-            if(!this.data.idBoard && !this.data.board)
+            if(!("idBoard" in this.data) && !("board" in this.data))
                 this.load();
             
             var data = (this.data.board) ? this.data.board:{id: this.data.idBoard};
@@ -306,7 +306,7 @@ var Card = function(data)
     {
         if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
         {
-            if(!this.data.dateLastActivity)
+            if(!("dateLastActivity" in this.data))
                 this.load();
             
             return new Date(this.data.dateLastActivity);
@@ -430,7 +430,7 @@ var Card = function(data)
     {
       var ret = null;
       
-      if(!this.data.list && !this.current_list)
+      if(!("list" in this.data) && !this.current_list)
           this.load();
       
       if(this.current_list)
@@ -615,7 +615,7 @@ var Card = function(data)
 
         else
         {
-            if(!this.data.attachments)
+            if(!("attachments" in this.data))
                 this.load();
     
             return new IterableCollection(this.data.attachments).find(function(elem)
@@ -666,7 +666,7 @@ var Card = function(data)
             return this.id();
         else
         {
-            if(!this.data.shortLink)
+            if(!("shortLink" in this.data))
                 this.load();
             
             return this.data.shortLink;
@@ -818,7 +818,7 @@ var Card = function(data)
         )
             this.load();
 
-        return this.data.text || this.data.name || this.data.title;
+        return this.data.text || this.data.name || this.data.title || "";
     }
     
     /**
@@ -905,7 +905,7 @@ var Card = function(data)
     {
         if(!this.members_list)
         {
-            if(!this.data.members)
+            if(!("members" in this.data))
                 this.load();
 
             this.members_list = new IterableCollection(this.data.members).find(function(elem)
@@ -956,10 +956,13 @@ var Card = function(data)
     */
     this.description = function()
     {
-        if(!this.data.desc && !this.data.description)
+        if(
+            !("desc" in this.data) &&
+            !("description" in this.data)
+        )
             this.load();
         
-        return this.data.desc || this.data.description;
+        return this.data.desc || this.data.description || "";
     }
 
     /**
@@ -1019,7 +1022,7 @@ var Card = function(data)
     {
         if(!this.labels_list)
         {
-            if(!this.data.labels && !this.data.labelIds)
+            if(!("labels" in this.data) && !("labelIds" in this.data))
                 this.load();
     
             if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
@@ -1074,10 +1077,13 @@ var Card = function(data)
     */
     this.due = function()
     {
-        if(!this.data.due && !this.data.dueAt)
+        if(
+            !("due" in this.data) &&
+            !("dueAt" in this.data)
+        )
             this.load();
         
-        return this.data.due || this.data.dueAt;
+        return this.data.due || this.data.dueAt || false;
     }
     
     /**

@@ -17,7 +17,7 @@
 var Attachment = function(data)
 {    
     this.data         = data;
-    this.name         = data.name || data.text;
+    this.name         = data.name || data.text || "";
     this.url          = data.url;
     this.card_object  = null;
 
@@ -40,7 +40,10 @@ var Attachment = function(data)
     */
     this.text = function()
     {
-        if(!this.data.name && !this.data.text)
+        if(
+            !("name" in this.data) &&
+            !("text" in this.data)
+        )
             this.load();
 
         return this.data.name ? this.data.name:this.data.text;
@@ -54,7 +57,7 @@ var Attachment = function(data)
     */
     this.link = function()
     {
-      if(!this.data.url)
+      if(!("url" in this.data))
         this.load();
       
       if((this.data.url.indexOf("https://trello") === 0) && (this.card_object) && (this.data.fileName))

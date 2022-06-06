@@ -125,10 +125,13 @@ var List = function(data)
     */
     this.position = function()
     {
-        if(!this.data.pos && !this.data.sort)
+        if(
+            !("pos" in this.data) &&
+            !("sort" in this.data)
+        )
             this.load();
 
-        return this.data.pos || this.data.sort;
+        return this.data.pos || this.data.sort || 0;
     }
 
     /**
@@ -220,10 +223,14 @@ var List = function(data)
     */
     this.name = function()
     {
-        if(!this.data.name && !this.data.text && !this.data.title)
+        if(
+            !("name" in this.data) &&
+            !("text" in this.data) &&
+            !("title" in this.data)
+        )
             this.load();
 
-        return this.data.name || this.data.text || this.data.title;
+        return this.data.name || this.data.text || this.data.title || "";
     }
     
     /**
@@ -234,7 +241,7 @@ var List = function(data)
     */
     this.board = function()
     {
-        if(!this.data.idBoard && !this.board_object)
+        if(!("idBoard" in this.data) && !this.board_object)
             this.load();
         
         if(!this.board_object && this.data.idBoard)

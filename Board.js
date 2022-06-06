@@ -116,7 +116,7 @@ var Board = function(data)
     */
     this.name = function()
     {
-        if(!this.data.name && !this.data.title)
+        if(!("name" in this.data) && !("title" in this.data))
             this.load();
 
         if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
@@ -153,7 +153,7 @@ var Board = function(data)
 
           else
           {
-              if(!this.data.idOrganization)
+              if(!("idOrganization" in this.data))
                   this.load();
     
               if(this.data.idOrganization)

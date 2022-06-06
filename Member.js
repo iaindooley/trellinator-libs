@@ -29,9 +29,10 @@ var Member = function(data)
 {    
     //allow Trello style IDs
     if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
+    {
         data['userId'] = data['userId'] || data.id;
-    if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
         data['_id'] = data['_id'] || data.id;
+    }
 
     this.data = data;
     this.list_of_teams = null;
@@ -138,10 +139,13 @@ var Member = function(data)
     */
     this.fullName = function()
     {
-        if(!this.data.fullName && !this.data.fullname)
+        if(
+            !("fullName" in this.data) &&
+            !("fullname" in this.data)
+        )
             this.load();
 
-        return this.data.fullName || this.data.fullname;
+        return this.data.fullName || this.data.fullname || "";
     }
 
     /**
@@ -219,7 +223,7 @@ var Member = function(data)
     */
     this.name = function()
     {
-        if(!this.data.username)
+        if(!("username" in this.data))
             this.load();
 
         return this.data.username;
