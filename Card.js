@@ -988,6 +988,7 @@ var Card = function(data)
         
         catch(e)
         {
+            Notification.expectException(InvalidDataException,e);
             return false;
         }
     }
