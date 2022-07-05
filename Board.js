@@ -1006,10 +1006,12 @@ var Board = function(data)
 * use the Board.copy() method instead
 * @memberof module:TrelloEntities.Board
 * @param data {Object} an object containing key/value pairs for all the fields
+* @param team {Object} optionally pass in a team object rather than setting idOrganization in the data object
+*                      because it will also then accept a string as the data, which can be a board name
 * @example
 * Board.create({name: "Hi there!"});
 */
-Board.create = function(data)
+Board.create = function(data,team)
 {
     if((prov = Trellinator.provider()) && (prov.name == "WeKan"))
     {
@@ -1022,6 +1024,9 @@ Board.create = function(data)
     
     else
     {
+        if(team)
+            data.idOrganization = team.id();
+
         if(typeof data === "string")
             data = {name: data};
         
