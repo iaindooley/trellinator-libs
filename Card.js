@@ -1037,13 +1037,15 @@ var Card = function(data)
 
             else
             {
-                this.labels_list = new IterableCollection(this.data.labels).transform(function(elem)
+                var labels_to_use = this.data.labels ? this.data.labels : this.data.idLabels;
+
+                this.labels_list = new IterableCollection(labels_to_use).transform(function(elem)
                 {
                     return new Label(elem).setContainingCard(this);
                 }.bind(this));
             }
         }
-        
+
         return this.labels_list.findByName(name);
     }
     
@@ -1166,7 +1168,7 @@ var Card = function(data)
             }
 
             this.members_list = null;
-            this.data.members = null;
+            delete this.data.members;
         }
 
         catch(e)
@@ -1226,8 +1228,8 @@ var Card = function(data)
         else
             TrelloApi.put("cards/"+this.data.id+"?due=null");
 
-        this.data.due = null;
-        this.data.dueAt = null;
+        delete this.data.due;
+        delete this.data.dueAt;
         return this;
     }
 
@@ -1741,7 +1743,7 @@ var Card = function(data)
         }
         
         this.labels_list = null;
-        this.data.labels = null;
+        delete this.data.labels;
         return this;
     }
 
