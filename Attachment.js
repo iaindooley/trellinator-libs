@@ -63,7 +63,8 @@ var Attachment = function(data)
       {
           if(!("url" in this.data))
             this.load();
-          if((this.data.url.indexOf("https://trello") === 0) && (this.card_object) && (this.data.fileName))
+          //if((this.data.url.indexOf("https://trello") === 0) && (this.card_object) && (this.data.fileName))
+          if((this.data.url.indexOf("https://trello") === 0) && (this.card_object) && (this.data.isUpload) && (this.data.fileName))
           {
             var ret = "https://api.trello.com/1/cards/"+this.card_object.id()+"/attachments/"+this.data.id+"/download/"+this.data.fileName;
             var creds = TrelloApi.checkControlValues();
